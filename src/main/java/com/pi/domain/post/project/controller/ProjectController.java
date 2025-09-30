@@ -1,6 +1,6 @@
-package com.pi.domain.project.project.controller;
+package com.pi.domain.post.project.controller;
 
-import com.pi.domain.project.project.service.ProjectService;
+import com.pi.domain.post.project.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,6 +1,6 @@
-package com.pi.domain.project.project.dto;
+package com.pi.domain.post.project.dto;
 
-import com.pi.domain.project.project.entity.Project;
+import com.pi.domain.post.project.entity.Project;
 
 import java.time.LocalDateTime;
 

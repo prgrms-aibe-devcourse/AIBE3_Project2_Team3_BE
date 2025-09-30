@@ -1,4 +1,4 @@
-package com.pi.domain.project.project.service;
+package com.pi.domain.post.project.service;
 
 import org.springframework.stereotype.Service;
 
