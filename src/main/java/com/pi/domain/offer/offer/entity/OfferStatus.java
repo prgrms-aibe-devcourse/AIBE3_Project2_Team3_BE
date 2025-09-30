@@ -1,6 +1,6 @@
-package com.pi.domain.freelancer.freelancerOffer.entity;
+package com.pi.domain.offer.offer.entity;
 
-public enum FreelancerOfferStatus {
+public enum OfferStatus {
     REQUESTED("요청"),
     ACCEPTED("수락"),
     REJECTED("거절"),
@@ -8,7 +8,7 @@ public enum FreelancerOfferStatus {
 
     private final String description;
 
-    FreelancerOfferStatus(String description) {
+    OfferStatus(String description) {
         this.description = description;
     }
 

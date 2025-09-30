@@ -1,6 +1,6 @@
-package com.pi.domain.freelancer.freelancerOffer.entity;
+package com.pi.domain.offer.offer.entity;
 
-import com.pi.domain.freelancer.freelancer.entity.Freelancer;
+import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FreelancerOffer extends BaseEntity {
+public class Offer extends BaseEntity {
     @ManyToOne
     private Freelancer freelancer;
 
@@ -23,5 +23,5 @@ public class FreelancerOffer extends BaseEntity {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private FreelancerOfferStatus status;
+    private OfferStatus status;
 }
