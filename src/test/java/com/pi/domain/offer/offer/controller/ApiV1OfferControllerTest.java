@@ -38,7 +38,6 @@ public class ApiV1OfferControllerTest {
     @Test
     @DisplayName("구인(삽니다) 등록하기")
     void t1() throws Exception {
-//        Freelancer freelancer = freelancerRepository.save(new Freelancer());
         long freelancerId = 1;
 
         ResultActions resultActions = mvc
