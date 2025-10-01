@@ -3,7 +3,7 @@ package com.pi.domain.post.freelancer.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record FreelancerRequestDto(
+public record FreelancerReqDto(
 
         @NotNull(message = "게시글 ID는 필수입니다.")
         Long postId,

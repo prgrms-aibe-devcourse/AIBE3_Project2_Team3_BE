@@ -1,8 +1,8 @@
 package com.pi.domain.post.freelancer.controller;
 
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
-import com.pi.domain.post.freelancer.dto.FreelancerRequestDto;
-import com.pi.domain.post.freelancer.dto.FreelancerResponseDto;
+import com.pi.domain.post.freelancer.dto.FreelancerReqDto;
+import com.pi.domain.post.freelancer.dto.FreelancerResDto;
 import com.pi.domain.post.freelancer.service.FreelancerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +24,11 @@ public class ApiV1FreelancerController {
 
     @GetMapping("/{id}")
     public FreelancerDto getById(@PathVariable Long id) {
-        return freelancerService.findById(id);
+        return freelancerService.findDtoById(id);
     }
 
     @PostMapping
-    public FreelancerResponseDto create(@Valid @RequestBody FreelancerRequestDto requestDto) {
+    public FreelancerResDto create(@Valid @RequestBody FreelancerReqDto requestDto) {
         return freelancerService.create(requestDto);
     }
 
@@ -37,3 +37,4 @@ public class ApiV1FreelancerController {
         freelancerService.delete(id);
     }
 }
+

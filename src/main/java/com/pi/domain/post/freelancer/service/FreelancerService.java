@@ -1,8 +1,8 @@
 package com.pi.domain.post.freelancer.service;
 
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
-import com.pi.domain.post.freelancer.dto.FreelancerRequestDto;
-import com.pi.domain.post.freelancer.dto.FreelancerResponseDto;
+import com.pi.domain.post.freelancer.dto.FreelancerReqDto;
+import com.pi.domain.post.freelancer.dto.FreelancerResDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import com.pi.domain.post.post.entity.Post;
@@ -19,9 +19,10 @@ public class FreelancerService {
     private final FreelancerRepository freelancerRepository;
     private final PostRepository postRepository;
 
-    public FreelancerResponseDto create(FreelancerRequestDto requestDto) {
+    public FreelancerResDto create(FreelancerReqDto requestDto) {
         Post post = postRepository.findById(requestDto.postId())
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+
         Freelancer freelancer = Freelancer.builder()
                 .post(post)
                 .salary(requestDto.salary())
@@ -30,13 +31,19 @@ public class FreelancerService {
 
         Freelancer saved = freelancerRepository.save(freelancer);
 
-        return new FreelancerResponseDto(new FreelancerDto(saved), "프리랜서가 등록되었습니다.");
+        return new FreelancerResDto(
+                new FreelancerDto(saved),
+                "프리랜서가 성공적으로 등록되었습니다."
+        );
     }
 
-    public FreelancerDto findById(Long id) {
-        Freelancer freelancer = freelancerRepository.findById(id)
+    public Freelancer findById(Long id) {
+        return freelancerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Freelancer not found"));
-        return new FreelancerDto(freelancer);
+    }
+
+    public FreelancerDto findDtoById(Long id) {
+        return new FreelancerDto(findById(id));
     }
 
     public List<FreelancerDto> findAll() {
@@ -49,6 +56,6 @@ public class FreelancerService {
     public void delete(Long id) {
         freelancerRepository.deleteById(id);
     }
-
 }
+
 
