@@ -1,7 +1,10 @@
 package com.pi.domain.post.freelancer.controller;
 
-import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.freelancer.dto.FreelancerDto;
+import com.pi.domain.post.freelancer.dto.FreelancerRequestDto;
+import com.pi.domain.post.freelancer.dto.FreelancerResponseDto;
 import com.pi.domain.post.freelancer.service.FreelancerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,18 +18,18 @@ public class ApiV1FreelancerController {
     private final FreelancerService freelancerService;
 
     @GetMapping
-    public List<Freelancer> getAll() {
+    public List<FreelancerDto> getAll() {
         return freelancerService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Freelancer getById(@PathVariable Long id) {
+    public FreelancerDto getById(@PathVariable Long id) {
         return freelancerService.findById(id);
     }
 
     @PostMapping
-    public Freelancer create(@RequestBody Freelancer freelancer) {
-        return freelancerService.save(freelancer);
+    public FreelancerResponseDto create(@Valid @RequestBody FreelancerRequestDto requestDto) {
+        return freelancerService.create(requestDto);
     }
 
     @DeleteMapping("/{id}")
