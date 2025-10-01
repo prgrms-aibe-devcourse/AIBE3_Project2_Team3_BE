@@ -12,7 +12,6 @@ import java.util.List;
 public class FreelancerService {
 
     private final FreelancerRepository freelancerRepository;
-    private final PostRepository postRepository;
 
     public Freelancer save(Freelancer freelancer) {
         return freelancerRepository.save(freelancer);
