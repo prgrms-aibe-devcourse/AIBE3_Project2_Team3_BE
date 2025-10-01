@@ -24,3 +24,12 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+  mail:
+    host: smtp.naver.com
+    port: 587
+    username: sjsj6583@naver.com
+    password: dhkdlfem9923
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+      mail.smtp.ssl.trust: smtp.naver.com

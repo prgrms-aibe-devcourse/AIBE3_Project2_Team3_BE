@@ -107,4 +107,32 @@ public class ApiV1UserController {
                 "로그아웃 되었습니다."
         );
     }
+
+    @PostMapping("/findPw")
+    public RsData<Void> findPassword(
+            @Valid @RequestBody UserFindPasswordReqBody reqBody
+    ) {
+        userService.findPassword(reqBody.username(), reqBody.email());
+        return new RsData<>(
+                "200-1",
+                "임시 비밀번호가 **" + reqBody.email() + "** 로 발송되었습니다. 확인 후 로그인하여 비밀번호를 변경해 주세요."
+        );
+    }
+
+    @PatchMapping("/password")
+    public RsData<Void> updatePassword(
+            @Valid @RequestBody UserPasswordUpdateReqBody reqBody
+    ) {
+        long actorId = rq.getSecurityUser().getId();
+        userService.updatePassword(
+                actorId,
+                reqBody.oldPassword(),
+                reqBody.newPassword(),
+                reqBody.newPasswordConfirm()
+        );
+        return new RsData<>(
+                "200-1",
+                "비밀번호가 성공적으로 변경되었습니다."
+        );
+    }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -21,9 +22,12 @@ import java.util.List;
 public class User extends BaseEntity {
     @Column(unique = true)
     private String username;
+    @Setter
     private String password;
     private String nickname;
     private String role;
+    @Column(unique = true)
+    private String email;
 
     public User(String username, String password, String nickname) {
         this.username = username;
