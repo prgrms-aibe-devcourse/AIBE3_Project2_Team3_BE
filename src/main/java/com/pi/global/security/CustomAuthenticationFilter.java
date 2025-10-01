@@ -1,6 +1,6 @@
 package com.pi.global.security;
 
-import com.pi.domain.user.user.entity.Users;
+import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.AuthTokenService;
 import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
@@ -85,7 +85,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        Users users = null;
+        User users = null;
         boolean isAccessTokenExists = !accessToken.isBlank();
         boolean isAccessTokenValid = false;
 
@@ -97,7 +97,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 String username = (String) payload.get("username");
                 String nickname = (String) payload.get("nickname");
                 String role = (String) payload.get("role");
-                users = new Users(id, username, nickname);
+                users = new User(id, username, nickname);
 
                 // 토큰 유효성 검증 성공
                 isAccessTokenValid = true;

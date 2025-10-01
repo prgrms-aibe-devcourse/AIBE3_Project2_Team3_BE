@@ -1,12 +1,12 @@
 package com.pi.domain.user.user.repository;
 
-import com.pi.domain.user.user.entity.Users;
+import com.pi.domain.user.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, Long> {
-    Optional<Users> findByUsername(String username);
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
 }

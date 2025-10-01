@@ -1,6 +1,6 @@
 package com.pi.global.rq;
 
-import com.pi.domain.user.user.entity.Users;
+import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.security.SecurityUser;
 import jakarta.servlet.http.Cookie;
@@ -20,7 +20,7 @@ public class Rq {
     private final HttpServletRequest req;
     private final HttpServletResponse resp;
 
-    public Users getActor() {
+    public User getActor() {
         return Optional.ofNullable(
                         SecurityContextHolder
                                 .getContext()
@@ -29,7 +29,7 @@ public class Rq {
                 .map(Authentication::getPrincipal)
                 .filter(principal -> principal instanceof SecurityUser)
                 .map(principal -> (SecurityUser) principal)
-                .map(securityUser -> new Users(securityUser.getId(), securityUser.getUsername(), securityUser.getNickname()))
+                .map(securityUser -> new User(securityUser.getId(), securityUser.getUsername(), securityUser.getNickname()))
                 .orElse(null);
     }
 

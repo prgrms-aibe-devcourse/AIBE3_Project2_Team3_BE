@@ -1,7 +1,7 @@
 package com.pi.domain.user.user.controller;
 
 import com.pi.domain.user.user.dto.*;
-import com.pi.domain.user.user.entity.Users;
+import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
@@ -23,7 +23,7 @@ public class ApiV1UserController {
     public RsData<UserDto> me() {
         SecurityUser securityUser = rq.getSecurityUser();
         String currentUsername = securityUser.getUsername();
-        Users user = userService.findByUsername(currentUsername)
+        User user = userService.findByUsername(currentUsername)
                 .orElseThrow(() -> new ServiceException("404-1", "로그인된 사용자를 찾을 수 없습니다."));
 
         return new RsData<>(
@@ -37,7 +37,7 @@ public class ApiV1UserController {
     public RsData<UserDto> modify(
             @Valid @RequestBody UserModifyReqBody reqBody
     ) {
-        Users user = userService.findByUsername("user1").get();
+        User user = userService.findByUsername("user1").get();
         user.checkActorCanModify(user);
         userService.modify(user, reqBody.nickname());
 
@@ -50,7 +50,7 @@ public class ApiV1UserController {
 
     @DeleteMapping
     public RsData<Void> delete() {
-        Users user = userService.findByUsername("user1").get();
+        User user = userService.findByUsername("user1").get();
 
         user.checkActorCanDelete(user);
         userService.delete(user);
@@ -62,7 +62,7 @@ public class ApiV1UserController {
     public RsData<UserDto> join(
             @Valid @RequestBody UserJoinReqBody reqBody
     ) {
-        Users user = userService.join(reqBody.username(), reqBody.password(), reqBody.nickname());
+        User user = userService.join(reqBody.username(), reqBody.password(), reqBody.nickname());
 
         return new RsData<>(
                 "201-1",
@@ -76,7 +76,7 @@ public class ApiV1UserController {
     public RsData<UserLoginResBody> login(
             @Valid @RequestBody UserLoginReqBody reqBody
     ) {
-        Users user = userService.findByUsername(reqBody.username())
+        User user = userService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "사용자를 찾을 수 없습니다."));
         userService.checkPassword(
                 user,

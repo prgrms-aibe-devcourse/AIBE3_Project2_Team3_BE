@@ -4,6 +4,7 @@ import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,21 +17,22 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Getter
-public class Users extends BaseEntity {
+@Table(name = "Users")
+public class User extends BaseEntity {
     @Column(unique = true)
     private String username;
     private String password;
     private String nickname;
     private String role;
 
-    public Users(String username,String password, String nickname) {
+    public User(String username, String password, String nickname) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.role = "ROLE_USER";
     }
 
-    public Users(long id, String username, String nickname) {
+    public User(long id, String username, String nickname) {
         this.id = id;
         this.username = username;
         this.nickname = nickname;
@@ -41,13 +43,13 @@ public class Users extends BaseEntity {
         this.nickname = nickname;
     }
 
-    public void checkActorCanModify(Users actor) {
+    public void checkActorCanModify(User actor) {
         if(!actor.getUsername().equals(getUsername())){
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
-    public void checkActorCanDelete(Users actor) {
+    public void checkActorCanDelete(User actor) {
         if(!actor.getUsername().equals(getUsername())){
             throw new ServiceException("403-1", "권한이 없습니다.");
         }

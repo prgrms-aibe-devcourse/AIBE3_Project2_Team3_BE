@@ -1,6 +1,6 @@
 package com.pi.domain.user.user.service;
 
-import com.pi.domain.user.user.entity.Users;
+import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.util.Ut;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ public class AuthTokenService {
     @Value("${custom.refreshToken.expireSeconds}")
     private int refreshTokenExpireSeconds;
 
-    String genAccessToken(Users user) {
+    String genAccessToken(User user) {
         long id = user.getId();
         String username = user.getUsername();
         String nickname = user.getNickname();
@@ -33,7 +33,7 @@ public class AuthTokenService {
         );
     }
 
-    String genRefreshToken(Users user) {
+    String genRefreshToken(User user) {
         long id = user.getId();
         String username = user.getUsername();
         String nickname = user.getNickname();
