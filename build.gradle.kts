@@ -27,6 +27,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    testImplementation("org.springframework.security:spring-security-test")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
@@ -35,6 +38,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     // spring doc
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+    implementation("io.jsonwebtoken:jjwt:0.12.6")
 }
 
 tasks.withType<Test> {
