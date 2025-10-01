@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/freelancers")
 @RequiredArgsConstructor
-public class FreelancerController {
+public class ApiV1FreelancerController {
 
     private final FreelancerService freelancerService;
 
