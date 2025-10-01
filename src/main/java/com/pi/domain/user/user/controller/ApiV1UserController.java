@@ -123,12 +123,11 @@ public class ApiV1UserController {
     public RsData<Void> updatePassword(
             @Valid @RequestBody UserPasswordUpdateReqBody reqBody
     ) {
-        long actorId = rq.getSecurityUser().getId();
+        SecurityUser actor = rq.getSecurityUser();
         userService.updatePassword(
-                actorId,
+                actor,
                 reqBody.oldPassword(),
-                reqBody.newPassword(),
-                reqBody.newPasswordConfirm()
+                reqBody.newPassword()
         );
         return new RsData<>(
                 "200-1",

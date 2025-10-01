@@ -3,6 +3,7 @@ package com.pi.domain.user.user.service;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.repository.UserRepository;
 import com.pi.global.exception.ServiceException;
+import com.pi.global.security.SecurityUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -84,21 +85,19 @@ public class UserService {
 
     @Transactional
     public void updatePassword(
-            long actorId,
+            SecurityUser actor,
             String oldPassword,
-            String newPassword,
-            String newPasswordConfirm) {
-        if (!newPassword.equals(newPasswordConfirm)) {
-            throw new ServiceException("400-1", "새 비밀번호와 일치하지 않습니다.");
-        }
-        User user = userRepository.findById(actorId)
-                .orElseThrow(() -> new ServiceException("404-1", "일치하는 유저를 찾을 수 없습니다."));
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            String newPassword
+    ) {
+        User user = userRepository.findById(actor.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "사용자가 존재하지 않습니다."));
+        if (!passwordEncoder.matches(oldPassword, actor.getPassword())) {
             throw new ServiceException("400-2", "현재 비밀번호가 일치하지 않습니다.");
         }
-
         String newEncodedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(newEncodedPassword);
         userRepository.save(user);
+        // 더티 체킹으로 저장은 되지만 명시적으로 작성
+        // 지워도 작동은 동일하게 동작
     }
 }

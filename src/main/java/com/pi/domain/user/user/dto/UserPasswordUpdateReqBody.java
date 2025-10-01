@@ -8,8 +8,6 @@ public record UserPasswordUpdateReqBody(
         String oldPassword,
         @NotBlank
         @Size(min = 8)
-        String newPassword,
-        @NotBlank
-        String newPasswordConfirm
+        String newPassword
 ) {
 }
