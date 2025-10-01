@@ -62,7 +62,7 @@ public class ApiV1UserController {
     public RsData<UserDto> join(
             @Valid @RequestBody UserJoinReqBody reqBody
     ) {
-        User user = userService.join(reqBody.username(), reqBody.password(), reqBody.nickname());
+        User user = userService.join(reqBody.username(), reqBody.password(), reqBody.nickname(), reqBody.email());
 
         return new RsData<>(
                 "201-1",

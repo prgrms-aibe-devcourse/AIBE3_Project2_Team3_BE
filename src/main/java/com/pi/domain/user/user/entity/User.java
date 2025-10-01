@@ -29,10 +29,11 @@ public class User extends BaseEntity {
     @Column(unique = true)
     private String email;
 
-    public User(String username, String password, String nickname) {
+    public User(String username, String password, String nickname, String email) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
+        this.email = email;
         this.role = "ROLE_USER";
     }
 
@@ -41,6 +42,13 @@ public class User extends BaseEntity {
         this.username = username;
         this.nickname = nickname;
         this.role = "ROLE_USER";
+    }
+
+    public User(long id, String username, String nickname, String role) {
+        this.id = id;
+        this.username = username;
+        this.nickname = nickname;
+        this.role = role;
     }
 
     public void modify(String nickname){

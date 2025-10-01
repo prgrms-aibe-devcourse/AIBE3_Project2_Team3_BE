@@ -97,7 +97,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 String username = (String) payload.get("username");
                 String nickname = (String) payload.get("nickname");
                 String role = (String) payload.get("role");
-                users = new User(id, username, nickname);
+                users = new User(id, username, nickname, role);
 
                 // 토큰 유효성 검증 성공
                 isAccessTokenValid = true;

@@ -57,13 +57,13 @@ public class UserService {
         }
     }
 
-    public User join(String username, String password, String nickname) {
+    public User join(String username, String password, String nickname, String email) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
             throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
         });
         password = passwordEncoder.encode(password);
-        User user = new User(username, password, nickname);
+        User user = new User(username, password, nickname, email);
         return userRepository.save(user);
     }
 
