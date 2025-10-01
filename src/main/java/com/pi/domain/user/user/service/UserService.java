@@ -70,7 +70,7 @@ public class UserService {
     @Transactional
     public void findPassword(String username, String email) {
         User user = userRepository.findByUsernameAndEmail(username, email)
-                .orElseThrow(() -> new ServiceException("404-1", "일치하는 사용자 정보가 없습니다."));
+                .orElseThrow(() -> new ServiceException("404-1", ""));
         String temporaryPassword = generateTemporaryPassword();
         String encodedPassword = passwordEncoder.encode(temporaryPassword);
         user.setPassword(encodedPassword);
