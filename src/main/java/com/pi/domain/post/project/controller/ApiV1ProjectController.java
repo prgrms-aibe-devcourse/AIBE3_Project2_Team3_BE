@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/projects")
-public class ProjectController {
+@RequestMapping("/api/v1/projects")
+public class ApiV1ProjectController {
     private final ProjectService projectService;
 }
