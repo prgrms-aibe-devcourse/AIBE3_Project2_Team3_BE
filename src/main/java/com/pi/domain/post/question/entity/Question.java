@@ -1,8 +1,9 @@
 package com.pi.domain.post.question.entity;
 
 import com.pi.domain.post.answer.entity.Answer;
-import com.pi.domain.user.entity.User;
+import com.pi.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "questions")
 public class Question {
     @Id
@@ -33,11 +35,4 @@ public class Question {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Question(String title, String content, LocalDateTime createdAt, LocalDateTime modifiedAt, User user) {
-        this.title = title;
-        this.content = content;
-        this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
-        this.user = user;
-    }
 }

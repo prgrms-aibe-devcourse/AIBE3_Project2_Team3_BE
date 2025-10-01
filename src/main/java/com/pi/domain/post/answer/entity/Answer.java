@@ -1,7 +1,9 @@
 package com.pi.domain.post.answer.entity;
 
 import com.pi.domain.post.question.entity.Question;
+import com.pi.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "answers")
 public class Answer {
     @Id
@@ -19,8 +22,9 @@ public class Answer {
     @Column(nullable = false, length = 1000)
     private String content;
 
-    @Column(nullable = false)
-    private String author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -29,10 +33,4 @@ public class Answer {
     @JoinColumn(name = "question_id")
     private Question question;
 
-    public Answer(String content, String author, LocalDateTime createdAt, Question question) {
-        this.content = content;
-        this.author = author;
-        this.createdAt = createdAt;
-        this.question = question;
-    }
 }
