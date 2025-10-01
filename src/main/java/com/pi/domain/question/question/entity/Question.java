@@ -2,34 +2,33 @@ package com.pi.domain.question.question.entity;
 
 import com.pi.domain.answer.answer.entity.Answer;
 import com.pi.domain.user.user.entity.User;
+import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "questions")
-public class Question {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Question extends BaseEntity {
+    @Column(nullable = false, length = 200)
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-
+    @Builder.Default
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
-    private List<Answer> answers;
+    private List<Answer> answers = new ArrayList<>();
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

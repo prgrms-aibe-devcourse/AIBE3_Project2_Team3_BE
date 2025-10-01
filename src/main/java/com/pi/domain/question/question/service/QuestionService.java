@@ -2,6 +2,7 @@ package com.pi.domain.question.question.service;
 
 import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.repository.QuestionRepository;
+import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,13 @@ public class QuestionService {
         return questionRepository.findById(id).orElse(null);
     }
 
-    public Question save(Question question) {
+    public Question create(String title, String content, User user) {
+        Question question = Question.builder()
+                .title(title)
+                .content(content)
+                .user(user)
+                .build();
+
         return questionRepository.save(question);
     }
 

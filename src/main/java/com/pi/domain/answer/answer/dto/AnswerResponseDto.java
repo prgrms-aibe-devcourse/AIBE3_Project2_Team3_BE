@@ -1,22 +1,25 @@
 package com.pi.domain.answer.answer.dto;
 
 import com.pi.domain.answer.answer.entity.Answer;
-import com.pi.domain.user.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
 public record AnswerResponseDto(
         Long id,
         String content,
-        LocalDateTime createdAt,
-        UserDto author
+        LocalDateTime createdDate,
+        LocalDateTime modifiedDate,
+        Long userId,
+        Long questionId
 ) {
     public static AnswerResponseDto from(Answer answer) {
         return new AnswerResponseDto(
                 answer.getId(),
                 answer.getContent(),
-                answer.getCreatedAt(),
-                new UserDto(answer.getUser())
+                answer.getCreatedDate(),
+                answer.getModifiedDate(),
+                answer.getUser().getId(),
+                answer.getQuestion().getId()
         );
     }
 }

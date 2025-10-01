@@ -20,8 +20,8 @@ public record QuestionResponseDto(
                 question.getId(),
                 question.getTitle(),
                 question.getContent(),
-                question.getCreatedAt(),
-                question.getModifiedAt(),
+                question.getCreatedDate(),
+                question.getModifiedDate(),
                 question.getAnswers().stream()
                         .map(AnswerResponseDto::from)
                         .collect(Collectors.toList())
