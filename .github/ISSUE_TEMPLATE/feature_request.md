@@ -8,7 +8,8 @@ assignees: ""
 
 ## 🛠️ 작업 내용
 > 어떤 작업을 할 예정인가요?
-- 
+-
+
 ## 🧩 예상 브랜치명
 > (예시1) feat/profile-edit-Yoepee\
 > (예시2) fix/application-sort-Yoepee
