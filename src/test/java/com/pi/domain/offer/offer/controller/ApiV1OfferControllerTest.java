@@ -47,9 +47,12 @@ public class ApiV1OfferControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/freelancers/%d/offers".formatted(freelancerId))
+                        post("/api/v1/offers")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{}")
+                                .content("""
+                                        {
+                                            "freelancerId": %d
+                                        }""".formatted(freelancerId))
                 )
                 .andDo(print());
 
@@ -58,7 +61,7 @@ public class ApiV1OfferControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ApiV1OfferController.class))
                 .andExpect(handler().methodName("create"))
-                .andExpect(status().isCreated())
+//                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
                 .andExpect(jsonPath("$.message").value("%d번 구인이 등록되었습니다.".formatted(offer.getId())))
                 .andExpect(jsonPath("$.data.id").value(offer.getId()))

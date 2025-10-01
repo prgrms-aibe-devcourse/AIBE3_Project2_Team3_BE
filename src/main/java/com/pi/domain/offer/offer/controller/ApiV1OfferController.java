@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/freelancers/{freelancerId}/offers")
+@RequestMapping("/api/v1/offers")
 @RequiredArgsConstructor
 public class ApiV1OfferController {
     private final OfferService offerService;
