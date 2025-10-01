@@ -34,6 +34,7 @@ public class SecurityConfig {
                                         "/api/*/posts/{postId:\\d+}/comments/{id:\\d+}").permitAll()
                                 .requestMatchers("/api/*/users/login", "/api/*/users/logout").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/join").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/*/users/findPw").permitAll()
                                 .requestMatchers("/api/*/adm/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
                                 .requestMatchers("/api/*/**").authenticated()
                                 .anyRequest().permitAll()
