@@ -3,9 +3,7 @@ package com.pi.domain.offer.offer.controller;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
-import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.repository.FreelancerRepository;
-import com.pi.domain.user.user.repository.UserRepositoy;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -34,16 +33,13 @@ public class ApiV1OfferControllerTest {
     private OfferService offerService;
 
     @Autowired
-    private UserRepositoy userRepositoy;
-
-    @Autowired
     private FreelancerRepository freelancerRepository;
 
     @Test
     @DisplayName("구인(삽니다) 등록하기")
     void t1() throws Exception {
-        Freelancer freelancer = freelancerRepository.save(new Freelancer());
-        long freelancerId = freelancer.getId();
+//        Freelancer freelancer = freelancerRepository.save(new Freelancer());
+        long freelancerId = 1;
 
         ResultActions resultActions = mvc
                 .perform(
