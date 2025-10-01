@@ -25,10 +25,10 @@ spring:
         highlight_sql: true
         use_sql_comments: true
   mail:
-    host: smtp.naver.com
-    port: 587
-    username: sjsj6583
-    password: 72PUQQYVVRQ4
+    host: ${SPRING__MAIL__HOST}
+    port: ${SPRING__MAIL__PORT}
+    username: ${SPRING__MAIL__USERNAME}
+    password: ${SPRING__MAIL__PASSWORD}
     properties:
       mail:
         smtp:
