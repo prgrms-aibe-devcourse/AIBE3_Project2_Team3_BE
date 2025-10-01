@@ -37,9 +37,7 @@ public class NotProdInitData {
     ApplicationRunner notProdInitDataApplicationRunner() {
         return args -> {
             self.work1();
-            self.work2();
         };
-
     }
 
     @Transactional
@@ -48,13 +46,7 @@ public class NotProdInitData {
 
         User user1 = userService.join("user1", "1234", "유저1", "user1@example.com");
         User user2 = userService.join("user2", "1234", "유저2", "user2@example.com");
-    }
 
-    @Transactional
-    public void work2() {
-        if (freelancerRepository.count() > 0) return;
-
-        User user1 = userRepository.findByUsername("user1").get();
         Post post1 = postRepository.save(new Post(user1, true, "만들어드립니다.", "만들어드립니다..."));
         Freelancer freelancer1 = freelancerRepository.save(
                 Freelancer.builder()
@@ -64,7 +56,6 @@ public class NotProdInitData {
                         .build()
         );
 
-        User user2 = userRepository.findByUsername("user2").get();
         offerRepository.save(new Offer(freelancer1, user2, OfferStatus.REQUESTED));
     }
 }
