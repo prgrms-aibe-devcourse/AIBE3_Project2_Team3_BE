@@ -1,4 +1,4 @@
-package com.pi.domain.post.question.dto;
+package com.pi.domain.question.question.dto;
 
 public record QuestionCreateDto (
         String title,

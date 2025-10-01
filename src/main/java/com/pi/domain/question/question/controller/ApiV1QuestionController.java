@@ -1,7 +1,7 @@
-package com.pi.domain.post.question.controller;
+package com.pi.domain.question.question.controller;
 
-import com.pi.domain.post.question.entity.Question;
-import com.pi.domain.post.question.service.QuestionService;
+import com.pi.domain.question.question.entity.Question;
+import com.pi.domain.question.question.service.QuestionService;
 import com.pi.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

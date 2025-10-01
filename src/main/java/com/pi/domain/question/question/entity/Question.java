@@ -1,6 +1,6 @@
-package com.pi.domain.post.question.entity;
+package com.pi.domain.question.question.entity;
 
-import com.pi.domain.post.answer.entity.Answer;
+import com.pi.domain.answer.answer.entity.Answer;
 import com.pi.domain.user.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

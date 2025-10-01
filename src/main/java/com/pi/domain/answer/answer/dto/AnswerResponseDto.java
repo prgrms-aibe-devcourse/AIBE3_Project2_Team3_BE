@@ -1,6 +1,6 @@
-package com.pi.domain.post.answer.dto;
+package com.pi.domain.answer.answer.dto;
 
-import com.pi.domain.post.answer.entity.Answer;
+import com.pi.domain.answer.answer.entity.Answer;
 import com.pi.domain.user.user.dto.UserDto;
 
 import java.time.LocalDateTime;

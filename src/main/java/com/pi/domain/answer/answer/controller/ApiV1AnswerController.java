@@ -1,4 +1,4 @@
-package com.pi.domain.post.answer.controller;
+package com.pi.domain.answer.answer.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package com.pi.domain.post.answer.dto;
+package com.pi.domain.answer.answer.dto;
 
 public record AnswerCreateDto(
         String content,

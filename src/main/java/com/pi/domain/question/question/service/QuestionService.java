@@ -1,7 +1,7 @@
-package com.pi.domain.post.question.service;
+package com.pi.domain.question.question.service;
 
-import com.pi.domain.post.question.entity.Question;
-import com.pi.domain.post.question.repository.QuestionRepository;
+import com.pi.domain.question.question.entity.Question;
+import com.pi.domain.question.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

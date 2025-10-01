@@ -1,7 +1,7 @@
-package com.pi.domain.post.question.dto;
+package com.pi.domain.question.question.dto;
 
-import com.pi.domain.post.answer.dto.AnswerResponseDto;
-import com.pi.domain.post.question.entity.Question;
+import com.pi.domain.answer.answer.dto.AnswerResponseDto;
+import com.pi.domain.question.question.entity.Question;
 
 import java.time.LocalDateTime;
 import java.util.List;
