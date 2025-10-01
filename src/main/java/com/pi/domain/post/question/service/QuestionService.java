@@ -1,7 +1,7 @@
-package com.pi.global.jpa.service;
+package com.pi.domain.post.question.service;
 
-import com.pi.global.jpa.entity.Question;
-import com.pi.global.jpa.repository.QuestionRepository;
+import com.pi.domain.post.question.entity.Question;
+import com.pi.domain.post.question.repository.QuestionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,7 +1,7 @@
-package com.pi.global.jpa.controller;
+package com.pi.domain.post.question.controller;
 
-import com.pi.global.jpa.entity.Question;
-import com.pi.global.jpa.service.QuestionService;
+import com.pi.domain.post.question.entity.Question;
+import com.pi.domain.post.question.service.QuestionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
