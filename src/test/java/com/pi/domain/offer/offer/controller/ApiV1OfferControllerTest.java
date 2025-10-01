@@ -3,7 +3,6 @@ package com.pi.domain.offer.offer.controller;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
-import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,15 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -32,11 +31,9 @@ public class ApiV1OfferControllerTest {
     @Autowired
     private OfferService offerService;
 
-    @Autowired
-    private FreelancerRepository freelancerRepository;
-
     @Test
-    @DisplayName("구인(삽니다) 등록하기")
+    @DisplayName("구인(삽니다) 등록")
+    @WithUserDetails("user1")
     void t1() throws Exception {
         long freelancerId = 1;
 
@@ -47,16 +44,17 @@ public class ApiV1OfferControllerTest {
                                 .content("""
                                         {
                                             "freelancerId": %d
-                                        }""".formatted(freelancerId))
+                                        }
+                                        """.formatted(freelancerId))
                 )
                 .andDo(print());
 
-        Offer offer = offerService.findLatest().get();
+        Offer offer = offerService.findLatest();
 
         resultActions
                 .andExpect(handler().handlerType(ApiV1OfferController.class))
                 .andExpect(handler().methodName("create"))
-//                .andExpect(status().isCreated())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
                 .andExpect(jsonPath("$.message").value("%d번 구인이 등록되었습니다.".formatted(offer.getId())))
                 .andExpect(jsonPath("$.data.id").value(offer.getId()))
@@ -65,5 +63,55 @@ public class ApiV1OfferControllerTest {
                 .andExpect(jsonPath("$.data.freelancerId").value(offer.getFreelancer().getId()))
                 .andExpect(jsonPath("$.data.userId").value(offer.getUser().getId()))
                 .andExpect(jsonPath("$.data.status").value(OfferStatus.REQUESTED.name()));
+    }
+
+    @Test
+    @DisplayName("구인 상태 수정")
+    @WithUserDetails("user1")
+    void t2() throws Exception {
+        long offerId = 1;
+        Offer offer = offerService.findById(offerId);
+
+        String status = OfferStatus.ACCEPTED.name();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/api/v1/offers/" + offerId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "status": "%s"
+                                        }""".formatted(status))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1OfferController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("%d번 구인 상태가 수정되었습니다.".formatted(offerId)))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("구인 삭제")
+    @WithUserDetails("user2")
+    void t3() throws Exception {
+        long offerId = 1;
+        Offer offer = offerService.findById(offerId);
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/offers/" + offerId)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1OfferController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("%d번 구인이 삭제되었습니다.".formatted(offerId)));
     }
 }
