@@ -1,6 +1,6 @@
 package com.pi.domain.user.user.dto;
 
-import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.entity.Users;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ public record UserDto (
         String nickname,
         String role
 ){
-    public UserDto(User user) {
+    public UserDto(Users user) {
         this(
                 user.getId(),
                 user.getCreatedDate(),
