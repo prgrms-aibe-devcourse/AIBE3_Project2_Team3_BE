@@ -53,7 +53,7 @@ public class ApiV1OfferControllerTest {
 
         resultActions
                 .andExpect(handler().handlerType(ApiV1OfferController.class))
-                .andExpect(handler().methodName("create"))
+                .andExpect(handler().methodName("write"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
                 .andExpect(jsonPath("$.message").value("%d번 구인이 등록되었습니다.".formatted(offer.getId())))

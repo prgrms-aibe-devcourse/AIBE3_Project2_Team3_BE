@@ -1,6 +1,6 @@
 package com.pi.domain.offer.offer.controller;
 
-import com.pi.domain.offer.offer.dto.OfferCreateReqBody;
+import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
 import com.pi.domain.offer.offer.dto.OfferDto;
 import com.pi.domain.offer.offer.dto.OfferModifyReqBody;
 import com.pi.domain.offer.offer.entity.Offer;
@@ -29,8 +29,8 @@ public class ApiV1OfferController {
     @PostMapping
     @Transactional
     @Operation(summary = "등록")
-    public RsData<OfferDto> create(
-            @Valid @RequestBody OfferCreateReqBody reqBody
+    public RsData<OfferDto> write(
+            @Valid @RequestBody OfferWriteReqBody reqBody
     ) {
         User actor = rq.getActor();
         Freelancer freelancer = freelancerService.findById(reqBody.freelancerId());
