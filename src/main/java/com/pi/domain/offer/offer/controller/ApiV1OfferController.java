@@ -1,12 +1,13 @@
 package com.pi.domain.offer.offer.controller;
 
-import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
 import com.pi.domain.offer.offer.dto.OfferDto;
 import com.pi.domain.offer.offer.dto.OfferModifyReqBody;
+import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.service.FreelancerService;
+import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/offers")
 @RequiredArgsConstructor
@@ -26,12 +29,32 @@ public class ApiV1OfferController {
     private final OfferService offerService;
     private final FreelancerService freelancerService;
 
+    @GetMapping
+    @Transactional(readOnly = true)
+    @Operation(summary = "다건 조회")
+    public List<OfferDto> getItems() {
+
+        List<Offer> items = offerService.getList();
+
+        return items
+                .stream()
+                .map(OfferDto::new)
+                .toList();
+    }
+
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    @Operation(summary = "단건 조회")
+    public OfferDto getItem(@PathVariable Long id) {
+        Offer item = offerService.findById(id);
+
+        return new OfferDto(item);
+    }
+
     @PostMapping
     @Transactional
     @Operation(summary = "등록")
-    public RsData<OfferDto> write(
-            @Valid @RequestBody OfferWriteReqBody reqBody
-    ) {
+    public RsData<OfferDto> write(@Valid @RequestBody OfferWriteReqBody reqBody) {
         User actor = rq.getActor();
         Freelancer freelancer = freelancerService.findById(reqBody.freelancerId());
 
@@ -68,9 +91,7 @@ public class ApiV1OfferController {
     @Transactional
     @DeleteMapping("/{id}")
     @Operation(summary = "삭제")
-    public RsData<OfferDto> delete(
-            @PathVariable Long id
-    ) {
+    public RsData<OfferDto> delete(@PathVariable Long id) {
         Offer offer = offerService.findById(id);
 
         User actor = rq.getActor();
