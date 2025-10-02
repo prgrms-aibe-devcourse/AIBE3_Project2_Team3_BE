@@ -29,6 +29,14 @@ public class OfferService {
         return offerRepository.findFirstByOrderByIdDesc().get();
     }
 
+    public Page<Offer> findAllByUserIdAndStatus(long id, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
+    }
+
+    public Page<Offer> findAllByFreelancerIdAndStatus(Long freelancerId, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
+    }
+
     public Offer create(Freelancer freelancer, User user) {
         Offer offer = new Offer(freelancer, user, OfferStatus.REQUESTED);
 
@@ -46,13 +54,5 @@ public class OfferService {
     public User getFreelancerUser(Offer offer) {
         Freelancer freelancer = freelancerService.findById(offer.getFreelancer().getId());
         return freelancer.getPost().getUser();
-    }
-
-    public Page<Offer> getOffersByUserIdAndStatus(long id, OfferStatus status, Pageable pageable) {
-        return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
-    }
-
-    public Page<Offer> getOffersByFreelancerIdAndStatus(Long freelancerId, OfferStatus status, Pageable pageable) {
-        return offerRepository.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
     }
 }

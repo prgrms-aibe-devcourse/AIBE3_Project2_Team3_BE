@@ -37,12 +37,12 @@ public class ApiV1OfferController {
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();
-        Page<Offer> items = offerService.getOffersByUserIdAndStatus(actor.getId(), status, pageable);
+        Page<Offer> pagedOffers = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable);
 
         return new RsData<>(
                 "200-1",
-                "구인이 조회되었습니다.",
-                items.map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
+                "%d번 사용자의 구인이 조회되었습니다.".formatted(actor.getId()),
+                pagedOffers.map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
         );
     }
 
@@ -58,12 +58,12 @@ public class ApiV1OfferController {
         Freelancer freelancer = freelancerService.findById(freelancerId);
         freelancer.checkActorCanReadOffer(actor);
 
-        Page<Offer> items = offerService.getOffersByFreelancerIdAndStatus(freelancerId, status, pageable);
+        Page<Offer> pagedOffers = offerService.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
 
         return new RsData<>(
                 "200-1",
                 "%d번 프리랜서의 구인이 조회되었습니다.".formatted(freelancer.getId()),
-                items.map(OfferWithUserDto::new)
+                pagedOffers.map(OfferWithUserDto::new)
         );
     }
 
