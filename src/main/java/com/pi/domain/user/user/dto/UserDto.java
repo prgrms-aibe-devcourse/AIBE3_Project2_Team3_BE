@@ -9,6 +9,7 @@ public record UserDto (
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         String nickname,
+        String email,
         String role
 ){
     public UserDto(User user) {
@@ -17,6 +18,7 @@ public record UserDto (
                 user.getCreatedDate(),
                 user.getModifiedDate(),
                 user.getNickname(),
+                user.getEmail(),
                 user.getRole()
         );
     }

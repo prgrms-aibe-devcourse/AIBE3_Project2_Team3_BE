@@ -6,7 +6,6 @@ import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
-import com.pi.global.security.SecurityUser;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +20,8 @@ public class ApiV1UserController {
 
     @GetMapping("/me")
     public RsData<UserDto> me() {
-        SecurityUser securityUser = rq.getSecurityUser();
-        String currentUsername = securityUser.getUsername();
-        User user = userService.findByUsername(currentUsername)
-                .orElseThrow(() -> new ServiceException("404-1", "로그인된 사용자를 찾을 수 없습니다."));
+        User actor = rq.getActor();
+        User user = userService.findByUsername(actor.getUsername()).get();
 
         return new RsData<>(
                 "200-1",
@@ -34,25 +31,25 @@ public class ApiV1UserController {
     }
 
     @PutMapping
-    public RsData<UserDto> modify(
+    public RsData<Void> modify(
             @Valid @RequestBody UserModifyReqBody reqBody
     ) {
-        User user = userService.findByUsername("user1").get();
-        user.checkActorCanModify(user);
+        User actor = rq.getActor();
+        User user = userService.findByUsername(actor.getUsername()).get();
+        user.checkActorCanModify(actor);
         userService.modify(user, reqBody.nickname());
 
         return new RsData<>(
                 "200-1",
-                "%s님 정보가 수정되었습니다.".formatted(user.getNickname()),
-                new UserDto(user)
+                "%s님 정보가 수정되었습니다.".formatted(user.getNickname())
         );
     }
 
     @DeleteMapping
     public RsData<Void> delete() {
-        User user = userService.findByUsername("user1").get();
-
-        user.checkActorCanDelete(user);
+        User actor = rq.getActor();
+        User user = userService.findByUsername(actor.getUsername()).get();
+        user.checkActorCanDelete(actor);
         userService.delete(user);
         return new RsData<>("200-1", "회원 탈퇴가 완료되었습니다.");
     }

@@ -15,6 +15,8 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final FreelancerService freelancerService;
 
+    public long count() { return offerRepository.count();}
+
     public Offer findById(long id) {
         return offerRepository.findById(id).get();
     }
