@@ -28,8 +28,7 @@ class FreelancerServiceTest {
     private FreelancerService freelancerService;
 
     public FreelancerServiceTest() {
-        MockitoAnnotations.openMocks(this); // Mockito 초기화
-    }
+        MockitoAnnotations.openMocks(this);
 
     @Test
     void 프리랜서_생성_성공() {
