@@ -10,6 +10,8 @@ import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/offers")
 @RequiredArgsConstructor
+@Tag(name = "ApiV1OfferController", description = "API 구인(삽니다) 컨트롤러")
 public class ApiV1OfferController {
     private final Rq rq;
     private final OfferService offerService;
@@ -25,6 +28,7 @@ public class ApiV1OfferController {
 
     @PostMapping
     @Transactional
+    @Operation(summary = "등록")
     public RsData<OfferDto> create(
             @Valid @RequestBody OfferCreateReqBody reqBody
     ) {
@@ -42,6 +46,7 @@ public class ApiV1OfferController {
 
     @PutMapping("/{id}")
     @Transactional
+    @Operation(summary = "수정")
     public RsData<Void> modify(
             @PathVariable long id,
             @Valid @RequestBody OfferModifyReqBody reqBody
@@ -62,6 +67,7 @@ public class ApiV1OfferController {
 
     @Transactional
     @DeleteMapping("/{id}")
+    @Operation(summary = "삭제")
     public RsData<OfferDto> delete(
             @PathVariable Long id
     ) {
