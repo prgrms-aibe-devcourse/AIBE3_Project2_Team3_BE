@@ -19,6 +19,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    public long count() {
+        return userRepository.count();
+    }
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
