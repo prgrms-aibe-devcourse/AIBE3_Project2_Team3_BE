@@ -2,6 +2,7 @@ package com.pi.domain.offer.offer.controller;
 
 import com.pi.domain.offer.offer.dto.*;
 import com.pi.domain.offer.offer.entity.Offer;
+import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.service.FreelancerService;
@@ -12,10 +13,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/offers")
@@ -29,37 +32,38 @@ public class ApiV1OfferController {
     @GetMapping("/my")
     @Transactional(readOnly = true)
     @Operation(summary = "본인이 등록한 구인 조회")
-    public RsData<List<OfferWithPostDto>> getMyOffers() {
+    public RsData<Page<OfferWithPostDto>> getMyOffers(
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) OfferStatus status
+    ) {
         User actor = rq.getActor();
-        List<Offer> items = offerService.getOffersByUserId(actor.getId());
+        Page<Offer> items = offerService.getOffersByUserIdAndStatus(actor.getId(), status, pageable);
 
         return new RsData<>(
                 "200-1",
                 "구인이 조회되었습니다.",
-                items
-                        .stream()
-                        .map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
-                        .toList()
+                items.map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
         );
     }
 
     @GetMapping("/freelancer/{freelancerId}")
     @Transactional(readOnly = true)
     @Operation(summary = "프리랜서의 구인 조회")
-    public RsData<List<OfferWithUserDto>> getOffersForFreelancer(@PathVariable Long freelancerId) {
+    public RsData<Page<OfferWithUserDto>> getOffersForFreelancer(
+            @PathVariable Long freelancerId,
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) OfferStatus status
+    ) {
         User actor = rq.getActor();
         Freelancer freelancer = freelancerService.findById(freelancerId);
         freelancer.checkActorCanReadOffer(actor);
 
-        List<Offer> items = offerService.getOffersByFreelancerId(freelancerId);
+        Page<Offer> items = offerService.getOffersByFreelancerIdAndStatus(freelancerId, status, pageable);
 
         return new RsData<>(
                 "200-1",
                 "%d번 프리랜서의 구인이 조회되었습니다.".formatted(freelancer.getId()),
-                items
-                        .stream()
-                        .map(OfferWithUserDto::new)
-                        .toList()
+                items.map(OfferWithUserDto::new)
         );
     }
 

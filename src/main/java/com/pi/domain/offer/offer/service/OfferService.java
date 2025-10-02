@@ -7,9 +7,9 @@ import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +17,9 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final FreelancerService freelancerService;
 
-    public long count() { return offerRepository.count();}
+    public long count() {
+        return offerRepository.count();
+    }
 
     public Offer findById(long id) {
         return offerRepository.findById(id).get();
@@ -46,11 +48,11 @@ public class OfferService {
         return freelancer.getPost().getUser();
     }
 
-    public List<Offer> getOffersByUserId(long userId) {
-        return offerRepository.findAllByUserId(userId).get();
+    public Page<Offer> getOffersByUserIdAndStatus(long id, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
     }
 
-    public List<Offer> getOffersByFreelancerId(Long freelancerId) {
-        return offerRepository.findAllByFreelancerId(freelancerId).get();
+    public Page<Offer> getOffersByFreelancerIdAndStatus(Long freelancerId, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
     }
 }
