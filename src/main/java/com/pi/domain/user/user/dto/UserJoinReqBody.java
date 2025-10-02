@@ -12,6 +12,8 @@ public record UserJoinReqBody(
         String password,
         @NotBlank
         @Size(min = 2, max = 20)
-        String nickname
+        String nickname,
+        @NotBlank
+        String email
 ) {
 }
