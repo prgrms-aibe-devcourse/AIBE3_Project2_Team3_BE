@@ -2,6 +2,7 @@ package com.pi.domain.question.question.entity;
 
 import com.pi.domain.answer.answer.entity.Answer;
 import com.pi.domain.user.user.entity.User;
+import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -33,5 +34,23 @@ public class Question extends BaseEntity {
         this.content = content;
         this.user = user;
     }
+
+    public void checkActorCanDelete(User actor) {
+        if (actor == null || !actor.equals(this.user)) {
+            throw new ServiceException("403-1", "삭제 권한이 없습니다.");
+        }
+    }
+
+    public void modify(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void checkActorCanModify(User actor) {
+        if (actor == null || !actor.equals(this.user)) {
+            throw new ServiceException("403-1", "수정 권한이 없습니다.");
+        }
+    }
+
 
 }
