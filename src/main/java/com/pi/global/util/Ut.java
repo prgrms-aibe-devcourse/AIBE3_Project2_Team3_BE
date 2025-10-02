@@ -7,11 +7,20 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HexFormat;
+import java.util.Map;
 
 public class Ut {
     public static class jwt {
+        private static final SecureRandom R = new SecureRandom();
+
         public static String toString(String secret, int expireSeconds, Map<String, Object> body) {
             ClaimsBuilder claimsBuilder = Jwts.claims();
 
@@ -63,6 +72,21 @@ public class Ut {
                         .getPayload();
             } catch (Exception e) {
                 return null;
+            }
+        }
+
+        public static String newOpaqueToken(int bytes) {
+            byte[] buf = new byte[bytes]; // 64 권장
+            R.nextBytes(buf);
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
+        }
+
+        public static String sha256(String s) {
+            try {
+                var md = MessageDigest.getInstance("SHA-256");
+                return HexFormat.of().formatHex(md.digest(s.getBytes(StandardCharsets.UTF_8)));
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException(e);
             }
         }
     }
