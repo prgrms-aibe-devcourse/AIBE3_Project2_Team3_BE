@@ -1,15 +1,26 @@
 package com.pi.domain.user.user.service;
 
+import com.pi.domain.user.user.entity.RefreshToken;
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.repository.RefreshTokenRepository;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.util.Ut;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class AuthTokenService {
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final Clock clock = Clock.systemUTC();
+
     @Value("${custom.jwt.secretKey}")
     private String jwtSecretKey;
 
@@ -70,5 +81,37 @@ public class AuthTokenService {
             throw new ServiceException("401-4", "유효하지 않은 토큰입니다.");
         }
         return ((Number) parsedPayload.get("id")).longValue();
+    }
+
+    @Transactional
+    public String issueRefresh(User user) {
+        String plain = Ut.jwt.newOpaqueToken(64);
+        String hash  = Ut.jwt.sha256(plain);
+        Instant exp  = Instant.now(clock).plus(Duration.ofSeconds(refreshTokenExpireSeconds));
+        refreshTokenRepository.save(RefreshToken.of(user, hash, exp));
+        return plain; // 쿠키(HttpOnly)로 내려줄 원문
+    }
+
+    @Transactional
+    public String rotateRefresh(String refreshPlain) {
+        String hash = Ut.jwt.sha256(refreshPlain);
+        RefreshToken rt = refreshTokenRepository.findByTokenHashAndRevokedFalse(hash)
+                .orElseThrow(() -> new ServiceException("401-1", "유효하지 않은 Token 입니다."));
+        if (!rt.isActive(Instant.now(clock))) throw new ServiceException("401-2", "Token이 만료되었습니다.");
+
+        rt.revoke(); // 이전 토큰 폐기(간단 회전)
+
+        String newPlain = Ut.jwt.newOpaqueToken(64);
+        String newHash  = Ut.jwt.sha256(newPlain);
+        Instant exp     = Instant.now(clock).plus(Duration.ofSeconds(refreshTokenExpireSeconds));
+
+        refreshTokenRepository.save(RefreshToken.of(rt.getUser(), newHash, exp));
+        return newPlain;
+    }
+
+    @Transactional
+    public void revokeRefresh(String refreshPlain) {
+        String hash = Ut.jwt.sha256(refreshPlain);
+        refreshTokenRepository.findByTokenHashAndRevokedFalse(hash).ifPresent(RefreshToken::revoke);
     }
 }
