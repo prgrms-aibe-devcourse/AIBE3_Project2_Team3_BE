@@ -32,7 +32,7 @@ public class ApiV1OfferController {
     @GetMapping("/my")
     @Transactional(readOnly = true)
     @Operation(summary = "본인이 등록한 구인 조회")
-    public RsData<Page<OfferWithPostDto>> getMyOffers(
+    public RsData<PagedResBody<OfferWithPostDto>> getMyOffers(
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
     ) {
@@ -42,14 +42,19 @@ public class ApiV1OfferController {
         return new RsData<>(
                 "200-1",
                 "%d번 사용자의 구인이 조회되었습니다.".formatted(actor.getId()),
-                pagedOffers.map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
+                new PagedResBody<>(
+                        pagedOffers.getContent().stream()
+                                .map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
+                                .toList()
+                        , pagedOffers
+                )
         );
     }
 
     @GetMapping("/freelancer/{freelancerId}")
     @Transactional(readOnly = true)
     @Operation(summary = "프리랜서의 구인 조회")
-    public RsData<Page<OfferWithUserDto>> getOffersForFreelancer(
+    public RsData<PagedResBody<OfferWithUserDto>> getOffersForFreelancer(
             @PathVariable Long freelancerId,
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
@@ -63,7 +68,12 @@ public class ApiV1OfferController {
         return new RsData<>(
                 "200-1",
                 "%d번 프리랜서의 구인이 조회되었습니다.".formatted(freelancer.getId()),
-                pagedOffers.map(OfferWithUserDto::new)
+                new PagedResBody<>(
+                        pagedOffers.getContent().stream()
+                                .map(OfferWithUserDto::new)
+                                .toList()
+                        , pagedOffers
+                )
         );
     }
 
