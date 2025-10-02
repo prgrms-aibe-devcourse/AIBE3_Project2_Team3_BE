@@ -32,12 +32,6 @@ public class Offer extends BaseEntity {
         return actor.getUsername().equals(user.getUsername());
     }
 
-    public void checkActorCanRead(User actor) {
-        if (!isOwner(actor)) {
-            throw new ServiceException("403-1", "%d번 구인 읽기 권한이 없습니다.".formatted(getId()));
-        }
-    }
-
     public void checkActorCanModify(User actor, User freelancerUser) {
         if (!actor.getUsername().equals(freelancerUser.getUsername())) {
             throw new ServiceException("403-1", "%d번 구인 상태 수정 권한이 없습니다.".formatted(getId()));

@@ -103,7 +103,7 @@ public class ApiV1OfferController {
         Offer offer = offerService.findById(id);
 
         User actor = rq.getActor();
-        User freelancerUser = offerService.getFreelancerUser(offer);
+        User freelancerUser = offer.getFreelancer().getPost().getUser();
         offer.checkActorCanModify(actor, freelancerUser);
 
         offerService.update(offer, reqBody.status());

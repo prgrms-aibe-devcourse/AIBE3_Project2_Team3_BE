@@ -50,9 +50,4 @@ public class OfferService {
     public void delete(Offer offer) {
         offerRepository.delete(offer);
     }
-
-    public User getFreelancerUser(Offer offer) {
-        Freelancer freelancer = freelancerService.findById(offer.getFreelancer().getId());
-        return freelancer.getPost().getUser();
-    }
 }
