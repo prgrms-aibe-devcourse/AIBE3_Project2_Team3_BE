@@ -1,5 +1,6 @@
 package com.pi.domain.question.question.service;
 
+import com.pi.domain.question.question.dto.QuestionCreateReqBody;
 import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.repository.QuestionRepository;
 import com.pi.domain.user.user.entity.User;
@@ -18,15 +19,12 @@ public class QuestionService {
         return questionRepository.findAll();
     }
 
-    public Question findById(Long id) {
-        return questionRepository.findById(id).orElse(null);
-    }
-
     @Transactional
-    public Question create(String title, String content, User user) {
-        Question question = new Question(title, content, user);
+    public Question create(QuestionCreateReqBody dto, User user) {
+        Question question = new Question(dto.title(), dto.content(), user);
         return questionRepository.save(question);
     }
+
 
     public void delete(Question question) {
         questionRepository.delete(question);

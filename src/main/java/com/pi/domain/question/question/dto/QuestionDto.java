@@ -11,8 +11,8 @@ public record QuestionDto(
         Long id,
         String title,
         String content,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
+        LocalDateTime createdDate,
+        LocalDateTime modifiedDate,
         List<AnswerDto> answers
 ) {
     public QuestionDto(Question question) {
