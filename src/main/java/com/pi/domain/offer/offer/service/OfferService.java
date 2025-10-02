@@ -49,4 +49,8 @@ public class OfferService {
     public List<Offer> getOffersByUserId(long userId) {
         return offerRepository.findAllByUserId(userId).get();
     }
+
+    public List<Offer> getOffersByFreelancerId(Long freelancerId) {
+        return offerRepository.findAllByFreelancerId(freelancerId).get();
+    }
 }

@@ -1,9 +1,6 @@
 package com.pi.domain.offer.offer.controller;
 
-import com.pi.domain.offer.offer.dto.OfferDto;
-import com.pi.domain.offer.offer.dto.OfferModifyReqBody;
-import com.pi.domain.offer.offer.dto.OfferWithPostDto;
-import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
+import com.pi.domain.offer.offer.dto.*;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -46,25 +43,25 @@ public class ApiV1OfferController {
         );
     }
 
-//    // TODO freelancer 컨트롤러로 옮기기 (freelancers/{freelancerId}/offers)
-//    @GetMapping("/freelancer/{freelancerId}")
-//    @Transactional(readOnly = true)
-//    @Operation(summary = "프리랜서의 구인 조회")
-//    public List<OfferDto> getOffersForFreelancer(@PathVariable Long freelancerId) {
-//        User actor = rq.getActor();
-//        offer.checkActorCanDelete(actor);
-//        List<Offer> items = offerService.getOffersByPostId();
-//
-//        return items
-//                .stream()
-//                .map(OfferDto::new)
-//                .toList();
-////        return new RsData<>(
-////                "201-1",
-////                "%d번 구인이 등록되었습니다.".formatted(offer.getId()),
-////                new OfferDto(offer)
-////        );
-//    }
+    @GetMapping("/freelancer/{freelancerId}")
+    @Transactional(readOnly = true)
+    @Operation(summary = "프리랜서의 구인 조회")
+    public RsData<List<OfferWithUserDto>> getOffersForFreelancer(@PathVariable Long freelancerId) {
+        User actor = rq.getActor();
+        Freelancer freelancer = freelancerService.findById(freelancerId);
+        freelancer.checkActorCanReadOffer(actor);
+
+        List<Offer> items = offerService.getOffersByFreelancerId(freelancerId);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 프리랜서의 구인이 조회되었습니다.".formatted(freelancer.getId()),
+                items
+                        .stream()
+                        .map(OfferWithUserDto::new)
+                        .toList()
+        );
+    }
 
     @PostMapping
     @Transactional
