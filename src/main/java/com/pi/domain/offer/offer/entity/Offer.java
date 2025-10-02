@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "offers")
+@Table(name = "offers", indexes = {
+        @Index(name = "idx_offers_created_date", columnList = "createdDate")
+})
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
