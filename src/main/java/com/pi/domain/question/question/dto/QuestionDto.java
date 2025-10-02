@@ -1,21 +1,21 @@
 package com.pi.domain.question.question.dto;
 
-import com.pi.domain.answer.answer.dto.AnswerResponseDto;
+import com.pi.domain.answer.answer.dto.AnswerDto;
 import com.pi.domain.question.question.entity.Question;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record QuestionResponseDto(
+public record QuestionDto(
         Long id,
         String title,
         String content,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
-        List<AnswerResponseDto> answers
+        List<AnswerDto> answers
 ) {
-    public QuestionResponseDto(Question question) {
+    public QuestionDto(Question question) {
         this(
                 question.getId(),
                 question.getTitle(),
@@ -23,7 +23,7 @@ public record QuestionResponseDto(
                 question.getCreatedDate(),
                 question.getModifiedDate(),
                 question.getAnswers().stream()
-                        .map(AnswerResponseDto::from)
+                        .map(AnswerDto::new)
                         .collect(Collectors.toList())
         );
     }

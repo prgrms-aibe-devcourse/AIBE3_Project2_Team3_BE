@@ -4,7 +4,7 @@ import com.pi.domain.answer.answer.entity.Answer;
 
 import java.time.LocalDateTime;
 
-public record AnswerResponseDto(
+public record AnswerDto(
         Long id,
         String content,
         LocalDateTime createdDate,
@@ -12,8 +12,8 @@ public record AnswerResponseDto(
         Long userId,
         Long questionId
 ) {
-    public static AnswerResponseDto from(Answer answer) {
-        return new AnswerResponseDto(
+    public AnswerDto(Answer answer) {
+        this(
                 answer.getId(),
                 answer.getContent(),
                 answer.getCreatedDate(),

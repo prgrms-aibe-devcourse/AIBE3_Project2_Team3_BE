@@ -5,6 +5,7 @@ import com.pi.domain.question.question.repository.QuestionRepository;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,13 +22,9 @@ public class QuestionService {
         return questionRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public Question create(String title, String content, User user) {
-        Question question = Question.builder()
-                .title(title)
-                .content(content)
-                .user(user)
-                .build();
-
+        Question question = new Question(title, content, user);
         return questionRepository.save(question);
     }
 

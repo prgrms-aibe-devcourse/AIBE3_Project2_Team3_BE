@@ -1,6 +1,6 @@
 package com.pi.domain.question.question.dto;
 
-public record QuestionCreateDto (
+public record QuestionCreateReqBody(
         String title,
         String content
 ) {}

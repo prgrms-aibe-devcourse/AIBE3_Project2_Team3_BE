@@ -1,15 +1,16 @@
 package com.pi.domain.question.question.controller;
 
-import com.pi.domain.question.question.dto.QuestionCreateDto;
+import com.pi.domain.question.question.dto.QuestionCreateReqBody;
 import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.service.QuestionService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.UserService;
+import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
+import com.pi.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -18,6 +19,7 @@ import java.util.List;
 public class ApiV1QuestionController {
     private final QuestionService questionService;
     private final UserService userService;
+    private final Rq rq;
 
     @GetMapping
     public RsData<List<Question>> getAllQuestions() {
@@ -28,17 +30,18 @@ public class ApiV1QuestionController {
 
     @PostMapping
     public RsData<Question> createQuestion(
-            @RequestBody QuestionCreateDto questionCreateDto,
-            Principal principal
+            @RequestBody QuestionCreateReqBody questionCreateDto
     ) {
         try {
-            User currentUser = userService.findByUsername(principal.getName())
-                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+            User actor = rq.getActor();
+//            User currentUser = userService.findByUsername(principal.getName())
+//                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
             Question newQuestion = questionService.create(
                     questionCreateDto.title(),
                     questionCreateDto.content(),
-                    currentUser
+                    actor
             );
 
             return new RsData<>(
