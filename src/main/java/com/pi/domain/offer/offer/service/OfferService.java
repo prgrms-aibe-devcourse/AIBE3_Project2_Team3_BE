@@ -9,6 +9,8 @@ import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OfferService {
@@ -42,5 +44,9 @@ public class OfferService {
     public User getFreelancerUser(Offer offer) {
         Freelancer freelancer = freelancerService.findById(offer.getFreelancer().getId());
         return freelancer.getPost().getUser();
+    }
+
+    public List<Offer> getOffersByUserId(long userId) {
+        return offerRepository.findAllByUserId(userId).get();
     }
 }

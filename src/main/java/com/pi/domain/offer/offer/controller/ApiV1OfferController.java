@@ -2,12 +2,12 @@ package com.pi.domain.offer.offer.controller;
 
 import com.pi.domain.offer.offer.dto.OfferDto;
 import com.pi.domain.offer.offer.dto.OfferModifyReqBody;
+import com.pi.domain.offer.offer.dto.OfferWithPostDto;
 import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.service.FreelancerService;
-import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
@@ -29,27 +29,42 @@ public class ApiV1OfferController {
     private final OfferService offerService;
     private final FreelancerService freelancerService;
 
-    @GetMapping
+    @GetMapping("/my")
     @Transactional(readOnly = true)
-    @Operation(summary = "다건 조회")
-    public List<OfferDto> getItems() {
+    @Operation(summary = "본인이 등록한 구인 조회")
+    public RsData<List<OfferWithPostDto>> getMyOffers() {
+        User actor = rq.getActor();
+        List<Offer> items = offerService.getOffersByUserId(actor.getId());
 
-        List<Offer> items = offerService.getList();
-
-        return items
-                .stream()
-                .map(OfferDto::new)
-                .toList();
+        return new RsData<>(
+                "200-1",
+                "구인이 조회되었습니다.",
+                items
+                        .stream()
+                        .map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
+                        .toList()
+        );
     }
 
-    @GetMapping("/{id}")
-    @Transactional(readOnly = true)
-    @Operation(summary = "단건 조회")
-    public OfferDto getItem(@PathVariable Long id) {
-        Offer item = offerService.findById(id);
-
-        return new OfferDto(item);
-    }
+//    // TODO freelancer 컨트롤러로 옮기기 (freelancers/{freelancerId}/offers)
+//    @GetMapping("/freelancer/{freelancerId}")
+//    @Transactional(readOnly = true)
+//    @Operation(summary = "프리랜서의 구인 조회")
+//    public List<OfferDto> getOffersForFreelancer(@PathVariable Long freelancerId) {
+//        User actor = rq.getActor();
+//        offer.checkActorCanDelete(actor);
+//        List<Offer> items = offerService.getOffersByPostId();
+//
+//        return items
+//                .stream()
+//                .map(OfferDto::new)
+//                .toList();
+////        return new RsData<>(
+////                "201-1",
+////                "%d번 구인이 등록되었습니다.".formatted(offer.getId()),
+////                new OfferDto(offer)
+////        );
+//    }
 
     @PostMapping
     @Transactional

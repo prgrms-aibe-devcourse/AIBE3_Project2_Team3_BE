@@ -26,6 +26,16 @@ public class Offer extends BaseEntity {
     @Setter
     private OfferStatus status;
 
+    private boolean checkActorIsOwner(User actor) {
+        return actor.getUsername().equals(user.getUsername());
+    }
+
+    public void checkActorCanRead(User actor) {
+        if (!checkActorIsOwner(actor)) {
+            throw new ServiceException("403-1", "%d번 구인 읽기 권한이 없습니다.".formatted(getId()));
+        }
+    }
+
     public void checkActorCanModify(User actor, User freelancerUser) {
         if (!actor.getUsername().equals(freelancerUser.getUsername())) {
             throw new ServiceException("403-1", "%d번 구인 상태 수정 권한이 없습니다.".formatted(getId()));
@@ -33,7 +43,7 @@ public class Offer extends BaseEntity {
     }
 
     public void checkActorCanDelete(User actor) {
-        if (!actor.getUsername().equals(user.getUsername())) {
+        if (!checkActorIsOwner(actor)) {
             throw new ServiceException("403-1", "%d번 구인 삭제 권한이 없습니다.".formatted(getId()));
         }
     }
