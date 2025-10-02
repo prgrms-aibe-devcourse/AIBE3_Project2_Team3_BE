@@ -1,8 +1,8 @@
 package com.pi.domain.post.freelancer.service;
 
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
-import com.pi.domain.post.freelancer.dto.FreelancerReqDto;
-import com.pi.domain.post.freelancer.dto.FreelancerResDto;
+import com.pi.domain.post.freelancer.dto.FreelancerReqBody;
+import com.pi.domain.post.freelancer.dto.FreelancerResBody;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import com.pi.domain.post.post.entity.Post;
@@ -19,7 +19,7 @@ public class FreelancerService {
     private final FreelancerRepository freelancerRepository;
     private final PostRepository postRepository;
 
-    public FreelancerResDto create(FreelancerReqDto requestDto) {
+    public FreelancerResBody create(FreelancerReqBody requestDto) {
         Post post = postRepository.findById(requestDto.postId())
                 .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
 
@@ -31,7 +31,7 @@ public class FreelancerService {
 
         Freelancer saved = freelancerRepository.save(freelancer);
 
-        return new FreelancerResDto(
+        return new FreelancerResBody(
                 new FreelancerDto(saved),
                 "프리랜서가 성공적으로 등록되었습니다."
         );

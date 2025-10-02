@@ -1,8 +1,8 @@
 package com.pi.domain.post.freelancer.controller;
 
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
-import com.pi.domain.post.freelancer.dto.FreelancerReqDto;
-import com.pi.domain.post.freelancer.dto.FreelancerResDto;
+import com.pi.domain.post.freelancer.dto.FreelancerReqBody;
+import com.pi.domain.post.freelancer.dto.FreelancerResBody;
 import com.pi.domain.post.freelancer.service.FreelancerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ApiV1FreelancerController {
     }
 
     @PostMapping
-    public FreelancerResDto create(@Valid @RequestBody FreelancerReqDto requestDto) {
+    public FreelancerResBody create(@Valid @RequestBody FreelancerReqBody requestDto) {
         return freelancerService.create(requestDto);
     }
 

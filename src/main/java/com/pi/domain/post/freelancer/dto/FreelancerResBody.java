@@ -1,6 +1,6 @@
 package com.pi.domain.post.freelancer.dto;
 
-public record FreelancerResDto(
+public record FreelancerResBody(
     FreelancerDto freelancerDto,
     String message
 ) {}
