@@ -2,10 +2,8 @@ package com.pi.global.security;
 
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.AuthTokenService;
-import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
-import com.pi.global.rsData.RsData;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,118 +23,96 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private final Rq rq;
-    private final UserService userService;
     private final AuthTokenService authTokenService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            work(request, response, filterChain);
-        } catch (ServiceException e) {
-            RsData<Void> rsData = e.getRsData();
-            response.setContentType("application/json");
-            response.setStatus(rsData.statusCode());
-            //response.getWriter().write()
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    private void work(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // API 요청 아니라면 패스
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        // 1) API 보호 대상이 아니면 패스
         if (!request.getRequestURI().startsWith("/api/")) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // 인증, 인가가 필요없는 API 요청 이라면 패스
-        if (List.of("/api/v1/users/login", "/api/v1/users/logout", "/api/v1/users/join").contains(request.getRequestURI())) {
+        // 2) 화이트리스트 패스
+        if (List.of("/api/v1/users/login", "/api/v1/users/logout", "/api/v1/users/join")
+                .contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String accessToken = null;
-        String refreshToken = null;
+        try {
+            /* ---------- 액세스 토큰 처리 (헤더 우선 → 쿠키) ---------- */
+            String header = rq.getHeader("Authorization", "");
+            String accessToken = (!header.isBlank() && header.startsWith("Bearer "))
+                    ? header.substring("Bearer ".length()).trim()
+                    : rq.getCookieValue("accessToken", "");
 
-        String headerAuthorization = rq.getHeader("Authorization", "");
-
-        // headerAuthorization이 존재한다면
-        if (!headerAuthorization.isBlank()) {
-            if (!headerAuthorization.startsWith("Bearer ")) {
-                throw new ServiceException("401-2", "인증 정보가 올바르지 않습니다.");
+            if (!accessToken.isBlank()) {
+                Map<String, Object> claims = authTokenService.payload(accessToken);
+                if (claims != null) {
+                    setAuthenticationFromClaims(claims);
+                    filterChain.doFilter(request, response);
+                    return;
+                }
             }
 
-            // ["Bearer", accessToken]
-            String[] headerAuthorizations = headerAuthorization.split(" ", 3);
+            /* ---------- 리프레시로 회복 (쿠키 전용) ---------- */
+            String refreshPlain = rq.getCookieValue("refreshToken", "");
+            if (!refreshPlain.isBlank()) {
+                try {
+                    // 1) 소유자 확인 (fetch join → LAZY 예외 방지)
+                    User owner = authTokenService.findActiveRefreshOwner(refreshPlain);
 
-            accessToken = headerAuthorizations[1];
-            refreshToken = headerAuthorizations.length == 3 ? headerAuthorizations[2] : "";
-        } else { // headerAuthorization이 존재하지 않는다면 쿠키에서 정보 가져오기
-            accessToken = rq.getCookieValue("accessToken", "");
-            refreshToken = rq.getCookieValue("refreshToken", "");
-        }
+                    // 2) 회전 + 새 액세스 발급
+                    String newRefresh = authTokenService.rotateRefresh(refreshPlain);
+                    String newAccess  = authTokenService.genAccessToken(owner);
 
-        logger.debug("accessToken: " + accessToken);
-        logger.debug("refreshToken: " + refreshToken);
+                    // 3) 쿠키 갱신 (여기서 응답 쿠키 세팅)
+                    rq.setCookie("refreshToken", newRefresh);
+                    rq.setCookie("accessToken", newAccess);
 
-        if (accessToken.isBlank() && refreshToken.isBlank()) {
+                    // 4) 현재 요청 인증 확정 (헤더 수정은 현재 요청에 의미 없음)
+                    setAuthenticationFromUser(owner);
+
+                    filterChain.doFilter(request, response);
+                    return;
+
+                } catch (ServiceException e) {
+                    // 회복 실패 → 401로 종료 (컨트롤러 진입 차단)
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
+            }
+
+            // 액세스/리프레시 모두 없음 → 익명으로 통과
             filterChain.doFilter(request, response);
-            return;
+
+        } catch (ServiceException e) {
+            response.setStatus(e.getRsData().statusCode());
         }
+    }
 
-        User users = null;
-        boolean isAccessTokenExists = !accessToken.isBlank();
-        boolean isAccessTokenValid = false;
+    private void setAuthenticationFromClaims(Map<String, Object> claims) {
+        long id = ((Number) claims.get("id")).longValue();
+        String username = (String) claims.get("username");
+        String nickname = (String) claims.get("nickname");
+        String role = (String) claims.getOrDefault("role", "ROLE_USER");
 
-        if (isAccessTokenExists) {
-            Map<String, Object> payload = authTokenService.payload(accessToken);
-
-            if (payload != null) {
-                long id = ((Number) payload.get("id")).longValue();
-                String username = (String) payload.get("username");
-                String nickname = (String) payload.get("nickname");
-                String role = (String) payload.get("role");
-                users = new User(id, username, nickname, role);
-
-                // 토큰 유효성 검증 성공
-                isAccessTokenValid = true;
-            }
-        }
-
-        // accessToken이 유효하지 않거나 없을 때 refreshToken을 이용하여 새로운 accessToken 발급
-        if (users == null && !refreshToken.isBlank()) {
-            users = userService.findByRefreshToken(refreshToken)
-                    .orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
-        }
-
-        // 토큰이 존재하고, accessToken 유효성 검증 실패 시
-        if (isAccessTokenExists && !isAccessTokenValid) {
-            // refreshToken을 이용해 새로운 accessToken을 발급
-            String actorAccessToken = userService.genAccessToken(users);
-
-            rq.setCookie("accessToken", actorAccessToken); // 새로운 accessToken을 쿠키에 설정
-            rq.setHeader("Authorization", "Bearer " + actorAccessToken); // Authorization 헤더에 새로운 토큰 설정
-        }
-
-        UserDetails user = new SecurityUser(
-                users.getId(),
-                users.getUsername(),
-                "",
-                users.getNickname(),
-                users.getAuthorities()
+        SecurityUser principal = new SecurityUser(
+                id, username, "", nickname,
+                List.of(() -> role)
         );
-
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user,
-                "",
-                user.getAuthorities()
+                principal, "", principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private void setAuthenticationFromUser(User user) {
+        SecurityUser principal = new SecurityUser(
+                user.getId(), user.getUsername(), "", user.getNickname(), user.getAuthorities()
         );
-
-        // 이 시점 이후부터는 시큐리티가 이 요청을 인증된 사용자의 요청으로 취급
-        SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
-
-        filterChain.doFilter(request, response);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                principal, "", principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
