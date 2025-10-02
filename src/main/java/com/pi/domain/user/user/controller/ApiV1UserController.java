@@ -122,7 +122,8 @@ public class ApiV1UserController {
     public RsData<Void> updatePassword(
             @Valid @RequestBody UserPasswordUpdateReqBody reqBody
     ) {
-        User actor = rq.getActor();
+        User actor = userService.findByUsername(rq.getActor().getUsername())
+                .orElseThrow(() -> new ServiceException("404-1", "사용자를 찾을 수 없습니다."));
         userService.updatePassword(
                 actor,
                 reqBody.oldPassword(),
