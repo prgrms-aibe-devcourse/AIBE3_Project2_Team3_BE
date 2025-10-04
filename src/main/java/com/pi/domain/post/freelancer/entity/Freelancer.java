@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Freelancer {
     @Id
     private Long id;
@@ -21,4 +20,10 @@ public class Freelancer {
 
     private String salary;
     private String period;
+
+    public Freelancer(Post post, String salary, String period) {
+        this.post = post;
+        this.salary = salary;
+        this.period = period;
+    }
 }
