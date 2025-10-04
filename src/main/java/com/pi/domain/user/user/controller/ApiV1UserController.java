@@ -2,6 +2,7 @@ package com.pi.domain.user.user.controller;
 
 import com.pi.domain.user.user.dto.*;
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.service.AuthTokenService;
 import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ApiV1UserController {
     private final UserService userService;
+    private final AuthTokenService authTokenService;
     private final Rq rq;
 
     @GetMapping("/me")
@@ -80,7 +82,7 @@ public class ApiV1UserController {
                 reqBody.password()
         );
         String accessToken = userService.genAccessToken(user);
-        String refreshToken = userService.genRefreshToken(user);
+        String refreshToken = authTokenService.issueRefresh(user);
 
         rq.setCookie("accessToken", accessToken);
         rq.setCookie("refreshToken", refreshToken);
@@ -120,7 +122,8 @@ public class ApiV1UserController {
     public RsData<Void> updatePassword(
             @Valid @RequestBody UserPasswordUpdateReqBody reqBody
     ) {
-        User actor = rq.getActor();
+        User actor = userService.findByUsername(rq.getActor().getUsername())
+                .orElseThrow(() -> new ServiceException("404-1", "사용자를 찾을 수 없습니다."));
         userService.updatePassword(
                 actor,
                 reqBody.oldPassword(),
