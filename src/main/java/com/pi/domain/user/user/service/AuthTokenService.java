@@ -73,7 +73,7 @@ public class AuthTokenService {
             throw new ServiceException("401-3", "refreshToken이 비어있습니다.");
 
         String hash = Ut.jwt.sha256(refreshPlain);
-        RefreshToken rt = refreshTokenRepository.findActiveWithUserByTokenHash(hash)
+        RefreshToken rt = refreshTokenRepository.findByTokenHashAndRevokedFalse(hash)
                 .orElseThrow(() -> new ServiceException("401-1", "유효하지 않은 Token 입니다."));
 
         if (!rt.isActive(Instant.now(clock)))
