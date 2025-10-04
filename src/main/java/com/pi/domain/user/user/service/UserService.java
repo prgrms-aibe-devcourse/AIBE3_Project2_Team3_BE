@@ -30,30 +30,7 @@ public class UserService {
     public String genAccessToken(User user) {
         return authTokenService.genAccessToken(user);
     }
-    public String genRefreshToken(User user) {
-        return authTokenService.genRefreshToken(user);
-    }
 
-    public Optional<User> findByRefreshToken(String refreshToken) {
-        // 1. refreshToken 검증 (JWT 토큰인지 확인)
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new ServiceException("401-3", "refreshToken이 비어있습니다.");
-        }
-
-        // JWT 토큰에서 회원 정보를 추출 (예: id, username, nickname 등)
-        long userId = authTokenService.getUserIdFromToken(refreshToken); // JWT에서 사용자 ID 추출
-
-        // 2. 데이터베이스에서 해당 사용자 조회
-        Optional<User> userOptional = userRepository.findById(userId);
-
-        // 3. 사용자 조회 실패 시 예외 처리
-        if (userOptional.isEmpty()) {
-            throw new ServiceException("401-3", "회원을 찾을 수 없습니다.");
-        }
-
-        // 4. 사용자가 존재하면 반환
-        return userOptional;
-    }
     public void checkPassword(User user, String password) {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ServiceException("401-1", "비밀번호가 일치 하지 않습니다.");
