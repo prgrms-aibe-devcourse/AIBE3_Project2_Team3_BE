@@ -26,4 +26,9 @@ public class Freelancer {
         this.salary = salary;
         this.period = period;
     }
+
+    public void modify(String salary, String period) {
+        this.salary = salary;
+        this.period = period;
+    }
 }
