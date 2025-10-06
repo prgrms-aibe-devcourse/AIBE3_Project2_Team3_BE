@@ -13,7 +13,7 @@ public class Freelancer {
     @Id
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @MapsId
     @JoinColumn(name = "id", nullable = false)
     private Post post;

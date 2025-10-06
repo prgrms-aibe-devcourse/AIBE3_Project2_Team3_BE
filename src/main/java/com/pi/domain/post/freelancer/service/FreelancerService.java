@@ -1,5 +1,6 @@
 package com.pi.domain.post.freelancer.service;
 
+import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerReqBody;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.repository.FreelancerRepository;
@@ -19,7 +20,7 @@ public class FreelancerService {
     private final PostRepository postRepository;
 
     @Transactional
-    public RsData<Freelancer> create(User user, FreelancerReqBody reqBody) {
+    public RsData<FreelancerDto> create(User user, FreelancerReqBody reqBody) {
         Post post = new Post(
                 user,
                 false,
@@ -31,7 +32,7 @@ public class FreelancerService {
         Freelancer freelancer = new Freelancer(post, reqBody.salary(), reqBody.period());
         freelancerRepository.save(freelancer);
 
-        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", freelancer);
+        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(freelancer));
     }
 
     public Freelancer findById(Long id) {
@@ -40,7 +41,7 @@ public class FreelancerService {
     }
 
     @Transactional
-    public RsData<Freelancer> modify(Long id, FreelancerReqBody reqBody, User user) {
+    public RsData<FreelancerDto> modify(Long id, FreelancerReqBody reqBody, User user) {
         Freelancer freelancer = findById(id);
         Post post = freelancer.getPost();
 
@@ -51,20 +52,18 @@ public class FreelancerService {
         post.modify(reqBody.title(), reqBody.content());
         freelancer.modify(reqBody.salary(), reqBody.period());
 
-        return new RsData<>("200-2", "프리랜서 게시글이 수정되었습니다.", freelancer);
+        return new RsData<>("200-2", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(freelancer));
     }
 
     @Transactional
     public RsData<Void> delete(Long id, User user) {
         Freelancer freelancer = findById(id);
-        Post post = freelancer.getPost();
 
-        if (!post.getUser().equals(user)) {
+        if (!freelancer.getPost().getUser().equals(user)) {
             return new RsData<>("403-1", "본인 게시글만 삭제할 수 있습니다.");
         }
 
         freelancerRepository.delete(freelancer);
-        postRepository.delete(post);
 
         return new RsData<>("200-3", "프리랜서 게시글이 삭제되었습니다.");
     }
