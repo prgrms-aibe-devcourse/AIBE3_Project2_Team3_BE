@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "offers")
+@Table(name = "offers", indexes = {
+        @Index(name = "idx_offers_created_date", columnList = "createdDate")
+})
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,6 +28,10 @@ public class Offer extends BaseEntity {
     @Setter
     private OfferStatus status;
 
+    private boolean isOwner(User actor) {
+        return actor.getUsername().equals(user.getUsername());
+    }
+
     public void checkActorCanModify(User actor, User freelancerUser) {
         if (!actor.getUsername().equals(freelancerUser.getUsername())) {
             throw new ServiceException("403-1", "%d번 구인 상태 수정 권한이 없습니다.".formatted(getId()));
@@ -33,7 +39,7 @@ public class Offer extends BaseEntity {
     }
 
     public void checkActorCanDelete(User actor) {
-        if (!actor.getUsername().equals(user.getUsername())) {
+        if (!isOwner(actor)) {
             throw new ServiceException("403-1", "%d번 구인 삭제 권한이 없습니다.".formatted(getId()));
         }
     }
