@@ -7,9 +7,9 @@ import java.util.List;
 
 public record FreelancerWriteReqBody(
         @Valid
-        PostWriteDto postWriteDto,
+        PostWriteDto post,
         @Valid
-        FreelancerWriteDto freelancerWriteDto,
+        FreelancerWriteDto freelancer,
         List<Long> regionIds,
         List<Long> categoryIds,
         List<Long> skillIds

@@ -38,7 +38,7 @@ public class ApiV1FreelancerController {
             @Valid @RequestBody FreelancerWriteReqBody reqBody
     ) {
         User actor = rq.getActor();
-        Post post = freelancerService.create(actor, reqBody.postWriteDto(), reqBody.freelancerWriteDto(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+        Post post = freelancerService.create(actor, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
         return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post));
     }
@@ -50,7 +50,7 @@ public class ApiV1FreelancerController {
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(defaultValue = "") String searchKeyword
     ) {
-        Page<FreelancerDto> dtoPage = postService.getPage(pageable, searchKeyword).map(FreelancerDto::new);
+        Page<FreelancerDto> dtoPage = freelancerService.getPage(pageable, searchKeyword).map(FreelancerDto::new);
         return Ut.pageMapper.of(dtoPage);
     }
 
@@ -60,7 +60,7 @@ public class ApiV1FreelancerController {
     public FreelancerDto getItem(
             @PathVariable Long id
     ) {
-        Post post = postService.findById(id);
+        Post post = freelancerService.findById(id);
         return new FreelancerDto(post);
     }
 
@@ -72,9 +72,9 @@ public class ApiV1FreelancerController {
             @Valid @RequestBody FreelancerModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
-        Post post = postService.findById(id);
+        Post post = freelancerService.findById(id);
         post.checkActorCanModify(actor);
-        freelancerService.modify(post, reqBody.postModifyDto(), reqBody.freelancerModifyDto(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+        freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
         return new RsData<>("200-1", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(post));
     }
@@ -86,7 +86,7 @@ public class ApiV1FreelancerController {
             @PathVariable Long id
     ) {
         User actor = rq.getActor();
-        Post post = postService.findById(id);
+        Post post = freelancerService.findById(id);
         post.checkActorCanDelete(actor);
         postService.delete(post);
 

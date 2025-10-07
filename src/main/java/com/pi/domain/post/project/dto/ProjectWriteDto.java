@@ -1,6 +1,8 @@
 package com.pi.domain.post.project.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
 
@@ -15,11 +17,11 @@ public record ProjectWriteDto(
         String hirerType,
         @NotBlank
         String employmentType,
-        @NotBlank
+        @NotNull @Positive
         Long salary,
-        @NotBlank
+        @NotNull @Positive
         Integer personnel,
-        @NotBlank
+        @NotNull @Positive
         Integer skillLevel
 ) {
 }

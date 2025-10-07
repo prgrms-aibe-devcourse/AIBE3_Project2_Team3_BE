@@ -12,6 +12,7 @@ import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequiredArgsConstructor
+@RestController
 @RequestMapping("/api/v1/projects")
+@RequiredArgsConstructor
+@Tag(name = "ApiV1ProjectController", description = "API 프로젝트 컨트롤러")
 public class ApiV1ProjectController {
     private final ProjectService projectService;
     private final PostService postService;
@@ -37,7 +38,7 @@ public class ApiV1ProjectController {
             @Valid @RequestBody ProjectWriteReqBody reqBody
     ) {
         User actor = rq.getActor();
-        Post post = projectService.create(actor, reqBody.postWriteDto(), reqBody.projectWriteDto(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+        Post post = projectService.create(actor, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
         return new RsData<>("200-1", "프로젝트 게시글이 등록되었습니다.", new ProjectDto(post));
     }
@@ -49,7 +50,7 @@ public class ApiV1ProjectController {
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(defaultValue = "") String searchKeyword
     ) {
-        Page<ProjectDto> dtoPage = postService.getPage(pageable, searchKeyword).map(ProjectDto::new);
+        Page<ProjectDto> dtoPage = projectService.getPage(pageable, searchKeyword).map(ProjectDto::new);
         return Ut.pageMapper.of(dtoPage);
     }
 
@@ -59,7 +60,7 @@ public class ApiV1ProjectController {
     public ProjectDto getItem(
             @PathVariable Long id
     ) {
-        Post post = postService.findById(id);
+        Post post = projectService.findById(id);
         return new ProjectDto(post);
     }
 
@@ -71,9 +72,9 @@ public class ApiV1ProjectController {
             @Valid @RequestBody ProjectModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
-        Post post = postService.findById(id);
+        Post post = projectService.findById(id);
         post.checkActorCanModify(actor);
-        projectService.modify(post, reqBody.postModifyDto(), reqBody.projectModifyDto(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+        projectService.modify(post, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
         return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.", new ProjectDto(post));
     }
@@ -85,7 +86,7 @@ public class ApiV1ProjectController {
             @PathVariable Long id
     ) {
         User actor = rq.getActor();
-        Post post = postService.findById(id);
+        Post post = projectService.findById(id);
         post.checkActorCanDelete(actor);
         postService.delete(post);
 

@@ -6,7 +6,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Page<Post> findAllByTitle(Pageable pageable, String title);
+    Optional<Post> findByFreelancerIsNotNullAndId(Long id);
+    Page<Post> findByFreelancerIsNotNull(Pageable pageable);
+    Page<Post> findByFreelancerIsNotNullAndTitle(Pageable pageable, String title);
+
+    Optional<Post> findByProjectIsNotNullAndId(Long id);
+    Page<Post> findByProjectIsNotNull(Pageable pageable);
+    Page<Post> findByProjectIsNotNullAndTitle(Pageable pageable, String searchKeyword);
 }

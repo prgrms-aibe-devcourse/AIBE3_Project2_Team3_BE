@@ -5,8 +5,8 @@ import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.post.post.entity.Post;
-import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApiV1OfferController {
     private final Rq rq;
     private final OfferService offerService;
-    private final PostService postService;
+    private final FreelancerService freelancerService;
 
     @GetMapping("/my")
     @Transactional(readOnly = true)
@@ -61,7 +61,7 @@ public class ApiV1OfferController {
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();
-        Post post = postService.findById(freelancerId);
+        Post post = freelancerService.findById(freelancerId);
         post.checkActorCanReadOffer(actor);
 
         Page<Offer> pagedOffers = offerService.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
@@ -83,7 +83,7 @@ public class ApiV1OfferController {
     @Operation(summary = "등록")
     public RsData<OfferDto> write(@Valid @RequestBody OfferWriteReqBody reqBody) {
         User actor = rq.getActor();
-        Freelancer freelancer = postService.findById(reqBody.freelancerId()).getFreelancer();
+        Freelancer freelancer = freelancerService.findById(reqBody.freelancerId()).getFreelancer();
 
         Offer offer = offerService.create(freelancer, actor);
 

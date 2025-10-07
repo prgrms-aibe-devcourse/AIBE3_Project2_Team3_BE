@@ -4,6 +4,7 @@ import com.pi.domain.category.category.repository.CategoryRepository;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
@@ -12,6 +13,8 @@ import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +22,26 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FreelancerService {
+    private final FreelancerRepository freelancerRepository;
     private final PostRepository postRepository;
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
+
+    public long count() {
+        return freelancerRepository.count();
+    }
+
+    public Post findById(Long id) {
+        return postRepository.findByFreelancerIsNotNullAndId(id).get();
+    }
+
+    public Page<Post> getPage(Pageable pageable, String searchKeyword) {
+        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+            return postRepository.findByFreelancerIsNotNull(pageable);
+        }
+        return postRepository.findByFreelancerIsNotNullAndTitle(pageable, searchKeyword);
+    }
 
     public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
         Post post = new Post(actor, p.title(), p.content());

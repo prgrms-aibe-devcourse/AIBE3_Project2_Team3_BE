@@ -7,9 +7,9 @@ import java.util.List;
 
 public record ProjectModifyReqBody(
         @Valid
-        PostModifyDto postModifyDto,
+        PostModifyDto post,
         @Valid
-        ProjectModifyDto projectModifyDto,
+        ProjectModifyDto project,
         List<Long> regionIds,
         List<Long> categoryIds,
         List<Long> skillIds

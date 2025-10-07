@@ -7,9 +7,9 @@ import java.util.List;
 
 public record ProjectWriteReqBody(
         @Valid
-        PostWriteDto postWriteDto,
+        PostWriteDto post,
         @Valid
-        ProjectWriteDto projectWriteDto,
+        ProjectWriteDto project,
         List<Long> regionIds,
         List<Long> categoryIds,
         List<Long> skillIds

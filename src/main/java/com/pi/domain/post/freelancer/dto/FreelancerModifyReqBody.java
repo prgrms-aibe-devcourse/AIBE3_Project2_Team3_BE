@@ -7,9 +7,9 @@ import java.util.List;
 
 public record FreelancerModifyReqBody(
         @Valid
-        PostModifyDto postModifyDto,
+        PostModifyDto post,
         @Valid
-        FreelancerModifyDto freelancerModifyDto,
+        FreelancerModifyDto freelancer,
         List<Long> regionIds,
         List<Long> categoryIds,
         List<Long> skillIds
