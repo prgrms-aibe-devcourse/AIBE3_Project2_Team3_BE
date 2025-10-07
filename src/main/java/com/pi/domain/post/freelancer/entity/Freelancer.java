@@ -11,12 +11,11 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Freelancer {
     @Id
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @MapsId
     @JoinColumn(name = "id", nullable = false)
     private Post post;
@@ -24,6 +23,15 @@ public class Freelancer {
     private String salary;
     private String period;
 
+    public Freelancer(Post post, String salary, String period) {
+        this.post = post;
+        this.salary = salary;
+        this.period = period;
+    }
+
+    public void modify(String salary, String period) {
+        this.salary = salary;
+        this.period = period;
     private boolean isOwner(User actor) {
         return actor.getUsername().equals(post.getUser().getUsername());
     }
