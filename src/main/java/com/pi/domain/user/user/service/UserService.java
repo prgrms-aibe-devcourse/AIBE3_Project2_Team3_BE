@@ -22,11 +22,19 @@ public class UserService {
     public long count() {
         return userRepository.count();
     }
+
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
-    public void delete(User user) { userRepository.delete(user); }
-    public void modify(User user, String nickname) { user.modify(nickname); }
+
+    public void delete(User user) {
+        userRepository.delete(user);
+    }
+
+    public void modify(User user, String nickname) {
+        user.modify(nickname);
+    }
+
     public String genAccessToken(User user) {
         return authTokenService.genAccessToken(user);
     }
@@ -40,8 +48,8 @@ public class UserService {
     public User join(String username, String password, String nickname, String email) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
-            throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
-        });
+                    throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
+                });
         password = passwordEncoder.encode(password);
         User user = new User(username, password, nickname, email);
         return userRepository.save(user);
@@ -58,6 +66,7 @@ public class UserService {
 
         emailService.sendTemporaryPasswordEmail(email, temporaryPassword);
     }
+
     private String generateTemporaryPassword() {
         return UUID.randomUUID().toString().substring(0, 10);
     }

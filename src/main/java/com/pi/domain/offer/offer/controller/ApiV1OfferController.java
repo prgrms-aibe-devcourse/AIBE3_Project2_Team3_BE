@@ -5,7 +5,8 @@ import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.entity.Freelancer;
-import com.pi.domain.post.freelancer.service.FreelancerService;
+import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApiV1OfferController {
     private final Rq rq;
     private final OfferService offerService;
-    private final FreelancerService freelancerService;
+    private final PostService postService;
 
     @GetMapping("/my")
     @Transactional(readOnly = true)
@@ -60,14 +61,14 @@ public class ApiV1OfferController {
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();
-        Freelancer freelancer = freelancerService.findById(freelancerId);
-        freelancer.checkActorCanReadOffer(actor);
+        Post post = postService.findById(freelancerId);
+        post.checkActorCanReadOffer(actor);
 
         Page<Offer> pagedOffers = offerService.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
 
         return new RsData<>(
                 "200-1",
-                "%d번 프리랜서의 구인이 조회되었습니다.".formatted(freelancer.getId()),
+                "%d번 프리랜서의 구인이 조회되었습니다.".formatted(post.getId()),
                 new PagedResBody<>(
                         pagedOffers.getContent().stream()
                                 .map(OfferWithUserDto::new)
@@ -82,7 +83,7 @@ public class ApiV1OfferController {
     @Operation(summary = "등록")
     public RsData<OfferDto> write(@Valid @RequestBody OfferWriteReqBody reqBody) {
         User actor = rq.getActor();
-        Freelancer freelancer = freelancerService.findById(reqBody.freelancerId());
+        Freelancer freelancer = postService.findById(reqBody.freelancerId()).getFreelancer();
 
         Offer offer = offerService.create(freelancer, actor);
 

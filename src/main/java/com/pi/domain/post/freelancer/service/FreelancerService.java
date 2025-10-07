@@ -1,70 +1,79 @@
 package com.pi.domain.post.freelancer.service;
 
-import com.pi.domain.post.freelancer.dto.FreelancerDto;
-import com.pi.domain.post.freelancer.dto.FreelancerReqBody;
+import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
+import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
-import com.pi.domain.post.freelancer.repository.FreelancerRepository;
+import com.pi.domain.post.post.dto.PostModifyDto;
+import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
+import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
-import com.pi.global.exception.ServiceException;
-import com.pi.global.rsData.RsData;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FreelancerService {
-    private final FreelancerRepository freelancerRepository;
     private final PostRepository postRepository;
+    private final RegionRepository regionRepository;
+    private final CategoryRepository categoryRepository;
+    private final SkillRepository skillRepository;
 
-    @Transactional
-    public RsData<FreelancerDto> create(User user, FreelancerReqBody reqBody) {
-        Post post = new Post(
-                user,
-                false,
-                reqBody.title(),
-                reqBody.content()
-        );
-        postRepository.save(post);
-
-        Freelancer freelancer = new Freelancer(post, reqBody.salary(), reqBody.period());
-        freelancerRepository.save(freelancer);
-
-        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(freelancer));
-    }
-
-    public Freelancer findById(Long id) {
-        return freelancerRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("404-1", "해당 프리랜서 게시글을 찾을 수 없습니다."));
-    }
-
-    @Transactional
-    public RsData<FreelancerDto> modify(Long id, FreelancerReqBody reqBody, User user) {
-        Freelancer freelancer = findById(id);
-        Post post = freelancer.getPost();
-
-        if (!post.getUser().equals(user)) {
-            return new RsData<>("403-1", "본인 게시글만 수정할 수 있습니다.");
+    public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+        Post post = new Post(actor, p.title(), p.content());
+        post.setFreelancer(Freelancer.of(post));
+        post.getFreelancer().modify(f.salary(), f.period());
+        if (regionIds != null) {
+            for (Long regionId : regionIds) {
+                post.addRegion(regionRepository.findById(regionId).get());
+            }
         }
 
-        post.modify(reqBody.title(), reqBody.content());
-        freelancer.modify(reqBody.salary(), reqBody.period());
-
-        return new RsData<>("200-2", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(freelancer));
-    }
-
-    @Transactional
-    public RsData<Void> delete(Long id, User user) {
-        Freelancer freelancer = findById(id);
-
-        if (!freelancer.getPost().getUser().equals(user)) {
-            return new RsData<>("403-1", "본인 게시글만 삭제할 수 있습니다.");
+        if (categoryIds != null) {
+            for (Long categoryId : categoryIds) {
+                post.addCategory(categoryRepository.findById(categoryId).get());
+            }
         }
 
-        freelancerRepository.delete(freelancer);
+        if (skillIds != null) {
+            for (Long skillId : skillIds) {
+                post.addSkill(skillRepository.findById(skillId).get());
+            }
+        }
 
-        return new RsData<>("200-3", "프리랜서 게시글이 삭제되었습니다.");
+        return postRepository.save(post);
+    }
+
+    public Post modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+        post.modify(p.title(), p.content(), p.isViewed());
+        post.getFreelancer().modify(f.salary(), f.period());
+
+        post.getPostRegions().clear();
+        if (regionIds != null) {
+            for (Long regionId : regionIds) {
+                post.addRegion(regionRepository.findById(regionId).get());
+            }
+        }
+
+        post.getPostCategories().clear();
+        if (categoryIds != null) {
+            for (Long categoryId : categoryIds) {
+                post.addCategory(categoryRepository.findById(categoryId).get());
+            }
+        }
+
+        post.getPostSkills().clear();
+        if (skillIds != null) {
+            for (Long skillId : skillIds) {
+                post.addSkill(skillRepository.findById(skillId).get());
+            }
+        }
+
+        return postRepository.save(post);
     }
 }

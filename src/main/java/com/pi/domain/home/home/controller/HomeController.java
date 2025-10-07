@@ -16,7 +16,7 @@ import static java.net.InetAddress.getLocalHost;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
 @RestController
-@Tag(name="HomeController", description = "홈 컨트롤러")
+@Tag(name = "HomeController", description = "홈 컨트롤러")
 public class HomeController {
     @SneakyThrows
     @GetMapping(produces = TEXT_HTML_VALUE)

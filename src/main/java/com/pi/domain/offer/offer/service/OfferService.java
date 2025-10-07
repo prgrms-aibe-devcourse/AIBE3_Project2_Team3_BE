@@ -4,7 +4,6 @@ import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.repository.OfferRepository;
 import com.pi.domain.post.freelancer.entity.Freelancer;
-import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
-    private final FreelancerService freelancerService;
 
     public long count() {
         return offerRepository.count();

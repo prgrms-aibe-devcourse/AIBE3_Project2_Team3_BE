@@ -1,13 +1,94 @@
 package com.pi.domain.post.project.controller;
 
+import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.post.post.service.PostService;
+import com.pi.domain.post.project.dto.ProjectDto;
+import com.pi.domain.post.project.dto.ProjectModifyReqBody;
+import com.pi.domain.post.project.dto.ProjectWriteReqBody;
 import com.pi.domain.post.project.service.ProjectService;
+import com.pi.domain.user.user.entity.User;
+import com.pi.global.rq.Rq;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.rsData.RsData;
+import com.pi.global.util.Ut;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/projects")
 public class ApiV1ProjectController {
     private final ProjectService projectService;
+    private final PostService postService;
+    private final Rq rq;
+
+    @PostMapping
+    @Transactional
+    @Operation(summary = "프로젝트 글 작성")
+    public RsData<ProjectDto> write(
+            @Valid @RequestBody ProjectWriteReqBody reqBody
+    ) {
+        User actor = rq.getActor();
+        Post post = projectService.create(actor, reqBody.postWriteDto(), reqBody.projectWriteDto(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+
+        return new RsData<>("200-1", "프로젝트 게시글이 등록되었습니다.", new ProjectDto(post));
+    }
+
+    @GetMapping
+    @Transactional
+    @Operation(summary = "프로젝트 글 다건 조회")
+    public PagePayload<ProjectDto> getItems(
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "") String searchKeyword
+    ) {
+        Page<ProjectDto> dtoPage = postService.getPage(pageable, searchKeyword).map(ProjectDto::new);
+        return Ut.pageMapper.of(dtoPage);
+    }
+
+    @GetMapping("/{id}")
+    @Transactional
+    @Operation(summary = "프로젝트 글 단건 조회")
+    public ProjectDto getItem(
+            @PathVariable Long id
+    ) {
+        Post post = postService.findById(id);
+        return new ProjectDto(post);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    @Operation(summary = "프로젝트 글 수정")
+    public RsData<ProjectDto> modify(
+            @PathVariable Long id,
+            @Valid @RequestBody ProjectModifyReqBody reqBody
+    ) {
+        User actor = rq.getActor();
+        Post post = postService.findById(id);
+        post.checkActorCanModify(actor);
+        projectService.modify(post, reqBody.postModifyDto(), reqBody.projectModifyDto(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+
+        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.", new ProjectDto(post));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    @Operation(summary = "프로젝트 글 삭제")
+    public RsData<Void> delete(
+            @PathVariable Long id
+    ) {
+        User actor = rq.getActor();
+        Post post = postService.findById(id);
+        post.checkActorCanDelete(actor);
+        postService.delete(post);
+
+        return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.");
+    }
 }

@@ -1,11 +1,11 @@
 package com.pi.global.initData;
 
-import com.pi.domain.offer.offer.repository.OfferRepository;
 import com.pi.domain.offer.offer.service.OfferService;
+import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
-import com.pi.domain.post.freelancer.repository.FreelancerRepository;
+import com.pi.domain.post.freelancer.service.FreelancerService;
+import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
-import com.pi.domain.post.post.repository.PostRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +28,8 @@ public class NotProdInitData {
     private NotProdInitData self;
 
     private final UserService userService;
-    private final PostRepository postRepository;
-    private final FreelancerRepository freelancerRepository;
-    private final OfferRepository offerRepository;
     private final OfferService offerService;
+    private final FreelancerService freelancerService;
 
     @Bean
     ApplicationRunner notProdInitDataApplicationRunner() {
@@ -57,14 +55,8 @@ public class NotProdInitData {
         if (offerService.count() > 0) return;
         User user1 = userService.findByUsername("user1").get();
         User user2 = userService.findByUsername("user2").get();
-        Post post1 = postRepository.save(new Post(user1, true, "만들어드립니다.", "만들어드립니다..."));
-        Freelancer freelancer1 = freelancerRepository.save(
-                Freelancer.builder()
-                        .post(post1)
-                        .salary("100")
-                        .period("12")
-                        .build()
-        );
+        Post post1 = freelancerService.create(user1, new PostWriteDto("만들어드립니다", "만들어드립니다.", true), new FreelancerWriteDto(100L, 12L), null, null, null);
+        Freelancer freelancer1 = post1.getFreelancer();
 
         offerService.create(freelancer1, user2);
     }

@@ -4,6 +4,7 @@ import com.pi.domain.post.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,7 @@ public class Project {
     private Long id;
 
     @OneToOne
+    @Setter
     @MapsId
     @JoinColumn(name = "id")
     private Post post;
@@ -24,7 +26,26 @@ public class Project {
     private LocalDateTime endedDate;
     private String hirerType;
     private String employmentType;
-    private String salary;
+    private Long salary;
     private Integer personnel;
-    private String skillLevel;
+    private Integer skillLevel;
+
+    private Project(Post post) {
+        setPost(post);
+    }
+
+    public static Project of(Post post) {
+        return new Project(post);
+    }
+
+    public void modify(LocalDateTime deadlineDate, LocalDateTime startedDate, LocalDateTime endedDate, String hirerType, String employmentType, Long salary, Integer personnel, Integer skillLevel) {
+        this.deadlineDate = deadlineDate;
+        this.startedDate = startedDate;
+        this.endedDate = endedDate;
+        this.hirerType = hirerType;
+        this.employmentType = employmentType;
+        this.salary = salary;
+        this.personnel = personnel;
+        this.skillLevel = skillLevel;
+    }
 }

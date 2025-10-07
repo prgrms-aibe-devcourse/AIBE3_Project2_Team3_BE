@@ -1,8 +1,12 @@
 package com.pi.domain.post.project.dto;
 
-import com.pi.domain.post.project.entity.Project;
+import com.pi.domain.category.category.dto.CategoryDto;
+import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.region.region.dto.RegionDto;
+import com.pi.domain.skill.skill.dto.SkillDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ProjectDto(
         Long id,
@@ -11,31 +15,37 @@ public record ProjectDto(
         String title,
         String content,
         boolean isViewed,
+        List<RegionDto> regions,
+        List<CategoryDto> categories,
+        List<SkillDto> skills,
         LocalDateTime deadlineDate,
         LocalDateTime startedDate,
         LocalDateTime endedDate,
         String hirerType,
         String employmentType,
-        String salary,
+        Long salary,
         Integer personnel,
-        String skillLevel
+        Integer skillLevel
 ) {
-    public ProjectDto(Project project) {
+    public ProjectDto(Post post) {
         this(
-                project.getId(),
-                project.getPost().getCreatedDate(),
-                project.getPost().getModifiedDate(),
-                project.getPost().getTitle(),
-                project.getPost().getContent(),
-                project.getPost().isViewed(),
-                project.getDeadlineDate(),
-                project.getStartedDate(),
-                project.getEndedDate(),
-                project.getHirerType(),
-                project.getEmploymentType(),
-                project.getSalary(),
-                project.getPersonnel(),
-                project.getSkillLevel()
+                post.getId(),
+                post.getCreatedDate(),
+                post.getModifiedDate(),
+                post.getTitle(),
+                post.getContent(),
+                post.isViewed(),
+                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
+                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
+                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
+                post.getProject().getDeadlineDate(),
+                post.getProject().getStartedDate(),
+                post.getProject().getEndedDate(),
+                post.getProject().getHirerType(),
+                post.getProject().getEmploymentType(),
+                post.getProject().getSalary(),
+                post.getProject().getPersonnel(),
+                post.getProject().getSkillLevel()
         );
     }
 }
