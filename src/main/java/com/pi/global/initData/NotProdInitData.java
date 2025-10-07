@@ -11,7 +11,6 @@ import com.pi.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("!prod")
 @RequiredArgsConstructor
 @Configuration
-@ConditionalOnProperty(name = "app.initdata.enabled", havingValue = "true", matchIfMissing = false)
 public class NotProdInitData {
     @Autowired
     @Lazy
