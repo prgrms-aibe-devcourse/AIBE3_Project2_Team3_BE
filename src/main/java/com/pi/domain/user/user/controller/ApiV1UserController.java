@@ -33,7 +33,8 @@ public class ApiV1UserController {
     }
 
     @PutMapping
-    public RsData<Void> modify(
+    @Transactional
+    public RsData<UserDto> modify(
             @Valid @RequestBody UserModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
@@ -43,7 +44,8 @@ public class ApiV1UserController {
 
         return new RsData<>(
                 "200-1",
-                "%s님 정보가 수정되었습니다.".formatted(user.getNickname())
+                "%s님 정보가 수정되었습니다.".formatted(user.getNickname()),
+                new UserDto(user)
         );
     }
 
@@ -72,7 +74,7 @@ public class ApiV1UserController {
 
     @Transactional
     @PostMapping("/login")
-    public RsData<UserLoginResBody> login(
+    public RsData<UserDto> login(
             @Valid @RequestBody UserLoginReqBody reqBody
     ) {
         User user = userService.findByUsername(reqBody.username())
@@ -90,7 +92,7 @@ public class ApiV1UserController {
         return new RsData<>(
                 "200-1",
                 "%s님, 로그인 성공".formatted(user.getNickname()),
-                new UserLoginResBody(new UserDto(user), accessToken, refreshToken)
+                new UserDto(user)
         );
     }
 
