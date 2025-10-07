@@ -1,10 +1,14 @@
 package com.pi.global.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pi.global.rsData.PageMeta;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.rsData.SortOrder;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.data.domain.Page;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -12,10 +16,7 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HexFormat;
-import java.util.Map;
+import java.util.*;
 
 public class Ut {
     public static class jwt {
@@ -104,6 +105,19 @@ public class Ut {
             } catch (Exception e) {
                 return defaultValue;
             }
+        }
+    }
+
+    public static class pageMapper {
+        public static <T> PagePayload<T> of(Page<T> p) {
+            List<SortOrder> sort = new ArrayList<>();
+            p.getSort().forEach(o -> sort.add(new SortOrder(o.getProperty(), o.getDirection().name())));
+
+            PageMeta meta = new PageMeta(
+                    p.getNumber(), p.getSize(), p.getTotalElements(), p.getTotalPages(),
+                    p.isFirst(), p.isLast(), p.hasNext(), p.hasPrevious(), sort
+            );
+            return new PagePayload<>(p.getContent(), meta);
         }
     }
 }
