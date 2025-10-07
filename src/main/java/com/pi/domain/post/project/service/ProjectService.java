@@ -40,7 +40,7 @@ public class ProjectService {
         if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
             return postRepository.findByProjectIsNotNull(pageable);
         }
-        return postRepository.findByProjectIsNotNullAndTitle(pageable, searchKeyword);
+        return postRepository.findByProjectIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
     }
 
     public Post create(User actor, PostWriteDto po, ProjectWriteDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {

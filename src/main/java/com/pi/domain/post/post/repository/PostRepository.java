@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByFreelancerIsNotNullAndId(Long id);
     Page<Post> findByFreelancerIsNotNull(Pageable pageable);
-    Page<Post> findByFreelancerIsNotNullAndTitle(Pageable pageable, String title);
+    Page<Post> findByFreelancerIsNotNullAndTitleContainingIgnoreCase(Pageable pageable, String title);
 
     Optional<Post> findByProjectIsNotNullAndId(Long id);
     Page<Post> findByProjectIsNotNull(Pageable pageable);
-    Page<Post> findByProjectIsNotNullAndTitle(Pageable pageable, String searchKeyword);
+    Page<Post> findByProjectIsNotNullAndTitleContainingIgnoreCase(Pageable pageable, String searchKeyword);
 }

@@ -40,7 +40,7 @@ public class FreelancerService {
         if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
             return postRepository.findByFreelancerIsNotNull(pageable);
         }
-        return postRepository.findByFreelancerIsNotNullAndTitle(pageable, searchKeyword);
+        return postRepository.findByFreelancerIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
     }
 
     public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
