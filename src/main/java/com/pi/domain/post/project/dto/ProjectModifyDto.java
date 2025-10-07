@@ -7,11 +7,11 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 public record ProjectModifyDto(
-        @NotBlank
+        @NotNull
         LocalDateTime deadlineDate,
-        @NotBlank
+        @NotNull
         LocalDateTime startedDate,
-        @NotBlank
+        @NotNull
         LocalDateTime endedDate,
         @NotBlank
         String hirerType,
