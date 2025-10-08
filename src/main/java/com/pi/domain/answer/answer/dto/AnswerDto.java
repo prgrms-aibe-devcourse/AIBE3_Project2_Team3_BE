@@ -1,6 +1,7 @@
 package com.pi.domain.answer.answer.dto;
 
 import com.pi.domain.answer.answer.entity.Answer;
+import com.pi.domain.user.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
@@ -9,7 +10,7 @@ public record AnswerDto(
         String content,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
-        Long userId
+        UserDto user
 ) {
     public AnswerDto(Answer answer) {
         this(
@@ -17,7 +18,7 @@ public record AnswerDto(
                 answer.getContent(),
                 answer.getCreatedDate(),
                 answer.getModifiedDate(),
-                answer.getUser().getId()
+                new UserDto(answer.getUser())
         );
     }
 }

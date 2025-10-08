@@ -6,6 +6,8 @@ import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import com.pi.global.exception.ServiceException;
+
 
 @Entity
 @Getter
@@ -30,5 +32,29 @@ public class Answer extends BaseEntity {
         this.question = question;
     }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public static void checkActorCanCreate(User actor) {
+
+        if (!actor.isAdmin()) {
+            throw new ServiceException("403-1", "관리자만 답변을 작성할 수 있습니다.");
+        }
+    }
+
+    public void checkActorCanModify(User actor) {
+
+        if (!actor.isAdmin() && actor.getId() != this.user.getId()) {
+            throw new ServiceException("403-1", "답변을 수정할 권한이 없습니다.");
+        }
+    }
+
+    public void checkActorCanDelete(User actor) {
+
+        if (!actor.isAdmin() && actor.getId() != this.user.getId()) {
+            throw new ServiceException("403-1", "답변을 삭제할 권한이 없습니다.");
+        }
+    }
 
 }

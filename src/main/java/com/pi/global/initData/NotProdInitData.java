@@ -1,5 +1,7 @@
 package com.pi.global.initData;
 
+import com.pi.domain.answer.answer.dto.AnswerCreateReqBody;
+import com.pi.domain.answer.answer.service.AnswerService;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -9,7 +11,11 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.service.ProjectService;
+import com.pi.domain.question.question.dto.QuestionCreateReqBody;
+import com.pi.domain.question.question.entity.Question;
+import com.pi.domain.question.question.service.QuestionService;
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.repository.UserRepository;
 import com.pi.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +41,9 @@ public class NotProdInitData {
     private final PostService postService;
     private final FreelancerService freelancerService;
     private final ProjectService projectService;
+    private final UserRepository userRepository;
+    private final QuestionService questionService;
+    private final AnswerService answerService;
 
     @Bean
     ApplicationRunner notProdInitDataApplicationRunner() {
@@ -42,6 +51,7 @@ public class NotProdInitData {
             self.work1();
             self.work2();
             self.work3();
+            self.work4();
         };
     }
 
@@ -73,4 +83,25 @@ public class NotProdInitData {
 
         offerService.create(freelancer1, user2);
     }
+
+    @Transactional
+    public boolean work4() {
+        if (answerService.count() > 0) return false;
+
+        Question question = questionService.create(
+                new QuestionCreateReqBody("테스트 질문", "일반 사용자 테스트 작성 내용."),
+                userRepository.findByUsername("user1").get()
+        );
+
+        answerService.createAnswer(
+                new AnswerCreateReqBody("관리자 테스트 답변.", question.getId()),
+                userRepository.findByUsername("admin").get()
+        );
+
+        return true;
+    }
+
+
+
+
 }

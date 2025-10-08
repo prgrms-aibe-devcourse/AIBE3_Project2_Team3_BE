@@ -7,19 +7,22 @@ import com.pi.domain.question.question.repository.QuestionRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import org.springframework.data.domain.Pageable;
+
 
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
     private final QuestionRepository questionRepository;
 
-    public List<Question> findAll() {
-        return questionRepository.findAll();
+    public Page<Question> findAllWithAnswers(Pageable pageable) {
+        return questionRepository.findAllWithAnswers(pageable);
     }
+
 
     @Transactional
     public Question create(QuestionCreateReqBody dto, User user) {
