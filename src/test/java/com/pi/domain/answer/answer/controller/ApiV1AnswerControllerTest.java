@@ -97,7 +97,7 @@ public class ApiV1AnswerControllerTest {
         resultActions
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("관리자만 답변을 작성할 수 있습니다."));
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class ApiV1AnswerControllerTest {
         resultActions
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("답변을 수정할 권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
     }
 
     @Test
@@ -178,7 +178,7 @@ public class ApiV1AnswerControllerTest {
         resultActions
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("답변을 삭제할 권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
     }
 
 }
