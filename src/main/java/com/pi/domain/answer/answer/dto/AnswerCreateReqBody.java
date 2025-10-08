@@ -4,4 +4,5 @@ public record AnswerCreateReqBody(
         String content,
         Long userId,
         Long questionId
-) {}
+) {
+}

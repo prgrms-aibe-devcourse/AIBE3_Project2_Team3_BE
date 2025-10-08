@@ -4,14 +4,14 @@ import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
-public record UserDto (
+public record UserDto(
         Long id,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         String nickname,
         String email,
         String role
-){
+) {
     public UserDto(User user) {
         this(
                 user.getId(),

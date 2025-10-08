@@ -22,38 +22,23 @@ public class UserService {
     public long count() {
         return userRepository.count();
     }
+
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
-    public void delete(User user) { userRepository.delete(user); }
-    public void modify(User user, String nickname) { user.modify(nickname); }
+
+    public void delete(User user) {
+        userRepository.delete(user);
+    }
+
+    public void modify(User user, String nickname) {
+        user.modify(nickname);
+    }
+
     public String genAccessToken(User user) {
         return authTokenService.genAccessToken(user);
     }
-    public String genRefreshToken(User user) {
-        return authTokenService.genRefreshToken(user);
-    }
 
-    public Optional<User> findByRefreshToken(String refreshToken) {
-        // 1. refreshToken 검증 (JWT 토큰인지 확인)
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new ServiceException("401-3", "refreshToken이 비어있습니다.");
-        }
-
-        // JWT 토큰에서 회원 정보를 추출 (예: id, username, nickname 등)
-        long userId = authTokenService.getUserIdFromToken(refreshToken); // JWT에서 사용자 ID 추출
-
-        // 2. 데이터베이스에서 해당 사용자 조회
-        Optional<User> userOptional = userRepository.findById(userId);
-
-        // 3. 사용자 조회 실패 시 예외 처리
-        if (userOptional.isEmpty()) {
-            throw new ServiceException("401-3", "회원을 찾을 수 없습니다.");
-        }
-
-        // 4. 사용자가 존재하면 반환
-        return userOptional;
-    }
     public void checkPassword(User user, String password) {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ServiceException("401-1", "비밀번호가 일치 하지 않습니다.");
@@ -63,8 +48,8 @@ public class UserService {
     public User join(String username, String password, String nickname, String email) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
-            throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
-        });
+                    throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
+                });
         password = passwordEncoder.encode(password);
         User user = new User(username, password, nickname, email);
         return userRepository.save(user);
@@ -81,6 +66,7 @@ public class UserService {
 
         emailService.sendTemporaryPasswordEmail(email, temporaryPassword);
     }
+
     private String generateTemporaryPassword() {
         return UUID.randomUUID().toString().substring(0, 10);
     }

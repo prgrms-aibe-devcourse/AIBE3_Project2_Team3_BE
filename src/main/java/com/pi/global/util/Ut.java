@@ -1,21 +1,25 @@
 package com.pi.global.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pi.global.rsData.PageMeta;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.rsData.SortOrder;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
 
 import javax.crypto.SecretKey;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HexFormat;
-import java.util.Map;
+import java.util.*;
 
 public class Ut {
     public static class jwt {
@@ -104,6 +108,57 @@ public class Ut {
             } catch (Exception e) {
                 return defaultValue;
             }
+        }
+    }
+
+    public static class cmd {
+        @SneakyThrows
+        public static void run(String... args) {
+            boolean isWindows = System
+                    .getProperty("os.name")
+                    .toLowerCase()
+                    .contains("win");
+
+            ProcessBuilder builder = new ProcessBuilder(
+                    Arrays.stream(args).map(arg -> arg.replace("{{DOT_CMD}}", isWindows ? ".cmd" : "")).toArray(String[]::new)
+            );
+
+            // 에러 스트림도 출력 스트림과 함께 병합
+            builder.redirectErrorStream(true);
+
+            // 프로세스 시작
+            Process process = builder.start();
+
+            // 결과 출력
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line); // 결과 한 줄씩 출력
+                }
+            }
+
+            // 종료 코드 확인
+            int exitCode = process.waitFor();
+            System.out.println("종료 코드: " + exitCode);
+        }
+
+        public static void runAsync(String... args) {
+            new Thread(() -> {
+                run(args);
+            }).start();
+        }
+    }
+
+    public static class pageMapper {
+        public static <T> PagePayload<T> of(Page<T> p) {
+            List<SortOrder> sort = new ArrayList<>();
+            p.getSort().forEach(o -> sort.add(new SortOrder(o.getProperty(), o.getDirection().name())));
+
+            PageMeta meta = new PageMeta(
+                    p.getNumber(), p.getSize(), p.getTotalElements(), p.getTotalPages(),
+                    p.isFirst(), p.isLast(), p.hasNext(), p.hasPrevious(), sort
+            );
+            return new PagePayload<>(p.getContent(), meta);
         }
     }
 }

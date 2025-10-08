@@ -4,18 +4,20 @@ import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.repository.OfferRepository;
 import com.pi.domain.post.freelancer.entity.Freelancer;
-import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
-    private final FreelancerService freelancerService;
 
-    public long count() { return offerRepository.count();}
+    public long count() {
+        return offerRepository.count();
+    }
 
     public Offer findById(long id) {
         return offerRepository.findById(id).get();
@@ -23,6 +25,14 @@ public class OfferService {
 
     public Offer findLatest() {
         return offerRepository.findFirstByOrderByIdDesc().get();
+    }
+
+    public Page<Offer> findAllByUserIdAndStatus(long id, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
+    }
+
+    public Page<Offer> findAllByFreelancerIdAndStatus(Long freelancerId, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
     }
 
     public Offer create(Freelancer freelancer, User user) {
@@ -37,10 +47,5 @@ public class OfferService {
 
     public void delete(Offer offer) {
         offerRepository.delete(offer);
-    }
-
-    public User getFreelancerUser(Offer offer) {
-        Freelancer freelancer = freelancerService.findById(offer.getFreelancer().getId());
-        return freelancer.getPost().getUser();
     }
 }

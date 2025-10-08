@@ -1,29 +1,42 @@
 package com.pi.domain.post.freelancer.dto;
 
-import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.category.category.dto.CategoryDto;
+import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.region.region.dto.RegionDto;
+import com.pi.domain.skill.skill.dto.SkillDto;
+import com.pi.domain.user.user.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-public record FreelancerDto (
+public record FreelancerDto(
         Long id,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         String title,
         String content,
         boolean isViewed,
-        String salary,
-        String period
-){
-    public FreelancerDto(Freelancer freelancer) {
+        UserDto author,
+        List<RegionDto> regions,
+        List<CategoryDto> categories,
+        List<SkillDto> skills,
+        Long salary,
+        Long period
+) {
+    public FreelancerDto(Post post) {
         this(
-                freelancer.getId(),
-                freelancer.getPost().getCreatedDate(),
-                freelancer.getPost().getModifiedDate(),
-                freelancer.getPost().getTitle(),
-                freelancer.getPost().getContent(),
-                freelancer.getPost().isViewed(),
-                freelancer.getSalary(),
-                freelancer.getPeriod()
+                post.getId(),
+                post.getCreatedDate(),
+                post.getModifiedDate(),
+                post.getTitle(),
+                post.getContent(),
+                post.isViewed(),
+                new UserDto(post.getUser()),
+                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
+                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
+                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
+                post.getFreelancer().getSalary(),
+                post.getFreelancer().getPeriod()
         );
     }
 }

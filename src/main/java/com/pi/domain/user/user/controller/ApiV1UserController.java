@@ -2,6 +2,7 @@ package com.pi.domain.user.user.controller;
 
 import com.pi.domain.user.user.dto.*;
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.service.AuthTokenService;
 import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ApiV1UserController {
     private final UserService userService;
+    private final AuthTokenService authTokenService;
     private final Rq rq;
 
     @GetMapping("/me")
@@ -31,7 +33,8 @@ public class ApiV1UserController {
     }
 
     @PutMapping
-    public RsData<Void> modify(
+    @Transactional
+    public RsData<UserDto> modify(
             @Valid @RequestBody UserModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
@@ -41,7 +44,8 @@ public class ApiV1UserController {
 
         return new RsData<>(
                 "200-1",
-                "%s님 정보가 수정되었습니다.".formatted(user.getNickname())
+                "%s님 정보가 수정되었습니다.".formatted(user.getNickname()),
+                new UserDto(user)
         );
     }
 
@@ -70,7 +74,7 @@ public class ApiV1UserController {
 
     @Transactional
     @PostMapping("/login")
-    public RsData<UserLoginResBody> login(
+    public RsData<UserDto> login(
             @Valid @RequestBody UserLoginReqBody reqBody
     ) {
         User user = userService.findByUsername(reqBody.username())
@@ -80,7 +84,7 @@ public class ApiV1UserController {
                 reqBody.password()
         );
         String accessToken = userService.genAccessToken(user);
-        String refreshToken = userService.genRefreshToken(user);
+        String refreshToken = authTokenService.issueRefresh(user);
 
         rq.setCookie("accessToken", accessToken);
         rq.setCookie("refreshToken", refreshToken);
@@ -88,7 +92,7 @@ public class ApiV1UserController {
         return new RsData<>(
                 "200-1",
                 "%s님, 로그인 성공".formatted(user.getNickname()),
-                new UserLoginResBody(new UserDto(user), accessToken, refreshToken)
+                new UserDto(user)
         );
     }
 
@@ -120,7 +124,8 @@ public class ApiV1UserController {
     public RsData<Void> updatePassword(
             @Valid @RequestBody UserPasswordUpdateReqBody reqBody
     ) {
-        User actor = rq.getActor();
+        User actor = userService.findByUsername(rq.getActor().getUsername())
+                .orElseThrow(() -> new ServiceException("404-1", "사용자를 찾을 수 없습니다."));
         userService.updatePassword(
                 actor,
                 reqBody.oldPassword(),
