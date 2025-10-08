@@ -9,8 +9,7 @@ public record AnswerDto(
         String content,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
-        Long userId,
-        Long questionId
+        Long userId
 ) {
     public AnswerDto(Answer answer) {
         this(
@@ -18,8 +17,7 @@ public record AnswerDto(
                 answer.getContent(),
                 answer.getCreatedDate(),
                 answer.getModifiedDate(),
-                answer.getUser().getId(),
-                answer.getQuestion().getId()
+                answer.getUser().getId()
         );
     }
 }
