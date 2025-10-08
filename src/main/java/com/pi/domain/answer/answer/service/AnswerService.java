@@ -8,12 +8,9 @@ import com.pi.domain.answer.answer.repository.AnswerRepository;
 import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.repository.QuestionRepository;
 import com.pi.domain.user.user.entity.User;
-import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +21,7 @@ public class AnswerService {
 
     @Transactional
     public AnswerDto createAnswer(AnswerCreateReqBody reqBody, User actor) {
-        Question question = questionRepository.findById(reqBody.questionId())
-                .orElseThrow(() -> new ServiceException(
-                        "404-1",
-                        "데이터를 찾을 수 없습니다."
-                ));
+        Question question = questionRepository.findById(reqBody.questionId()).get();
 
         Answer answer = new Answer(
                 reqBody.content(),
@@ -46,8 +39,8 @@ public class AnswerService {
         return new AnswerDto(answer);
     }
 
-    public Optional<Answer> findById(Long id) {
-        return answerRepository.findById(id);
+    public Answer findById(Long id) {
+        return answerRepository.findById(id).get();
     }
 
     @Transactional
