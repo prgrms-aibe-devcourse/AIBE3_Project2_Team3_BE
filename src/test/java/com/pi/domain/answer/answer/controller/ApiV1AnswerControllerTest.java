@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 public class ApiV1AnswerControllerTest {
+
     @Autowired
     private MockMvc mvc;
 
@@ -41,24 +42,19 @@ public class ApiV1AnswerControllerTest {
 
     @BeforeEach
     void setUp() {
-        System.out.println("\n=== 테스트 시작 ===");
         testAnswer = answerRepository.findAll().get(0);
         testQuestion = questionRepository.findAll().get(0);
-        System.out.println("테스트 질문 ID: " + testQuestion.getId());
-        System.out.println("테스트 답변 ID: " + testAnswer.getId());
     }
 
     @AfterEach
     void tearDown() {
-        System.out.println("=== 테스트 종료 ===\n");
+        // 필요시 후처리
     }
 
     @Test
     @DisplayName("관리자가 답변 작성")
     @WithUserDetails("admin")
     void t1() throws Exception {
-        System.out.println("\n### 테스트 1: 관리자가 답변 작성 ###");
-
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/answers")
@@ -85,8 +81,6 @@ public class ApiV1AnswerControllerTest {
     @DisplayName("일반 사용자는 답변 작성 불가")
     @WithUserDetails("user1")
     void t2() throws Exception {
-        System.out.println("\n### 테스트 2: 일반 사용자 답변 작성 시도 ###");
-
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/answers")
@@ -110,9 +104,6 @@ public class ApiV1AnswerControllerTest {
     @DisplayName("답변 수정")
     @WithUserDetails("admin")
     void t3() throws Exception {
-        System.out.println("\n### 테스트 3: 관리자가 답변 수정 ###");
-        System.out.println("수정할 답변 ID: " + testAnswer.getId());
-
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/answers/" + testAnswer.getId())
@@ -138,9 +129,6 @@ public class ApiV1AnswerControllerTest {
     @DisplayName("답변 수정 - 권한 없음")
     @WithUserDetails("user1")
     void t4() throws Exception {
-        System.out.println("\n### 테스트 4: 일반 사용자 답변 수정 시도 ###");
-        System.out.println("수정 시도할 답변 ID: " + testAnswer.getId());
-
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/answers/" + testAnswer.getId())
@@ -163,9 +151,6 @@ public class ApiV1AnswerControllerTest {
     @DisplayName("답변 삭제")
     @WithUserDetails("admin")
     void t5() throws Exception {
-        System.out.println("\n### 테스트 5: 관리자가 답변 삭제 ###");
-        System.out.println("삭제할 답변 ID: " + testAnswer.getId());
-
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/answers/" + testAnswer.getId())
@@ -184,9 +169,6 @@ public class ApiV1AnswerControllerTest {
     @DisplayName("답변 삭제 - 권한 없음")
     @WithUserDetails("user1")
     void t6() throws Exception {
-        System.out.println("\n### 테스트 6: 일반 사용자 답변 삭제 시도 ###");
-        System.out.println("삭제 시도할 답변 ID: " + testAnswer.getId());
-
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/answers/" + testAnswer.getId())
