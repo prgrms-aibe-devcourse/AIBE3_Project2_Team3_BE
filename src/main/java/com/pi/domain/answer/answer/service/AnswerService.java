@@ -27,7 +27,7 @@ public class AnswerService {
         Question question = questionRepository.findById(reqBody.questionId())
                 .orElseThrow(() -> new ServiceException(
                         "404-1",
-                        "질문을 찾을 수 없습니다."
+                        "데이터를 찾을 수 없습니다."
                 ));
 
         Answer answer = new Answer(

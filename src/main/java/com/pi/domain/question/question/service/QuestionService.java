@@ -40,7 +40,7 @@ public class QuestionService {
 
     public Question findById(Long id) {
         return questionRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("404-1", "해당 질문을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ServiceException("404-1", "데이터를 찾을 수 없습니다."));
     }
 
     @Transactional
