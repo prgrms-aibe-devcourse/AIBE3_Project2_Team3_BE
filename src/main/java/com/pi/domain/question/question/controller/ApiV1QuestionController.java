@@ -10,6 +10,7 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/questions")
 @RequiredArgsConstructor
+@Tag(name = "ApiV1QuestionController", description = "API 문의 컨트롤러")
 public class ApiV1QuestionController {
     private final QuestionService questionService;
     private final Rq rq;
