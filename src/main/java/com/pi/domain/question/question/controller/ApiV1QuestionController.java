@@ -1,6 +1,5 @@
 package com.pi.domain.question.question.controller;
 
-import com.pi.domain.offer.offer.dto.PagedResBody;
 import com.pi.domain.question.question.dto.QuestionCreateReqBody;
 import com.pi.domain.question.question.dto.QuestionDto;
 import com.pi.domain.question.question.dto.QuestionModifyReqBody;
@@ -8,7 +7,9 @@ import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.service.QuestionService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
+import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
+import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,42 +30,24 @@ public class ApiV1QuestionController {
 
     @GetMapping
     @Operation(summary = "질문,답변 조회")
-    public RsData<PagedResBody<QuestionDto>> getAllQuestionsWithAnswers(
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
-            Pageable pageable
+    public PagePayload<QuestionDto> getAllQuestionsWithAnswers(
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "") String searchKeyword
     ) {
-        Page<Question> questionPage = questionService.findAllWithAnswers(pageable);
-
-        return new RsData<>(
-                "200-1",
-                "질문과 답변 목록을 조회했습니다.",
-                new PagedResBody<>(
-                        questionPage.getContent().stream()
-                                .map(QuestionDto::new)
-                                .toList(),
-                        questionPage
-                )
-        );
+        Page<QuestionDto> dtoPage = questionService.getPage(pageable, searchKeyword)
+                .map(QuestionDto::new);
+        return Ut.pageMapper.of(dtoPage);
     }
 
     @GetMapping("/my")
     @Operation(summary = "본인이 등록한 문의 및 답변 조회")
-    public RsData<PagedResBody<QuestionDto>> getMyQuestionsWithAnswers(
+    public PagePayload<QuestionDto> getMyQuestionsWithAnswers(
             @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         User actor = rq.getActor();
-        Page<Question> questionPage = questionService.findAllWithAnswersByUserId(actor.getId(), pageable);
-
-        return new RsData<>(
-                "200-1",
-                "%d번 사용자의 문의와 답변이 조회되었습니다.".formatted(actor.getId()),
-                new PagedResBody<>(
-                        questionPage.getContent().stream()
-                                .map(QuestionDto::new)
-                                .toList(),
-                        questionPage
-                )
-        );
+        Page<QuestionDto> dtoPage = questionService.findAllWithAnswersByUserId(actor.getId(), pageable)
+                .map(QuestionDto::new);
+        return Ut.pageMapper.of(dtoPage);
     }
 
     @PostMapping

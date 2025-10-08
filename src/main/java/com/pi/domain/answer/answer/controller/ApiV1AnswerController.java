@@ -6,7 +6,6 @@ import com.pi.domain.answer.answer.dto.AnswerModifyReqBody;
 import com.pi.domain.answer.answer.entity.Answer;
 import com.pi.domain.answer.answer.service.AnswerService;
 import com.pi.domain.user.user.entity.User;
-import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,14 +46,12 @@ public class ApiV1AnswerController {
     ) {
         User actor = rq.getActor();
 
-        Answer answer = answerService.findById(id)
-                .orElseThrow(() -> new ServiceException("404-1", "답변을 찾을 수 없습니다."));
+        Answer answer = answerService.findById(id);
 
         answer.checkActorCanModify(actor);
 
         AnswerDto answerDto = answerService.modifyAnswer(answer, reqBody);
         return new RsData<>("200-1", "관리자가 %d번 답변을 수정했습니다.".formatted(id), answerDto);
-
     }
 
     @DeleteMapping("/{id}")
@@ -62,8 +59,7 @@ public class ApiV1AnswerController {
     public RsData<Void> deleteAnswer(@PathVariable Long id) {
         User actor = rq.getActor();
 
-        Answer answer = answerService.findById(id)
-                .orElseThrow(() -> new ServiceException("404-1", "답변을 찾을 수 없습니다."));
+        Answer answer = answerService.findById(id);
 
         answer.checkActorCanDelete(actor);
 

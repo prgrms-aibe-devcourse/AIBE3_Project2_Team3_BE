@@ -32,4 +32,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         WHERE q.user.id = :userId
         """)
     List<Question> findAllWithAnswersByUserId(Long userId, Pageable pageable);
+
+    Page<Question> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
 }

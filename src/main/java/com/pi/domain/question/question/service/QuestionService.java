@@ -5,14 +5,12 @@ import com.pi.domain.question.question.dto.QuestionModifyReqBody;
 import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.repository.QuestionRepository;
 import com.pi.domain.user.user.entity.User;
-import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -23,14 +21,12 @@ import java.util.List;
 public class QuestionService {
     private final QuestionRepository questionRepository;
 
-    public Page<Question> findAllWithAnswers(Pageable pageable) {
-        Page<Question> page = questionRepository.findAll(pageable);
-        List<Question> questions = questionRepository.findAllWithAnswersByIds(
-                page.getContent().stream().map(Question::getId).toList()
-        );
-        return new PageImpl<>(questions, pageable, page.getTotalElements());
+    public Page<Question> getPage(Pageable pageable, String searchKeyword) {
+        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+            return questionRepository.findAll(pageable);
+        }
+        return questionRepository.findByTitleContainingIgnoreCase(searchKeyword, pageable);
     }
-
 
     @Transactional
     public Question create(QuestionCreateReqBody dto, User user) {
