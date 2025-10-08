@@ -113,14 +113,14 @@ public class Ut {
 
     public static class cmd {
         @SneakyThrows
-        public static void run(String ...args) {
+        public static void run(String... args) {
             boolean isWindows = System
                     .getProperty("os.name")
                     .toLowerCase()
                     .contains("win");
 
             ProcessBuilder builder = new ProcessBuilder(
-                    Arrays.stream(args).map(arg -> arg.replace("{{DOT_CMD}}", isWindows ? ".cmd":"")).toArray(String[]::new)
+                    Arrays.stream(args).map(arg -> arg.replace("{{DOT_CMD}}", isWindows ? ".cmd" : "")).toArray(String[]::new)
             );
 
             // 에러 스트림도 출력 스트림과 함께 병합
@@ -146,6 +146,9 @@ public class Ut {
             new Thread(() -> {
                 run(args);
             }).start();
+        }
+    }
+
     public static class pageMapper {
         public static <T> PagePayload<T> of(Page<T> p) {
             List<SortOrder> sort = new ArrayList<>();

@@ -51,18 +51,18 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void modify(String nickname){
+    public void modify(String nickname) {
         this.nickname = nickname;
     }
 
     public void checkActorCanModify(User actor) {
-        if(!actor.getUsername().equals(getUsername())){
+        if (!actor.getUsername().equals(getUsername())) {
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
     public void checkActorCanDelete(User actor) {
-        if(!actor.getUsername().equals(getUsername())){
+        if (!actor.getUsername().equals(getUsername())) {
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }

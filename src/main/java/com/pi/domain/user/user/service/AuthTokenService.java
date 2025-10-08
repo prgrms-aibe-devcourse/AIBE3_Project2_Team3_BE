@@ -42,7 +42,9 @@ public class AuthTokenService {
         return Ut.jwt.toString(jwtSecretKey, accessTokenExpireSeconds, claims);
     }
 
-    /** 액세스 토큰 검증/파싱 */
+    /**
+     * 액세스 토큰 검증/파싱
+     */
     public Map<String, Object> payload(String accessToken) {
         Map<String, Object> parsed = Ut.jwt.payload(jwtSecretKey, accessToken);
         if (parsed == null) return null;
@@ -60,13 +62,15 @@ public class AuthTokenService {
     @Transactional
     public String issueRefresh(User user) {
         String plain = Ut.jwt.newOpaqueToken(64);
-        String hash  = Ut.jwt.sha256(plain);
-        Instant exp  = Instant.now(clock).plus(Duration.ofSeconds(refreshTokenExpireSeconds));
+        String hash = Ut.jwt.sha256(plain);
+        Instant exp = Instant.now(clock).plus(Duration.ofSeconds(refreshTokenExpireSeconds));
         refreshTokenRepository.save(RefreshToken.of(user, hash, exp));
         return plain; // HttpOnly 쿠키로 내려갈 원문
     }
 
-    /** ★ 활성 리프레시의 '소유자' 조회 (fetch join으로 User 초기화) */
+    /**
+     * ★ 활성 리프레시의 '소유자' 조회 (fetch join으로 User 초기화)
+     */
     @Transactional(readOnly = true)
     public User findActiveRefreshOwner(String refreshPlain) {
         if (refreshPlain == null || refreshPlain.isBlank())
@@ -82,7 +86,9 @@ public class AuthTokenService {
         return rt.getUser(); // 이미 초기화된 User
     }
 
-    /** 회전: 이전 토큰 revoke 후 새 리프레시 발급 */
+    /**
+     * 회전: 이전 토큰 revoke 후 새 리프레시 발급
+     */
     @Transactional
     public String rotateRefresh(String refreshPlain) {
         String hash = Ut.jwt.sha256(refreshPlain);
@@ -94,8 +100,8 @@ public class AuthTokenService {
         rt.revoke();
 
         String newPlain = Ut.jwt.newOpaqueToken(64);
-        String newHash  = Ut.jwt.sha256(newPlain);
-        Instant exp     = Instant.now(clock).plus(Duration.ofSeconds(refreshTokenExpireSeconds));
+        String newHash = Ut.jwt.sha256(newPlain);
+        Instant exp = Instant.now(clock).plus(Duration.ofSeconds(refreshTokenExpireSeconds));
         refreshTokenRepository.save(RefreshToken.of(rt.getUser(), newHash, exp));
         return newPlain;
     }
