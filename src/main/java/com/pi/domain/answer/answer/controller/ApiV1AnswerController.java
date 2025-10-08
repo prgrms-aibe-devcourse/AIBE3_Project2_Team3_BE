@@ -20,7 +20,7 @@ public class ApiV1AnswerController {
     private final AnswerService answerService;
     private final Rq rq;
 
-    @PostMapping("/create")
+    @PostMapping
     public RsData<AnswerDto> createAnswer(@Valid @RequestBody AnswerCreateReqBody reqBody) {
         User actor = rq.getActor();
 
@@ -35,34 +35,34 @@ public class ApiV1AnswerController {
 
     }
 
-    @PutMapping("/modify/{answerId}")
+    @PutMapping("/{id}")
     public RsData<AnswerDto> modifyAnswer(
-            @PathVariable Long answerId,
+            @PathVariable Long id,
             @Valid @RequestBody AnswerModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
 
-        Answer answer = answerService.findById(answerId)
+        Answer answer = answerService.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "답변을 찾을 수 없습니다."));
 
         answer.checkActorCanModify(actor);
 
         AnswerDto answerDto = answerService.modifyAnswer(answer, reqBody);
-        return new RsData<>("200-1", "관리자가 %d번 답변을 수정했습니다.".formatted(answerId), answerDto);
+        return new RsData<>("200-1", "관리자가 %d번 답변을 수정했습니다.".formatted(id), answerDto);
 
     }
 
-    @DeleteMapping("/delete/{answerId}")
-    public RsData<Void> deleteAnswer(@PathVariable Long answerId) {
+    @DeleteMapping("/{id}")
+    public RsData<Void> deleteAnswer(@PathVariable Long id) {
         User actor = rq.getActor();
 
-        Answer answer = answerService.findById(answerId)
+        Answer answer = answerService.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "답변을 찾을 수 없습니다."));
 
         answer.checkActorCanDelete(actor);
 
         answerService.delete(answer);
-        return new RsData<>("200-1", "관리자가 %d번 답변을 삭제했습니다.".formatted(answerId));
+        return new RsData<>("200-1", "관리자가 %d번 답변을 삭제했습니다.".formatted(id));
 
     }
 }

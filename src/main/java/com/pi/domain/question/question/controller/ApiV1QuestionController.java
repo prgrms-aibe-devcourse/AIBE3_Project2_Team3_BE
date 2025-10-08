@@ -43,7 +43,7 @@ public class ApiV1QuestionController {
         );
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public RsData<QuestionDto> createQuestion(@Valid @RequestBody QuestionCreateReqBody questionCreateDto) {
         User actor = rq.getActor();
 
@@ -57,38 +57,38 @@ public class ApiV1QuestionController {
                 new QuestionDto(createdQuestion));
     }
 
-    @DeleteMapping("/delete/{questionId}")
-    public RsData<Void> deleteQuestion(@PathVariable Long questionId) {
+    @DeleteMapping("/{id}")
+    public RsData<Void> deleteQuestion(@PathVariable Long id) {
         User actor = rq.getActor();
 
-        Question question = questionService.findById(questionId);
+        Question question = questionService.findById(id);
 
         question.checkActorCanDelete(actor);
 
-        questionService.delete(questionId);
+        questionService.delete(id);
 
         return new RsData<>(
                 "200-1",
-                "%d번 사용자가 %d번 질문을 삭제했습니다.".formatted(actor.getId(), questionId)
+                "%d번 사용자가 %d번 질문을 삭제했습니다.".formatted(actor.getId(), id)
         );
     }
 
-    @PutMapping("/modify/{questionId}")
+    @PutMapping("/modify/{id}")
     public RsData<QuestionDto> modifyQuestion(
-            @PathVariable Long questionId,
+            @PathVariable Long id,
             @Valid @RequestBody QuestionModifyReqBody modifyDto
     ) {
         User actor = rq.getActor();
 
-        Question question = questionService.findById(questionId);
+        Question question = questionService.findById(id);
 
         question.checkActorCanModify(actor);
 
-        Question modifiedQuestion = questionService.modify(questionId, modifyDto);
+        Question modifiedQuestion = questionService.modify(id, modifyDto);
 
         return new RsData<>(
                 "200-1",
-                "%d번 사용자가 %d번 질문을 수정했습니다.".formatted(actor.getId(), questionId),
+                "%d번 사용자가 %d번 질문을 수정했습니다.".formatted(actor.getId(), id),
                 new QuestionDto(modifiedQuestion)
         );
     }
