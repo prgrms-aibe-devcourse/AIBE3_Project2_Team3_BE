@@ -16,7 +16,7 @@ public record FreelancerDto(
         String title,
         String content,
         boolean isViewed,
-        UserDto user,
+        UserDto author,
         List<RegionDto> regions,
         List<CategoryDto> categories,
         List<SkillDto> skills,
