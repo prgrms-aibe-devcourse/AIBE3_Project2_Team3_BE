@@ -9,6 +9,7 @@ import com.pi.domain.question.question.service.QuestionService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,8 @@ public class ApiV1QuestionController {
     private final Rq rq;
 
     @GetMapping
-    public RsData<PagedResBody<QuestionDto>> getAllQuestions(
+    @Operation(summary = "질문,답변 조회")
+    public RsData<PagedResBody<QuestionDto>> getAllQuestionsWithAnswers(
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
@@ -33,7 +35,7 @@ public class ApiV1QuestionController {
 
         return new RsData<>(
                 "200-1",
-                "질문 목록을 조회했습니다.",
+                "질문과 답변 목록을 조회했습니다.",
                 new PagedResBody<>(
                         questionPage.getContent().stream()
                                 .map(QuestionDto::new)
@@ -44,6 +46,7 @@ public class ApiV1QuestionController {
     }
 
     @PostMapping
+    @Operation(summary = "질문 등록")
     public RsData<QuestionDto> createQuestion(@Valid @RequestBody QuestionCreateReqBody questionCreateDto) {
         User actor = rq.getActor();
 
@@ -57,23 +60,8 @@ public class ApiV1QuestionController {
                 new QuestionDto(createdQuestion));
     }
 
-    @DeleteMapping("/{id}")
-    public RsData<Void> deleteQuestion(@PathVariable Long id) {
-        User actor = rq.getActor();
-
-        Question question = questionService.findById(id);
-
-        question.checkActorCanDelete(actor);
-
-        questionService.delete(id);
-
-        return new RsData<>(
-                "200-1",
-                "%d번 사용자가 %d번 질문을 삭제했습니다.".formatted(actor.getId(), id)
-        );
-    }
-
     @PutMapping("/modify/{id}")
+    @Operation(summary = "질문 수정")
     public RsData<QuestionDto> modifyQuestion(
             @PathVariable Long id,
             @Valid @RequestBody QuestionModifyReqBody modifyDto
@@ -90,6 +78,23 @@ public class ApiV1QuestionController {
                 "200-1",
                 "%d번 사용자가 %d번 질문을 수정했습니다.".formatted(actor.getId(), id),
                 new QuestionDto(modifiedQuestion)
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "질문 삭제")
+    public RsData<Void> deleteQuestion(@PathVariable Long id) {
+        User actor = rq.getActor();
+
+        Question question = questionService.findById(id);
+
+        question.checkActorCanDelete(actor);
+
+        questionService.delete(id);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 사용자가 %d번 질문을 삭제했습니다.".formatted(actor.getId(), id)
         );
     }
 }

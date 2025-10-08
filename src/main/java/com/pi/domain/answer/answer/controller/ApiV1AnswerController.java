@@ -9,6 +9,7 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ public class ApiV1AnswerController {
     private final Rq rq;
 
     @PostMapping
+    @Operation(summary = "답변 등록")
     public RsData<AnswerDto> createAnswer(@Valid @RequestBody AnswerCreateReqBody reqBody) {
         User actor = rq.getActor();
 
@@ -36,6 +38,7 @@ public class ApiV1AnswerController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "답변 수정")
     public RsData<AnswerDto> modifyAnswer(
             @PathVariable Long id,
             @Valid @RequestBody AnswerModifyReqBody reqBody
@@ -53,6 +56,7 @@ public class ApiV1AnswerController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "답변 삭제")
     public RsData<Void> deleteAnswer(@PathVariable Long id) {
         User actor = rq.getActor();
 

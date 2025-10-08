@@ -8,19 +8,27 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class QuestionService {
     private final QuestionRepository questionRepository;
 
     public Page<Question> findAllWithAnswers(Pageable pageable) {
-        return questionRepository.findAllWithAnswers(pageable);
+        Page<Question> page = questionRepository.findAll(pageable);
+        List<Question> questions = questionRepository.findAllWithAnswersByIds(
+                page.getContent().stream().map(Question::getId).toList()
+        );
+        return new PageImpl<>(questions, pageable, page.getTotalElements());
     }
 
 
@@ -35,6 +43,7 @@ public class QuestionService {
                 .orElseThrow(() -> new ServiceException("404-1", "해당 질문을 찾을 수 없습니다."));
     }
 
+    @Transactional
     public void delete(Long id) {
         Question question = findById(id);
         questionRepository.delete(question);
