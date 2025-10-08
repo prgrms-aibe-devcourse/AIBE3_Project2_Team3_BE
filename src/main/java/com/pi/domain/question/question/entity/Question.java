@@ -42,19 +42,19 @@ public class Question extends BaseEntity {
 
     public static void checkActorCanCreate(User actor) {
         if (actor.isAdmin()) {
-            throw new ServiceException("403-1", "일반 사용자만 질문을 작성할 수 있습니다.");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
     public void checkActorCanModify(User actor) {
         if (actor.getId() != this.user.getId()) {
-            throw new ServiceException("403-1", "질문을 수정할 권한이 없습니다.");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
     public void checkActorCanDelete(User actor) {
         if (actor.getId() != this.user.getId()) {
-            throw new ServiceException("403-1", "질문을 삭제할 권한이 없습니다.");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
