@@ -20,4 +20,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "WHERE q.id IN :ids")
     List<Question> findAllWithAnswersByIds(List<Long> ids);
 
+    @Query("SELECT DISTINCT q FROM Question q " +
+            "LEFT JOIN FETCH q.answers a " +
+            "LEFT JOIN FETCH q.user qu " +
+            "LEFT JOIN FETCH a.user au " +
+            "WHERE q.user.id = :userId")
+    List<Question> findAllWithAnswersByUserId(Long userId, Pageable pageable);
 }

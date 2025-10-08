@@ -204,5 +204,24 @@ public class ApiV1QuestionControllerTest {
                 .andExpect(jsonPath("$.message").value("질문을 삭제할 권한이 없습니다."));
     }
 
+    @Test
+    @DisplayName("일반 사용자가 자신의 문의 및 답변 목록 조회")
+    @WithUserDetails("user1")
+    void t7() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/questions/my")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(result -> {
+                    System.out.println("응답 결과: " + result.getResponse().getContentAsString());
+                });
 
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1QuestionController.class))
+                .andExpect(handler().methodName("getMyQuestionsWithAnswers"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.data.content").isArray());
+    }
 }

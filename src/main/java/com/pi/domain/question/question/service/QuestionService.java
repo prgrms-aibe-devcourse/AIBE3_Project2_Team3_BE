@@ -55,5 +55,11 @@ public class QuestionService {
         question.modify(dto.title(), dto.content());
         return questionRepository.save(question);
     }
+
+    public Page<Question> findAllWithAnswersByUserId(Long userId, Pageable pageable) {
+        List<Question> questions = questionRepository.findAllWithAnswersByUserId(userId, pageable);
+        long total = questions.size();
+        return new PageImpl<>(questions, pageable, total);
+    }
 }
 

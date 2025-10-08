@@ -47,6 +47,26 @@ public class ApiV1QuestionController {
         );
     }
 
+    @GetMapping("/my")
+    @Operation(summary = "본인이 등록한 문의 및 답변 조회")
+    public RsData<PagedResBody<QuestionDto>> getMyQuestionsWithAnswers(
+            @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        User actor = rq.getActor();
+        Page<Question> questionPage = questionService.findAllWithAnswersByUserId(actor.getId(), pageable);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 사용자의 문의와 답변이 조회되었습니다.".formatted(actor.getId()),
+                new PagedResBody<>(
+                        questionPage.getContent().stream()
+                                .map(QuestionDto::new)
+                                .toList(),
+                        questionPage
+                )
+        );
+    }
+
     @PostMapping
     @Operation(summary = "질문 등록")
     public RsData<QuestionDto> createQuestion(@Valid @RequestBody QuestionCreateReqBody questionCreateDto) {
