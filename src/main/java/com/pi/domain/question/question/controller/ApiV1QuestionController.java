@@ -60,7 +60,7 @@ public class ApiV1QuestionController {
                 new QuestionDto(createdQuestion));
     }
 
-    @PutMapping("/modify/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "질문 수정")
     public RsData<QuestionDto> modifyQuestion(
             @PathVariable Long id,

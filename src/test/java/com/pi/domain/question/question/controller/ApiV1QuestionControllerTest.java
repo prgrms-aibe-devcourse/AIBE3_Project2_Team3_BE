@@ -56,7 +56,7 @@ public class ApiV1QuestionControllerTest {
     void t1() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/questions/create")
+                        post("/api/v1/questions")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -82,7 +82,7 @@ public class ApiV1QuestionControllerTest {
     void t2() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/questions/create")
+                        post("/api/v1/questions")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -114,7 +114,7 @@ public class ApiV1QuestionControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/questions/modify/" + testQuestion.getId())
+                        put("/api/v1/questions/" + testQuestion.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -144,7 +144,7 @@ public class ApiV1QuestionControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/questions/modify/" + testQuestion.getId())
+                        put("/api/v1/questions/" + testQuestion.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -171,7 +171,7 @@ public class ApiV1QuestionControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/api/v1/questions/delete/" + testQuestion.getId())
+                        delete("/api/v1/questions/" + testQuestion.getId())
                 )
                 .andDo(result -> {
                     System.out.println("응답 결과: " + result.getResponse().getContentAsString());
@@ -192,7 +192,7 @@ public class ApiV1QuestionControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/api/v1/questions/delete/" + testQuestion.getId())
+                        delete("/api/v1/questions/" + testQuestion.getId())
                 )
                 .andDo(result -> {
                     System.out.println("응답 결과: " + result.getResponse().getContentAsString());

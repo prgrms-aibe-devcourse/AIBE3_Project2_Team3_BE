@@ -61,7 +61,7 @@ public class ApiV1AnswerControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/answers/create")
+                        post("/api/v1/answers")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -89,7 +89,7 @@ public class ApiV1AnswerControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/answers/create")
+                        post("/api/v1/answers")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -115,7 +115,7 @@ public class ApiV1AnswerControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/answers/modify/" + testAnswer.getId())
+                        put("/api/v1/answers/" + testAnswer.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -143,7 +143,7 @@ public class ApiV1AnswerControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/answers/modify/" + testAnswer.getId())
+                        put("/api/v1/answers/" + testAnswer.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -168,7 +168,7 @@ public class ApiV1AnswerControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/api/v1/answers/delete/" + testAnswer.getId())
+                        delete("/api/v1/answers/" + testAnswer.getId())
                 )
                 .andDo(print());
 
@@ -189,7 +189,7 @@ public class ApiV1AnswerControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/api/v1/answers/delete/" + testAnswer.getId())
+                        delete("/api/v1/answers/" + testAnswer.getId())
                 )
                 .andDo(print());
 
