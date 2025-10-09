@@ -32,6 +32,7 @@ public class ApiV1ProjectController {
     private final PostService postService;
     private final Rq rq;
 
+    //TODO: 현재 글 작성, 수정, 삭제, 단건 조회, 다건 조회 기능 +추가할것:
     @PostMapping
     @Transactional
     @Operation(summary = "프로젝트 글 작성")
@@ -41,7 +42,7 @@ public class ApiV1ProjectController {
         User actor = rq.getActor();
         Post post = projectService.create(actor, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("200-1", "프로젝트 게시글이 등록되었습니다.", new ProjectDto(post));
+        return new RsData<>("201-1", "%d번 프로젝트 게시글이 등록되었습니다.".formatted(post.getId()), new ProjectDto(post));
     }
 
     @GetMapping
@@ -58,11 +59,11 @@ public class ApiV1ProjectController {
     @GetMapping("/{id}")
     @Transactional
     @Operation(summary = "프로젝트 글 단건 조회")
-    public ProjectDto getItem(
+    public RsData<ProjectDto> getItem(
             @PathVariable Long id
     ) {
         Post post = projectService.findById(id);
-        return new ProjectDto(post);
+        return new RsData<>("200-1", "프로젝트 게시글이 조회되었습니다.", new ProjectDto(post));
     }
 
     @PutMapping("/{id}")
@@ -77,7 +78,7 @@ public class ApiV1ProjectController {
         post.checkActorCanModify(actor);
         projectService.modify(post, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.", new ProjectDto(post));
+        return new RsData<>("200-1", "%d번 프로젝트 게시글이 수정되었습니다.".formatted(post.getId()), new ProjectDto(post));
     }
 
     @DeleteMapping("/{id}")
@@ -91,6 +92,6 @@ public class ApiV1ProjectController {
         post.checkActorCanDelete(actor);
         postService.delete(post);
 
-        return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.");
+        return new RsData<>("200-1", "%d번 프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
 }

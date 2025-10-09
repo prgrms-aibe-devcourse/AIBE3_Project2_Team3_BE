@@ -13,19 +13,16 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class Category extends BaseEntity {
-    private String name;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
     @OneToMany(mappedBy = "parent",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<Category> children = new ArrayList<>();
-
+    private final List<Category> children = new ArrayList<>();
     @OneToMany(mappedBy = "category")
-    private List<PostCategory> postCategories = new ArrayList<>();
+    private final List<PostCategory> postCategories = new ArrayList<>();
+    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
 
     public Category(String name) {
         this.name = name;

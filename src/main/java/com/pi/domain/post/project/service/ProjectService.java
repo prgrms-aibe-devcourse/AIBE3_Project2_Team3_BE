@@ -1,5 +1,6 @@
 package com.pi.domain.post.project.service;
 
+import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
@@ -9,9 +10,12 @@ import com.pi.domain.post.project.dto.ProjectModifyDto;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.repository.ProjectRepository;
+import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +32,7 @@ public class ProjectService {
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
 
+    //TODO: 현재 개수,id로 찾기, 페이지 가져오기, 생성, 수정 메서드 추가 기능 :지원기능,프로젝트 게시자가 지원자 채용,프로젝트 진행상황 업데이트, 프로젝트 지원항 유저 목록 조회,사용자가 해당 프로젝트에 지원한 상태인지
     public long count() {
         return projectRepository.count();
     }
@@ -48,23 +53,7 @@ public class ProjectService {
         post.setProject(Project.of(post));
         post.getProject().modify(pr.deadlineDate(), pr.startedDate(), pr.endedDate(), pr.hirerType(), pr.employmentType(), pr.salary(), pr.personnel(), pr.skillLevel());
 
-        if (regionIds != null) {
-            for (Long regionId : regionIds) {
-                post.addRegion(regionRepository.findById(regionId).get());
-            }
-        }
-
-        if (categoryIds != null) {
-            for (Long categoryId : categoryIds) {
-                post.addCategory(categoryRepository.findById(categoryId).get());
-            }
-        }
-
-        if (skillIds != null) {
-            for (Long skillId : skillIds) {
-                post.addSkill(skillRepository.findById(skillId).get());
-            }
-        }
+        addRelations(post, regionIds, categoryIds, skillIds);
 
         return postRepository.save(post);
     }
@@ -74,26 +63,57 @@ public class ProjectService {
         post.getProject().modify(pr.deadlineDate(), pr.startedDate(), pr.endedDate(), pr.hirerType(), pr.employmentType(), pr.salary(), pr.personnel(), pr.skillLevel());
 
         post.getPostRegions().clear();
+        post.getPostCategories().clear();
+        post.getPostSkills().clear();
+        postRepository.flush();
+        
+        addRelations(post, regionIds, categoryIds, skillIds);
+
+        return postRepository.save(post);
+    }
+
+    public void delete(Post post) {
+        if (post.getProject() != null) {
+            projectRepository.delete(post.getProject());
+        }
+        postRepository.delete(post);
+    }
+
+    // 테스트 용도
+    public Post findLatestPost() {
+        return postRepository.findTopByOrderByIdDesc()
+                .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
+    }
+
+    // 연관관계
+    private void addRelations(Post post, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+
+        post.getPostRegions().clear();
         if (regionIds != null) {
             for (Long regionId : regionIds) {
-                post.addRegion(regionRepository.findById(regionId).get());
+                Region region = regionRepository.findById(regionId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 지역 ID: " + regionId));
+                post.addRegion(region);
             }
         }
 
         post.getPostCategories().clear();
         if (categoryIds != null) {
             for (Long categoryId : categoryIds) {
-                post.addCategory(categoryRepository.findById(categoryId).get());
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 카테고리 ID: " + categoryId));
+                post.addCategory(category);
             }
         }
 
         post.getPostSkills().clear();
         if (skillIds != null) {
             for (Long skillId : skillIds) {
-                post.addSkill(skillRepository.findById(skillId).get());
+                Skill skill = skillRepository.findById(skillId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 스킬 ID: " + skillId));
+                post.addSkill(skill);
             }
         }
 
-        return postRepository.save(post);
     }
 }
