@@ -27,6 +27,10 @@ public class Category extends BaseEntity {
     @OneToMany(mappedBy = "category")
     private List<PostCategory> postCategories = new ArrayList<>();
 
+    public Category(String name) {
+        this.name = name;
+    }
+
     public void addChild(Category child) {
         if (child == null) return;
         // 사이클 방지: 자신이나 자신의 하위로는 이동 불가
