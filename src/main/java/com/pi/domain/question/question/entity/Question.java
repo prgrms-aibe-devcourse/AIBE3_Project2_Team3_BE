@@ -35,20 +35,26 @@ public class Question extends BaseEntity {
         this.user = user;
     }
 
-    public void checkActorCanDelete(User actor) {
-        if (actor == null || !actor.equals(this.user)) {
-            throw new ServiceException("403-1", "삭제 권한이 없습니다.");
-        }
-    }
-
     public void modify(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
+    public static void checkActorCanCreate(User actor) {
+        if (actor.isAdmin()) {
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
+    }
+
     public void checkActorCanModify(User actor) {
-        if (actor == null || !actor.equals(this.user)) {
-            throw new ServiceException("403-1", "수정 권한이 없습니다.");
+        if (actor.getId() != this.user.getId()) {
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
+    }
+
+    public void checkActorCanDelete(User actor) {
+        if (actor.getId() != this.user.getId()) {
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
