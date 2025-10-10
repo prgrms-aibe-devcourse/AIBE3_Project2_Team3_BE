@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     Optional<Application> findFirstByOrderByIdDesc();
 
+    Page<Application> findAllByUserId(long userId, Pageable pageable);
+
     Page<Application> findAllByUserIdAndStatus(long userId, ApplicationStatus status, Pageable page);
 
     Page<Application> findAllByPostIdAndStatus(long postId, ApplicationStatus status, Pageable page);
