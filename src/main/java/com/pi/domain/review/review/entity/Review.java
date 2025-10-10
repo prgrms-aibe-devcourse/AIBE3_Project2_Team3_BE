@@ -2,7 +2,6 @@ package com.pi.domain.review.review.entity;
 
 import com.pi.domain.contract.contract.entity.Contract;
 import com.pi.domain.user.user.entity.User;
-import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +9,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -21,17 +22,19 @@ public class Review extends BaseEntity {
     private Contract contract;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private User writer;
 
     @Column(nullable = false)
-    private Integer rating;
+    private int rating;
 
     @Column(columnDefinition ="TEXT", nullable = false)
     private String comment;
 
-    public Review(Contract contract, User user, Integer rating, String comment) {
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public Review(Contract contract, User writer, int rating, String comment) {
         this.contract = contract;
-        this.user = user;
+        this.writer = writer;
         this.rating = rating;
         this.comment = comment;
     }
@@ -41,14 +44,7 @@ public class Review extends BaseEntity {
         this.comment = comment;
     }
 
-    public void checkActorCanModify(User actor) {
-        if (!actor.isAdmin() && actor.getId() != this.user.getId()) {
-            throw new ServiceException("403-1", "권한이 없습니다.");
-        }
-    }
-    public void checkActorCanDelete(User actor) {
-        if (!actor.isAdmin() && actor.getId() != this.user.getId()) {
-            throw new ServiceException("403-1", "권한이 없습니다.");
-        }
+    public boolean isOwnedBy(User actor) {
+        return this.writer.equals(actor);
     }
 }
