@@ -3,6 +3,7 @@ package com.pi.domain.post.project.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+//TODO: 프로젝트단 상태관리 기능 필요시 사용
 public enum ProjectStatus {
     ONGOING("모집중"),
     CLOSED("마감됨");

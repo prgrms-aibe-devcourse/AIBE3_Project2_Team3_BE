@@ -37,7 +37,6 @@ public class ProjectService {
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
 
-    //TODO: 현재 개수,id로 찾기, 페이지 가져오기, 생성, 수정 메서드 추가 기능 :프로젝트 조회수 관리,프로젝트 상태 관리,프로젝트 필터링
     public long count() {
         return projectRepository.count();
     }

@@ -36,7 +36,6 @@ public class ApiV1ProjectController {
     private final PostService postService;
     private final Rq rq;
 
-    //TODO: 현재 글 작성, 수정, 삭제, 단건 조회, 다건 조회 기능 +추가할것:
     @PostMapping
     @Transactional
     @Operation(summary = "프로젝트 글 작성")
