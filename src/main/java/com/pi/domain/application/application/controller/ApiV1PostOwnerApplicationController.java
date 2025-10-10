@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/post-owner/applications")
 @RequiredArgsConstructor
-@Tag(name = "ApiV1PostOwnerApplicationController", description = "게시자용 API 구직(팝니다/지원서) 컨트롤러")
+@Tag(name = "ApiV1PostOwnerApplicationController", description = "게시자용 API 구직 컨트롤러")
 public class ApiV1PostOwnerApplicationController {
     private final Rq rq;
     private final ApplicationService applicationService;
@@ -62,7 +62,7 @@ public class ApiV1PostOwnerApplicationController {
     public PostOwnerApplicationGetResBody getItem(@PathVariable Long id) {
         User actor = rq.getActor();
 
-        Application application = applicationService.findByIdOrThrow(id);
+        Application application = applicationService.findById(id);
         User user = application.getPost().getUser();
         application.checkActorCanRead(actor, user);
 
@@ -78,7 +78,7 @@ public class ApiV1PostOwnerApplicationController {
     ) {
         User actor = rq.getActor();
 
-        Application application = applicationService.findByIdOrThrow(id);
+        Application application = applicationService.findById(id);
 
         User user = application.getPost().getUser();
         application.checkActorCanModify(actor, user);

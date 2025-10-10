@@ -12,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
@@ -23,12 +21,8 @@ public class ApplicationService {
         return applicationRepository.count();
     }
 
-    public Optional<Application> findById(long id) {
-        return applicationRepository.findById(id);
-    }
-
-    public Application findByIdOrThrow(long id) {
-        return findById(id).orElseThrow(() -> new ServiceException("404-1", "%d번 구직을 찾을 수 없습니다.".formatted(id)));
+    public Application findById(long id) {
+        return applicationRepository.findById(id).get();
     }
 
     public Application findLatest() {
@@ -54,20 +48,24 @@ public class ApplicationService {
     }
 
     public Application createOrUpdate(Post post, User actor, ApplicationWriteReqBody reqBody) {
-        if (reqBody.id() == null) {
+        Long id = reqBody.id();
+        ApplicationStatus status = ApplicationStatus.valueOf(reqBody.status());
+        String content = reqBody.content();
+
+        if (id == null || id == 0) {
             if (applicationRepository.existsByPostIdAndUserId(post.getId(), actor.getId())) {
-                throw new ServiceException("409-1", "이미 해당 공고에 지원했습니다.");
+                throw new ServiceException("409-1", "이미 존재하는 데이터입니다.");
             }
 
-            return create(post, actor, reqBody.status(), reqBody.content());
+            return create(post, actor, status, content);
         }
 
-        Application existingApplication = findByIdOrThrow(reqBody.id());
+        Application existingApplication = findById(id);
 
         User user = existingApplication.getUser();
         existingApplication.checkActorCanModify(actor, user);
 
-        return update(existingApplication, reqBody.status(), reqBody.content());
+        return update(existingApplication, status, content);
     }
 
     public void updateStatus(Application application, ApplicationStatus status, boolean isApplicant) {

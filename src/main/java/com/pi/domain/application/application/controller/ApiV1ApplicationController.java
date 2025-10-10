@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/applications")
 @RequiredArgsConstructor
-@Tag(name = "ApiV1ApplicationController", description = "API 구직(팝니다/지원서) 컨트롤러")
+@Tag(name = "ApiV1ApplicationController", description = "API 구직 컨트롤러")
 public class ApiV1ApplicationController {
     private final Rq rq;
     private final ApplicationService applicationService;
@@ -53,7 +55,7 @@ public class ApiV1ApplicationController {
     public ApplicationGetResBody getItem(@PathVariable Long id) {
         User actor = rq.getActor();
 
-        Application application = applicationService.findByIdOrThrow(id);
+        Application application = applicationService.findById(id);
         User user = application.getUser();
         application.checkActorCanRead(actor, user);
 
@@ -65,9 +67,12 @@ public class ApiV1ApplicationController {
     @Operation(summary = "등록 (임시저장 또는 제출)")
     public RsData<ApplicationWriteResBody> write(@Valid @RequestBody ApplicationWriteReqBody reqBody) {
         User actor = rq.getActor();
+        log.info("ActorName={}", actor.getUsername());
         Post post = projectService.findById(reqBody.postId());
+        User PostUser = post.getUser();
+        log.info("postUserName={}", PostUser.getUsername());
 
-        if (actor.getUsername().equals(post.getUser().getUsername())) {
+        if (actor.getUsername().equals(PostUser.getUsername())) {
             throw new ServiceException("403-2", "본인이 등록한 게시글에는 지원할 수 없습니다.");
         }
 
@@ -89,7 +94,7 @@ public class ApiV1ApplicationController {
     ) {
         User actor = rq.getActor();
 
-        Application application = applicationService.findByIdOrThrow(id);
+        Application application = applicationService.findById(id);
 
         User user = application.getUser();
         application.checkActorCanModify(actor, user);
@@ -106,7 +111,7 @@ public class ApiV1ApplicationController {
     @DeleteMapping("/{id}")
     @Operation(summary = "삭제")
     public RsData<ApplicationDeleteResBody> delete(@PathVariable Long id) {
-        Application application = applicationService.findByIdOrThrow(id);
+        Application application = applicationService.findById(id);
 
         User actor = rq.getActor();
         application.checkActorCanDelete(actor);
@@ -118,4 +123,6 @@ public class ApiV1ApplicationController {
                 new ApplicationDeleteResBody(id)
         );
     }
+
+    private static final Logger log = LoggerFactory.getLogger(ApiV1ApplicationController.class);
 }

@@ -19,8 +19,9 @@ import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "user_id"}),
-        indexes = @Index(name = "idx_applications_created_date", columnList = "createdDate")
+        name = "applications",
+        uniqueConstraints = @UniqueConstraint(name = "uk_application", columnNames = {"post_id", "user_id"}),
+        indexes = @Index(name = "idx_application_created_date", columnList = "createdDate")
 )
 @Getter
 @NoArgsConstructor
