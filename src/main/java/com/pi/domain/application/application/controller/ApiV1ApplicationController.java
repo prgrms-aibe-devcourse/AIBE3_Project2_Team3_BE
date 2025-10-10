@@ -66,12 +66,13 @@ public class ApiV1ApplicationController {
     @Transactional
     @Operation(summary = "등록 (임시저장 또는 제출)")
     public RsData<ApplicationWriteResBody> write(@Valid @RequestBody ApplicationWriteReqBody reqBody) {
-        User actor = rq.getActor();
-        log.info("ActorName={}", actor.getUsername());
         Post post = projectService.findById(reqBody.postId());
-        User PostUser = post.getUser();
-        log.info("postUserName={}", PostUser.getUsername());
+        if(post.getProject().isClosed()) {
+            throw new ServiceException("400-1", "마감된 프로젝트에는 지원할 수 없습니다.");
+        }
 
+        User actor = rq.getActor();
+        User PostUser = post.getUser();
         if (actor.getUsername().equals(PostUser.getUsername())) {
             throw new ServiceException("403-2", "본인이 등록한 게시글에는 지원할 수 없습니다.");
         }
@@ -112,6 +113,9 @@ public class ApiV1ApplicationController {
     @Operation(summary = "삭제")
     public RsData<ApplicationDeleteResBody> delete(@PathVariable Long id) {
         Application application = applicationService.findById(id);
+        if(application.getStatus() != ApplicationStatus.DRAFT) {
+            throw new ServiceException("400-1", "제출된 구직은 삭제할 수 없습니다.");
+        }
 
         User actor = rq.getActor();
         application.checkActorCanDelete(actor);
