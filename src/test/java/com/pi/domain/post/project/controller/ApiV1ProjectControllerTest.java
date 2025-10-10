@@ -308,7 +308,7 @@ public class ApiV1ProjectControllerTest {
     @WithUserDetails("user1")
     void t5() throws Exception {
         ResultActions resultActions = mvc.perform(
-                        get("/api/v1/projects/projects")
+                        get("/api/v1/projects/search")
                                 .param("status", "모집중")
                                 .param("region", "서울")
                                 .param("keyword", "프로젝트")

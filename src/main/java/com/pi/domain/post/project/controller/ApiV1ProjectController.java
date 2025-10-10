@@ -100,7 +100,7 @@ public class ApiV1ProjectController {
         return new RsData<>("200-1", "%d번 프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
 
-    @GetMapping("/projects")
+    @GetMapping("/search")
     @Operation(summary = "프로젝트 글 검색 및 다건조회")
     public List<ProjectDto> getProjects(
             @RequestParam(required = false) String status,
