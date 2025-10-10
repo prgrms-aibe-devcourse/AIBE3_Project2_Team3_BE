@@ -87,11 +87,14 @@ public class ProjectService {
     // 테스트 용도
     public Post findLatestPost() {
         return postRepository.findTopByOrderByIdDesc()
-                .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new RuntimeException());
     }
 
     @Transactional
     public void changeStatus(Long id, ProjectStatus status) throws NotFoundException {
+        if (status == null) {
+            throw new IllegalArgumentException();
+        }
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException());
         project.changeStatus(status);

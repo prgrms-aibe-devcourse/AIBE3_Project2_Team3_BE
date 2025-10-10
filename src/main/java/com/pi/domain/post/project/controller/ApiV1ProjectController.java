@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -119,5 +120,16 @@ public class ApiV1ProjectController {
         postService.delete(post);
 
         return new RsData<>("200-1", "%d번 프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
+    }
+
+    @PatchMapping("/{id}/status")
+    @Transactional
+    @Operation(summary = "프로젝트 상태 변경")
+    public RsData<Void> changeStatus(
+            @PathVariable Long id,
+            @RequestParam(required = false) String status
+    ) throws NotFoundException {
+        projectService.changeStatus(id, ProjectStatus.fromDisplayValue(status));
+        return new RsData<>("200-2", "프로젝트 상태가 변경되었습니다.");
     }
 }

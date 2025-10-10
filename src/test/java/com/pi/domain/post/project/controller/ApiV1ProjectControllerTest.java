@@ -250,7 +250,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("modify"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("%d번 글 수정 권한이 없습니다.".formatted(projectId)));
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
     }
 
     @Test
@@ -287,7 +287,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("delete"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("%d번 글 삭제 권한이 없습니다.".formatted(projectId)));
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
     }
 
     @Test
@@ -324,5 +324,22 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("프로젝트"))
                 .andExpect(jsonPath("$[0].regions[0]").value("서울"));
+    }
+
+    @Test
+    @DisplayName("프로젝트 상태 변경 ")
+    @WithUserDetails("user1")
+    void t6() throws Exception {
+        long projectId = 2L;
+        mvc.perform(
+                        patch("/api/v1/projects/{id}/status", projectId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        { "status": "모집중" }
+                                        """)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("모집중"));
     }
 }
