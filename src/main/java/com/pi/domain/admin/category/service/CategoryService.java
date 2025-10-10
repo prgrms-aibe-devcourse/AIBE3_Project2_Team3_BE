@@ -24,6 +24,11 @@ public class CategoryService {
         if (dto.parentId() != null) {
             parent = categoryRepository.findById(dto.parentId())
                     .orElseThrow(() -> new IllegalArgumentException("부모 카테고리 없음"));
+
+            if (parent.getParent() != null) {
+                throw new IllegalArgumentException("자식 카테고리에는 하위 카테고리를 추가할 수 없습니다");
+            }
+
             exists = categoryRepository.findByParentId(dto.parentId())
                     .stream().anyMatch(c -> c.getName().equals(dto.name()));
         } else {
