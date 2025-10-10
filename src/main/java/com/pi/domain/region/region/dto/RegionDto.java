@@ -12,4 +12,11 @@ public record RegionDto(
                 region.getName()
         );
     }
+
+    public RegionDto(String name) {
+        this(
+                null,
+                name
+        );
+    }
 }

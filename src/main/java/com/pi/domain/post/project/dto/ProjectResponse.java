@@ -2,6 +2,7 @@ package com.pi.domain.post.project.dto;
 
 import com.pi.domain.category.category.dto.CategoryDto;
 import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.skill.skill.dto.SkillDto;
 import com.pi.domain.user.user.dto.UserDto;
@@ -30,6 +31,10 @@ public record ProjectResponse(
         Integer skillLevel
 ) {
     public static ProjectResponse fromPost(Post post) {
+        Project project = post.getProject();
+
+        // UserDto, RegionDto, CategoryDto, SkillDto는 이미 존재한다고 가정
+
         return new ProjectResponse(
                 post.getId(),
                 post.getCreatedDate(),
@@ -37,21 +42,20 @@ public record ProjectResponse(
                 post.getTitle(),
                 post.getContent(),
                 post.isViewed(),
-                new UserDto(post.getUser()),
-                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
-                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
-                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
+                UserDto.from(post.getUser()),
+                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion().getName())).toList(), // 지역 이름만 반환하도록 가정
+                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory().getName())).toList(), // 카테고리 이름만 반환하도록 가정
+                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill().getName())).toList(), // 스킬 이름만 반환하도록 가정
 
-                // Project 엔티티 정보
-                post.getProject().getDeadlineDate(),
-                post.getProject().getStartedDate(),
-                post.getProject().getEndedDate(),
-                post.getProject().getHirerType(),
-                post.getProject().getEmploymentType(),
-                post.getProject().getSalary(),
-                post.getProject().getPersonnel(),
-                post.getProject().getSkillLevel()
+                // Project 정보
+                project.getDeadlineDate(),
+                project.getStartedDate(),
+                project.getEndedDate(),
+                project.getHirerType(),
+                project.getEmploymentType(),
+                project.getSalary(),
+                project.getPersonnel(),
+                project.getSkillLevel()
         );
-
     }
 }

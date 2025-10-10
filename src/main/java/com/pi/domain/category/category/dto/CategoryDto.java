@@ -12,4 +12,11 @@ public record CategoryDto(
                 category.getName()
         );
     }
+
+    public CategoryDto(String name) {
+        this(
+                null,
+                name
+        );
+    }
 }

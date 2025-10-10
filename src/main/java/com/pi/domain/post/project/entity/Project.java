@@ -52,9 +52,6 @@ public class Project {
         this.skillLevel = skillLevel;
     }
 
-    public void increaseViewCount() {
-
-    }
 
     public void changeStatus(ProjectStatus status) {
         this.status = status;

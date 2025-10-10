@@ -12,4 +12,11 @@ public record SkillDto(
                 skill.getName()
         );
     }
+
+    public SkillDto(String name) {
+        this(
+                null,
+                name
+        );
+    }
 }

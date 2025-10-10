@@ -250,7 +250,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("modify"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("%d번 글 수정 권한이 없습니다.".formatted(projectId)));
     }
 
     @Test
@@ -287,6 +287,42 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("delete"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("%d번 글 삭제 권한이 없습니다.".formatted(projectId)));
+    }
+
+    @Test
+    @DisplayName("프로젝트 삭제 - 없는 글 404-1")
+    @WithUserDetails("user1")
+    void t4_2() throws Exception {
+        long projectId = 9999L;
+        ResultActions resultActions = mvc.perform(
+                        delete("/api/v1/projects/%d".formatted(projectId))
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("404-1"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 데이터입니다."));
+    }
+
+    @Test
+    @DisplayName("프로젝트 검색")
+    @WithUserDetails("user1")
+    void t5() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                        get("/api/v1/projects/projects")
+                                .param("status", "모집중")
+                                .param("region", "서울")
+                                .param("keyword", "프로젝트")
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("getProjects"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("프로젝트"))
+                .andExpect(jsonPath("$[0].regions[0]").value("서울"));
     }
 }

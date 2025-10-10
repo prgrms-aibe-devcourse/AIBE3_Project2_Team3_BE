@@ -23,7 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -60,13 +62,24 @@ public class ApiV1ProjectController {
         return Ut.pageMapper.of(dtoPage);
     }
 
+    //    검색 기능 추후 구현 안되면 프론트엔드 필터링으로
     @GetMapping("/projects")
+    @Operation(summary = "프로젝트 글 검색 및 다건조회")
     public List<ProjectResponse> getProjects(
-            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String keyword
     ) {
-        return projectService.searchProjects(status, region, keyword);
+        ProjectStatus projectStatus = null;
+
+        if (status != null) {
+            try {
+                projectStatus = ProjectStatus.fromDisplayValue(status);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 status 값입니다: " + status);
+            }
+        }
+        return projectService.searchProjects(projectStatus, region, keyword);
     }
 
     @GetMapping("/{id}")

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -96,15 +97,15 @@ public class ProjectService {
         project.changeStatus(status);
     }
 
-    @Transactional(readOnly = true)
     public List<ProjectResponse> searchProjects(ProjectStatus status, String region, String keyword) {
-        List<Post> posts = postRepository.findByProjectIsNotNull();
 
-        return posts.stream()
-                .filter(post -> (status == null || post.getProject().getStatus() == status) &&
-                        (region == null || post.getPostRegions().stream().anyMatch(pr -> pr.getRegion().getName().equalsIgnoreCase(region))) &&
-                        (keyword == null || post.getTitle().toLowerCase().contains(keyword.toLowerCase()) || post.getContent().toLowerCase().contains(keyword.toLowerCase()))
-                )
+        Boolean isOngoing = null;
+        if (status != null) {
+            isOngoing = (status == ProjectStatus.ONGOING);
+        }
+
+        return projectRepository.search(isOngoing, region, keyword, LocalDateTime.now())
+                .stream()
                 .map(ProjectResponse::fromPost)
                 .toList();
     }

@@ -110,13 +110,13 @@ public class Post extends BaseEntity {
 
     public void checkActorCanModify(User actor) {
         if (isNotOwner(actor)) {
-            throw new ServiceException("403-1", "권한이 없습니다.");
+            throw new ServiceException("403-1", "%d번 글 수정 권한이 없습니다.".formatted(getId()));
         }
     }
 
     public void checkActorCanDelete(User actor) {
         if (isNotOwner(actor)) {
-            throw new ServiceException("403-1", "권한이 없습니다.");
+            throw new ServiceException("403-1", "%d번 글 삭제 권한이 없습니다.".formatted(getId()));
         }
     }
 
