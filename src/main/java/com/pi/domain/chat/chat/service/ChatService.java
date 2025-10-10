@@ -51,7 +51,7 @@ public class ChatService {
                 saved.getContent(),
                 saved.getCreatedDate()
         );
-        messagingTemplate.convertAndSend("/sub/rooms" + roomId, dto);
+        messagingTemplate.convertAndSend("/sub/rooms." + roomId, dto);
         return dto;
     }
 
