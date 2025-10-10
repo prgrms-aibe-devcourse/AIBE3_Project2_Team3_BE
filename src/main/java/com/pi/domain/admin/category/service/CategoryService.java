@@ -18,21 +18,23 @@ public class CategoryService {
 
     @Transactional
     public Category createCategory(CategoryCreateReqBody dto) {
-        Category category = new Category();
-        category.setName(dto.name());
+        boolean exists;
+        Category parent = null;
 
         if (dto.parentId() != null) {
-            Category parent = categoryRepository.findById(dto.parentId())
-                    .orElseThrow(() -> new IllegalArgumentException("부모 카테고리가 존재하지 않음."));
-            boolean exists = categoryRepository.findByParentId(dto.parentId())
+            parent = categoryRepository.findById(dto.parentId())
+                    .orElseThrow(() -> new IllegalArgumentException("부모 카테고리 없음"));
+            exists = categoryRepository.findByParentId(dto.parentId())
                     .stream().anyMatch(c -> c.getName().equals(dto.name()));
-            if (exists) throw new IllegalArgumentException("동일한 이름의 카테고리 존재.");
-            parent.addChild(category);
         } else {
-            boolean exists = categoryRepository.findByParentIsNull()
+            exists = categoryRepository.findByParentIsNull()
                     .stream().anyMatch(c -> c.getName().equals(dto.name()));
-            if (exists) throw new IllegalArgumentException("동일한 이름의 루트 카테고리 존재.");
         }
+        if (exists) throw new IllegalArgumentException("동일 이름 카테고리 존재");
+
+        Category category = new Category();
+        category.setName(dto.name());
+        if (parent != null) parent.addChild(category);
 
         return categoryRepository.save(category);
     }

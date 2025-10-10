@@ -51,4 +51,8 @@ public class Region extends BaseEntity {
         }
         return false;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
