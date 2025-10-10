@@ -34,6 +34,9 @@ public class ApplicationService {
     }
 
     public Page<Application> findAllByUserIdAndStatus(long userId, ApplicationStatus status, Pageable pageable) {
+        if (status == null) {
+            return applicationRepository.findAllByUserId(userId, pageable);
+        }
         return applicationRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 

@@ -112,13 +112,13 @@ public class ApiV1ApplicationController {
     @DeleteMapping("/{id}")
     @Operation(summary = "삭제")
     public RsData<ApplicationDeleteResBody> delete(@PathVariable Long id) {
+        User actor = rq.getActor();
         Application application = applicationService.findById(id);
+        application.checkActorCanDelete(actor);
+
         if(application.getStatus() != ApplicationStatus.DRAFT) {
             throw new ServiceException("400-1", "제출된 구직은 삭제할 수 없습니다.");
         }
-
-        User actor = rq.getActor();
-        application.checkActorCanDelete(actor);
 
         applicationService.delete(application);
 
