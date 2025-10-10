@@ -16,9 +16,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT pr.post FROM Project pr " +
             "JOIN pr.post p " +
             "LEFT JOIN p.postRegions prg " +
-            "WHERE (:keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%) " + // 1. 키워드 검색 (Post의 title/content)
-            "AND (:region IS NULL OR :region = '' OR prg.region.name = :region) " + // 2. 지역 필터링
-            "AND (" + // 3. 상태 필터링
+            "WHERE (:keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%) " + //  키워드 검색 (Post의 title/content)
+            "AND (:region IS NULL OR :region = '' OR prg.region.name = :region) " + //  지역 필터링
+            "AND (" + //  상태 필터링
             "    (:isOngoing = TRUE AND pr.deadlineDate > :now) " + // 모집중은 Project의 deadlineDate 사용
             " OR (:isOngoing = FALSE AND pr.deadlineDate <= :now) " +
             " OR (:isOngoing IS NULL) " +

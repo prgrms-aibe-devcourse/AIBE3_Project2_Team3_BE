@@ -120,7 +120,4 @@ public class Post extends BaseEntity {
         }
     }
 
-    public void increaseViewCount() {
-        this.isViewed = true;
-    }
 }

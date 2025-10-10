@@ -43,9 +43,9 @@ public record ProjectResponse(
                 post.getContent(),
                 post.isViewed(),
                 UserDto.from(post.getUser()),
-                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion().getName())).toList(), // 지역 이름만 반환하도록 가정
-                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory().getName())).toList(), // 카테고리 이름만 반환하도록 가정
-                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill().getName())).toList(), // 스킬 이름만 반환하도록 가정
+                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion().getName())).toList(),
+                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory().getName())).toList(),
+                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill().getName())).toList(),
 
                 // Project 정보
                 project.getDeadlineDate(),
