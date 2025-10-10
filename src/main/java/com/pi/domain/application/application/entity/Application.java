@@ -63,7 +63,7 @@ public class Application extends BaseEntity {
 
     public void checkActorCanRead(User actor, User user) {
         if (isDifferentUser(actor, user)) {
-            throw new ServiceException("403-1", "%d번 구직 읽기 권한이 없습니다.".formatted(getId()));
+            throw new ServiceException("403-1", "%d번 구직 조회 권한이 없습니다.".formatted(getId()));
         }
     }
 

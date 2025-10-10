@@ -12,9 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
+    public static final List<ApplicationStatus> EXCLUDED_STATUSES = List.of(ApplicationStatus.DRAFT, ApplicationStatus.CANCELED);
     private final ApplicationRepository applicationRepository;
 
     public long count() {
@@ -33,7 +36,15 @@ public class ApplicationService {
         return applicationRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 
-    public Page<Application> findAllByPostIdAndStatus(long postId, ApplicationStatus status, Pageable pageable) {
+    public Page<Application> findAllByPostIdAndStatusForPostOwner(long postId, ApplicationStatus status, Pageable pageable) {
+        if (status == null) {
+            return applicationRepository.findAllByPostIdAndStatusNotIn(postId, EXCLUDED_STATUSES, pageable);
+        }
+
+        if (EXCLUDED_STATUSES.contains(status)) {
+            throw new ServiceException("400-1", "허용되지 않는 상태값입니다.");
+        }
+
         return applicationRepository.findAllByPostIdAndStatus(postId, status, pageable);
     }
 

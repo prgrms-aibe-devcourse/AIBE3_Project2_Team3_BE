@@ -27,10 +27,12 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import static com.pi.domain.application.application.service.ApplicationService.EXCLUDED_STATUSES;
+
 @RestController
 @RequestMapping("/api/v1/post-owner/applications")
 @RequiredArgsConstructor
-@Tag(name = "ApiV1PostOwnerApplicationController", description = "게시자용 API 구직 컨트롤러")
+@Tag(name = "ApiV1PostOwnerApplicationController", description = "게시글 작성자용 API 구직 컨트롤러")
 public class ApiV1PostOwnerApplicationController {
     private final Rq rq;
     private final ApplicationService applicationService;
@@ -47,10 +49,10 @@ public class ApiV1PostOwnerApplicationController {
         User actor = rq.getActor();
         Post post = projectService.findById(postId);
         if (!actor.getUsername().equals(post.getUser().getUsername())) {
-            throw new ServiceException("403-1", "구직 조회 권한이 없습니다.");
+            throw new ServiceException("403-1", "%d번 게시글의 구직 조회 권한이 없습니다.".formatted(post.getId()));
         }
 
-        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatus(postId, status, pageable)
+        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatusForPostOwner(postId, status, pageable)
                 .map(PostOwnerApplicationWithUserDto::new);
 
         return Ut.pageMapper.of(dtoPage);
@@ -63,8 +65,11 @@ public class ApiV1PostOwnerApplicationController {
         User actor = rq.getActor();
 
         Application application = applicationService.findById(id);
-        User user = application.getPost().getUser();
-        application.checkActorCanRead(actor, user);
+        User postUser = application.getPost().getUser();
+        application.checkActorCanRead(actor, postUser);
+        if (EXCLUDED_STATUSES.contains(application.getStatus())) {
+            throw new ServiceException("403-1", "DRAFT 또는 CANCELED 상태의 구직 조회 권한이 없습니다.");
+        }
 
         return new PostOwnerApplicationGetResBody(application);
     }
