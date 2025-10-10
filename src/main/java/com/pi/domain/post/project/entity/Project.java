@@ -29,6 +29,7 @@ public class Project {
     private Long salary;
     private Integer personnel;
     private Integer skillLevel;
+    
     @Enumerated(EnumType.STRING)
     @Setter
     private ProjectStatus status;

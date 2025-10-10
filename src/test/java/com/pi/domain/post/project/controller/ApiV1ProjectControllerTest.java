@@ -329,13 +329,13 @@ public class ApiV1ProjectControllerTest {
         long projectId = 2L;
         mvc.perform(
                         patch("/api/v1/projects/{id}/status", projectId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        { "status": "모집중" }
-                                        """)
+                                .param("status", "마감됨")
                 )
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("changeStatus"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("모집중"));
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("프로젝트 상태가 변경되었습니다."));
     }
 }

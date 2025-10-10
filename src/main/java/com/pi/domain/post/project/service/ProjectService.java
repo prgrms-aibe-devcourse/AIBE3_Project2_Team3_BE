@@ -55,7 +55,13 @@ public class ProjectService {
 
     public Post create(User actor, PostWriteDto po, ProjectWriteDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
         Post post = new Post(actor, po.title(), po.content());
-        post.setProject(Project.of(post));
+        postRepository.save(post);  // ID 생성
+
+        Project project = new Project();
+        project.setPost(post); // @MapsId로 post.id 복사
+        project.changeStatus(ProjectStatus.ONGOING);
+        post.setProject(project);
+
         post.getProject().modify(pr.deadlineDate(), pr.startedDate(), pr.endedDate(), pr.hirerType(), pr.employmentType(), pr.salary(), pr.personnel(), pr.skillLevel());
 
         addRelations(post, regionIds, categoryIds, skillIds);

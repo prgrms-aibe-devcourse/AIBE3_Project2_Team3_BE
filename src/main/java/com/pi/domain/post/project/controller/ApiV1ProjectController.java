@@ -133,6 +133,6 @@ public class ApiV1ProjectController {
             @RequestParam(required = false) String status
     ) throws NotFoundException {
         projectService.changeStatus(id, ProjectStatus.fromDisplayValue(status));
-        return new RsData<>("200-2", "프로젝트 상태가 변경되었습니다.");
+        return new RsData<>("200-1", "프로젝트 상태가 변경되었습니다.");
     }
 }

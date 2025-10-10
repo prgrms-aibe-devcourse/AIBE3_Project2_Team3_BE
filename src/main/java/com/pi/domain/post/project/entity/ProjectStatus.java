@@ -21,7 +21,8 @@ public enum ProjectStatus {
     @JsonCreator
     public static ProjectStatus fromDisplayValue(String value) {
         for (ProjectStatus status : values()) {
-            if (status.displayValue.equalsIgnoreCase(value) || status.name().equalsIgnoreCase(value)) {
+            if (status.displayValue.equalsIgnoreCase(value.trim())
+                    || status.name().equalsIgnoreCase(value.trim())) {
                 return status;
             }
         }
