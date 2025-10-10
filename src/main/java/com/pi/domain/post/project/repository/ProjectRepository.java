@@ -13,20 +13,32 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
-    @Query("SELECT pr.post FROM Project pr " +
-            "JOIN pr.post p " +
-            "LEFT JOIN p.postRegions prg " +
-            "WHERE (:keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%) " + //  키워드 검색 (Post의 title/content)
-            "AND (:region IS NULL OR :region = '' OR prg.region.name = :region) " + //  지역 필터링
-            "AND (" + //  상태 필터링
-            "    (:isOngoing = TRUE AND pr.deadlineDate > :now) " + // 모집중은 Project의 deadlineDate 사용
-            " OR (:isOngoing = FALSE AND pr.deadlineDate <= :now) " +
-            " OR (:isOngoing IS NULL) " +
-            ")" +
-            "ORDER BY p.id DESC")
+    @Query("""
+            SELECT pr.post FROM Project pr
+            JOIN pr.post p
+            LEFT JOIN p.postRegions prg
+            LEFT JOIN p.postCategories pc
+            LEFT JOIN p.postSkills ps
+            WHERE (:keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%)
+            
+            AND (:regionIds IS NULL OR prg.region.id IN :regionIds)
+            
+            AND (:categoryIds IS NULL OR pc.category.id IN :categoryIds)
+            
+            AND (:skillIds IS NULL OR ps.skill.id IN :skillIds)
+            
+            AND (
+                (:isOngoing = TRUE AND pr.deadlineDate > :now)
+             OR (:isOngoing = FALSE AND pr.deadlineDate <= :now)
+             OR (:isOngoing IS NULL)
+            )
+            ORDER BY p.id DESC
+            """)
     List<Post> search(
             @Param("isOngoing") Boolean isOngoing,
-            @Param("region") String region,
+            @Param("regionIds") List<Long> regionIds,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("skillIds") List<Long> skillIds,
             @Param("keyword") String keyword,
             @Param("now") LocalDateTime now
     );

@@ -307,7 +307,6 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(jsonPath("$.message").value("존재하지 않는 데이터입니다."));
     }
 
-    //추후 구현예정
     @Test
     @DisplayName("프로젝트 검색")
     @WithUserDetails("user1")
@@ -324,7 +323,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("getProjects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("프로젝트"))
-                .andExpect(jsonPath("$[0].regions[0]").value("서울"));
+                .andExpect(jsonPath("$[0].regions[0].name").value("서울"));
     }
 
     @Test

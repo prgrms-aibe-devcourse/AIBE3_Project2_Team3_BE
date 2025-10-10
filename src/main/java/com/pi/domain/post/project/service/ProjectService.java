@@ -100,14 +100,27 @@ public class ProjectService {
         project.changeStatus(status);
     }
 
-    public List<ProjectResponse> searchProjects(ProjectStatus status, String region, String keyword) {
-
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> searchProjects(
+            ProjectStatus status,
+            List<Long> regionIds,
+            List<Long> categoryIds,
+            List<Long> skillIds,
+            String keyword
+    ) {
         Boolean isOngoing = null;
         if (status != null) {
             isOngoing = (status == ProjectStatus.ONGOING);
         }
 
-        return projectRepository.search(isOngoing, region, keyword, LocalDateTime.now())
+        return projectRepository.search(
+                        isOngoing,
+                        regionIds,
+                        categoryIds,
+                        skillIds,
+                        keyword,
+                        LocalDateTime.now()
+                )
                 .stream()
                 .map(ProjectResponse::fromPost)
                 .toList();
