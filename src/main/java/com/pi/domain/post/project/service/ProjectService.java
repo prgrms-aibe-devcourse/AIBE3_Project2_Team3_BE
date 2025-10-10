@@ -6,8 +6,8 @@ import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
+import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyDto;
-import com.pi.domain.post.project.dto.ProjectResponse;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.entity.ProjectStatus;
@@ -107,7 +107,7 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectResponse> searchProjects(
+    public List<ProjectDto> searchProjects(
             ProjectStatus status,
             List<Long> regionIds,
             List<Long> categoryIds,
@@ -128,7 +128,7 @@ public class ProjectService {
                         LocalDateTime.now()
                 )
                 .stream()
-                .map(ProjectResponse::fromPost)
+                .map(ProjectDto::new)
                 .toList();
     }
 

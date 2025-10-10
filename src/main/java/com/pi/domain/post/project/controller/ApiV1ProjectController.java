@@ -4,7 +4,6 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyReqBody;
-import com.pi.domain.post.project.dto.ProjectResponse;
 import com.pi.domain.post.project.dto.ProjectWriteReqBody;
 import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.post.project.service.ProjectService;
@@ -103,7 +102,7 @@ public class ApiV1ProjectController {
 
     @GetMapping("/projects")
     @Operation(summary = "프로젝트 글 검색 및 다건조회")
-    public List<ProjectResponse> getProjects(
+    public List<ProjectDto> getProjects(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) List<Long> regionIds,
             @RequestParam(required = false) List<Long> categoryIds,

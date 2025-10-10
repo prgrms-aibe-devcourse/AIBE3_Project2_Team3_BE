@@ -22,12 +22,5 @@ public record UserDto(
                 user.getRole()
         );
     }
-
-    // 추후 추가로직 필요시 작성
-    public static UserDto from(User user) {
-        if (user == null) {
-            return null;
-        }
-        return new UserDto(user);
-    }
+    
 }

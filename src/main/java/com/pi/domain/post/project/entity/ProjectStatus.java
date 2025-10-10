@@ -13,11 +13,13 @@ public enum ProjectStatus {
         this.displayValue = displayValue;
     }
 
+    // 문자열 반환 직렬화 "모집중"이렇게 내보냄
     @JsonValue
     public String getDisplayValue() {
         return displayValue;
     }
 
+    // 문자열 받아 역직렬화
     @JsonCreator
     public static ProjectStatus fromDisplayValue(String value) {
         for (ProjectStatus status : values()) {
