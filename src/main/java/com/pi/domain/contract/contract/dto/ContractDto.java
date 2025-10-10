@@ -1,7 +1,7 @@
-package com.pi.domain.contract.dto;
+package com.pi.domain.contract.contract.dto;
 
-import com.pi.domain.contract.entity.Contract;
-import com.pi.domain.contract.entity.ContractStatus;
+import com.pi.domain.contract.contract.entity.Contract;
+import com.pi.domain.contract.contract.entity.ContractStatus;
 
 import java.time.LocalDateTime;
 

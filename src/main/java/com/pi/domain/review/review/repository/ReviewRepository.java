@@ -1,6 +1,6 @@
-package com.pi.domain.review.repository;
+package com.pi.domain.review.review.repository;
 
-import com.pi.domain.review.entity.Review;
+import com.pi.domain.review.review.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,4 +1,4 @@
-package com.pi.domain.contract.entity;
+package com.pi.domain.contract.contract.entity;
 
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;

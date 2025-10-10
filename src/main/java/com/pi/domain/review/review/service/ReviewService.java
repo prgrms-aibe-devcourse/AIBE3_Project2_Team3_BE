@@ -1,9 +1,9 @@
-package com.pi.domain.review.service;
+package com.pi.domain.review.review.service;
 
-import com.pi.domain.contract.entity.Contract;
-import com.pi.domain.contract.repository.ContractRepository;
-import com.pi.domain.review.entity.Review;
-import com.pi.domain.review.repository.ReviewRepository;
+import com.pi.domain.contract.contract.entity.Contract;
+import com.pi.domain.contract.contract.repository.ContractRepository;
+import com.pi.domain.review.review.entity.Review;
+import com.pi.domain.review.review.repository.ReviewRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rsData.RsData;

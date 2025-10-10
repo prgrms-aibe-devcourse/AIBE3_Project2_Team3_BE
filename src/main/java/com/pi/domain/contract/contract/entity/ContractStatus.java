@@ -1,4 +1,4 @@
-package com.pi.domain.contract.entity;
+package com.pi.domain.contract.contract.entity;
 
 public enum ContractStatus {
     REQUESTED,

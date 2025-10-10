@@ -1,6 +1,6 @@
-package com.pi.domain.review.dto;
+package com.pi.domain.review.review.dto;
 
-import com.pi.domain.review.entity.Review;
+import com.pi.domain.review.review.entity.Review;
 
 import java.time.LocalDateTime;
 

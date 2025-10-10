@@ -1,10 +1,10 @@
-package com.pi.domain.review.controller;
+package com.pi.domain.review.review.controller;
 
-import com.pi.domain.review.dto.ReviewDto;
-import com.pi.domain.review.dto.ReviewModifyReqBody;
-import com.pi.domain.review.dto.ReviewWriteReqBody;
-import com.pi.domain.review.entity.Review;
-import com.pi.domain.review.service.ReviewService;
+import com.pi.domain.review.review.dto.ReviewDto;
+import com.pi.domain.review.review.dto.ReviewModifyReqBody;
+import com.pi.domain.review.review.dto.ReviewWriteReqBody;
+import com.pi.domain.review.review.entity.Review;
+import com.pi.domain.review.review.service.ReviewService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;

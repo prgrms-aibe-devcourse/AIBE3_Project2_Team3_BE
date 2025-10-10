@@ -1,6 +1,6 @@
-package com.pi.domain.review.entity;
+package com.pi.domain.review.review.entity;
 
-import com.pi.domain.contract.entity.Contract;
+import com.pi.domain.contract.contract.entity.Contract;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
