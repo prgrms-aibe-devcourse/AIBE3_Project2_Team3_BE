@@ -61,39 +61,15 @@ public class ApiV1ProjectController {
         return Ut.pageMapper.of(dtoPage);
     }
 
-    //    검색 기능 추후 구현 안되면 프론트엔드 필터링으로
-    @GetMapping("/projects")
-    @Operation(summary = "프로젝트 글 검색 및 다건조회")
-    public List<ProjectResponse> getProjects(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) List<Long> regionIds,
-            @RequestParam(required = false) List<Long> categoryIds,
-            @RequestParam(required = false) List<Long> skillIds,
-            @RequestParam(required = false) String keyword
-    ) {
-        ProjectStatus projectStatus = null;
-
-        if (status != null && !status.isEmpty()) {
-            projectStatus = ProjectStatus.fromDisplayValue(status);
-        }
-
-        return projectService.searchProjects(
-                projectStatus,
-                regionIds,
-                categoryIds,
-                skillIds,
-                keyword
-        );
-    }
 
     @GetMapping("/{id}")
     @Transactional
     @Operation(summary = "프로젝트 글 단건 조회")
-    public RsData<ProjectDto> getItem(
+    public ProjectDto getItem(
             @PathVariable Long id
     ) {
         Post post = projectService.findById(id);
-        return new RsData<>("200-1", "프로젝트 게시글이 조회되었습니다.", new ProjectDto(post));
+        return new ProjectDto(post);
     }
 
     @PutMapping("/{id}")
@@ -123,6 +99,30 @@ public class ApiV1ProjectController {
         postService.delete(post);
 
         return new RsData<>("200-1", "%d번 프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
+    }
+
+    @GetMapping("/projects")
+    @Operation(summary = "프로젝트 글 검색 및 다건조회")
+    public List<ProjectResponse> getProjects(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) List<Long> regionIds,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> skillIds,
+            @RequestParam(required = false) String keyword
+    ) {
+        ProjectStatus projectStatus = null;
+
+        if (status != null && !status.isEmpty()) {
+            projectStatus = ProjectStatus.fromDisplayValue(status);
+        }
+
+        return projectService.searchProjects(
+                projectStatus,
+                regionIds,
+                categoryIds,
+                skillIds,
+                keyword
+        );
     }
 
     @PatchMapping("/{id}/status")

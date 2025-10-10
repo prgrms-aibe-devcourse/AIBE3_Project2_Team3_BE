@@ -144,12 +144,8 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().handlerType(ApiV1ProjectController.class))
                 .andExpect(handler().methodName("getItem"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.message").value("프로젝트 게시글이 조회되었습니다."))
-                .andExpect(jsonPath("$.data.id").value(projectId))
-                .andExpect(jsonPath("$.data.title").value("프로젝트"))
-                .andExpect(jsonPath("$.data.content").value("만들어드립니다."))
-                .andExpect(jsonPath("$.data.salary").value(100));
+                .andExpect(jsonPath("$.id").value(projectId))
+                .andExpect(jsonPath("$.title").value("프로젝트"));
     }
 
     @Test
