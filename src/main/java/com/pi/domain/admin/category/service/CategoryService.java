@@ -23,8 +23,15 @@ public class CategoryService {
 
         if (dto.parentId() != null) {
             Category parent = categoryRepository.findById(dto.parentId())
-                    .get();
+                    .orElseThrow(() -> new IllegalArgumentException("부모 카테고리가 존재하지 않음."));
+            boolean exists = categoryRepository.findByParentId(dto.parentId())
+                    .stream().anyMatch(c -> c.getName().equals(dto.name()));
+            if (exists) throw new IllegalArgumentException("동일한 이름의 카테고리 존재.");
             parent.addChild(category);
+        } else {
+            boolean exists = categoryRepository.findByParentIsNull()
+                    .stream().anyMatch(c -> c.getName().equals(dto.name()));
+            if (exists) throw new IllegalArgumentException("동일한 이름의 루트 카테고리 존재.");
         }
 
         return categoryRepository.save(category);
@@ -34,8 +41,20 @@ public class CategoryService {
     public List<CategoryResBody> getCategoryTree() {
         List<Category> roots = categoryRepository.findByParentIsNull();
         return roots.stream()
-                .map(CategoryResBody::from)
+                .map(this::buildTree)
                 .collect(Collectors.toList());
+    }
+
+    private CategoryResBody buildTree(Category category) {
+        List<CategoryResBody> children = categoryRepository.findByParentId(category.getId()).stream()
+                .map(this::buildTree)
+                .collect(Collectors.toList());
+        return new CategoryResBody(
+                category.getId(),
+                category.getName(),
+                category.getParent() != null ? category.getParent().getId() : null,
+                children
+        );
     }
 
     @Transactional

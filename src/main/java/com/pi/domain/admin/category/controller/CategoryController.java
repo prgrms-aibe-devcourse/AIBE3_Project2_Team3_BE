@@ -22,7 +22,7 @@ public class CategoryController {
     @PostMapping
     public CategoryResBody createCategory(@RequestBody CategoryCreateReqBody dto) {
         Category category = categoryService.createCategory(dto);
-        return CategoryResBody.from(category);
+        return CategoryResBody.from(category, List.of());
     }
 
     @GetMapping
