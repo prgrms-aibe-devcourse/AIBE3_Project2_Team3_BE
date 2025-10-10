@@ -9,7 +9,6 @@ import com.pi.domain.chat.chat.repository.ChatMemberRepository;
 import com.pi.domain.chat.chat.repository.ChatMessageRepository;
 import com.pi.domain.chat.chat.repository.ChatRoomRepository;
 import com.pi.domain.user.user.entity.User;
-import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +29,11 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserService userService;
     private final Rq rq;
 
     @Transactional
     public ChatMessageRes sendMessage(Long userId, Long roomId, String content) {
-        ChatMember member = chatMemberRepository.findByChatRoomIdAndUser_IdAndEndedDateIsNull(roomId, userId)
+        ChatMember member = chatMemberRepository.findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, userId)
                 .orElseThrow(() -> new ServiceException("401-1", "방 참여자가 아닙니다."));
         ChatMessage saved = chatMessageRepository.save(
                 ChatMessage.builder()
@@ -59,7 +57,7 @@ public class ChatService {
     public Long join(Long userId, Long roomId) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
-        chatMemberRepository.findByChatRoomIdAndUser_IdAndEndedDateIsNull(roomId, userId)
+        chatMemberRepository.findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, userId)
                 .ifPresent(m -> { throw new IllegalStateException("이미 참여 중입니다."); });
         User actor = rq.getActor();
         if (actor == null) {
@@ -68,7 +66,7 @@ public class ChatService {
 
 
         return chatMemberRepository
-                .findByChatRoomIdAndUserIdAndEndedDateIsNull(roomId, actor.getId())
+                .findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, actor.getId())
                 .map(ChatMember::getId)
                 .orElseGet(() -> {
                     ChatMember m = ChatMember.builder()
@@ -85,7 +83,7 @@ public class ChatService {
     @Transactional
     public void leave(Long userId, Long roomId) {
         ChatMember m = chatMemberRepository
-                .findByChatRoomIdAndUser_IdAndEndedDateIsNull(roomId, userId)
+                .findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, userId)
                 .orElseThrow(() -> new ServiceException("401-1", "참여 기록이 없습니다."));
         m.setEndedDate(LocalDateTime.now());
     }
