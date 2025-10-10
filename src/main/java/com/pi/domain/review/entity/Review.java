@@ -1,5 +1,6 @@
 package com.pi.domain.review.entity;
 
+import com.pi.domain.contract.entity.Contract;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -15,8 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Review extends BaseEntity {
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    private Contract contract;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Contract contract;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
