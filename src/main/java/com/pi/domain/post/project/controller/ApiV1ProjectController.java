@@ -4,7 +4,9 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyReqBody;
+import com.pi.domain.post.project.dto.ProjectResponse;
 import com.pi.domain.post.project.dto.ProjectWriteReqBody;
+import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
@@ -22,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -54,6 +58,15 @@ public class ApiV1ProjectController {
     ) {
         Page<ProjectDto> dtoPage = projectService.getPage(pageable, searchKeyword).map(ProjectDto::new);
         return Ut.pageMapper.of(dtoPage);
+    }
+
+    @GetMapping("/projects")
+    public List<ProjectResponse> getProjects(
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String keyword
+    ) {
+        return projectService.searchProjects(status, region, keyword);
     }
 
     @GetMapping("/{id}")

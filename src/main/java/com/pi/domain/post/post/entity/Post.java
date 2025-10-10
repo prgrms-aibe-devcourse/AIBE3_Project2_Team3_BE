@@ -119,4 +119,8 @@ public class Post extends BaseEntity {
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
+
+    public void increaseViewCount() {
+        this.isViewed = true;
+    }
 }

@@ -91,6 +91,45 @@ public class ApiV1ProjectControllerTest {
     }
 
     @Test
+    @DisplayName("프로젝트 등록 - 제목 필수 400-1")
+    @WithUserDetails("user1")
+    void t1_1() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                        post("/api/v1/projects")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                           "post": {
+                                             "title": "",
+                                             "content": "프로젝트 내용",
+                                             "isViewed": true
+                                           },
+                                           "project": {
+                                             "deadlineDate": "2025-10-10T12:00:00",
+                                             "startedDate": "2025-10-11T12:00:00",
+                                             "endedDate": "2025-12-31T12:00:00",
+                                             "hirerType": "기업",
+                                             "employmentType": "정규직",
+                                             "salary": 5000000,
+                                             "personnel": 3,
+                                             "skillLevel": 2
+                                           },
+                                           "regionIds": [1,2],
+                                           "categoryIds": [1],
+                                           "skillIds": [1]
+                                         }
+                                        """)
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.message").value("post.title-NotBlank-must not be blank"));
+    }
+
+    @Test
     @DisplayName("프로젝트 단건 조회")
     @WithUserDetails("user1")
     void t2() throws Exception {
@@ -104,6 +143,27 @@ public class ApiV1ProjectControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ApiV1ProjectController.class))
                 .andExpect(handler().methodName("getItem"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("프로젝트 게시글이 조회되었습니다."))
+                .andExpect(jsonPath("$.data.id").value(projectId))
+                .andExpect(jsonPath("$.data.title").value("프로젝트"))
+                .andExpect(jsonPath("$.data.content").value("만들어드립니다."))
+                .andExpect(jsonPath("$.data.salary").value(100));
+    }
+
+    @Test
+    @DisplayName("프로젝트 다건 조회")
+    @WithUserDetails("user1")
+    void t2_1() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                        get("/api/v1/projects")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("getItems"))
                 .andExpect(status().isOk());
     }
 
@@ -154,6 +214,46 @@ public class ApiV1ProjectControllerTest {
     }
 
     @Test
+    @DisplayName("프로젝트 수정 - 권한 없음 403-1")
+    @WithUserDetails("user2")
+    void t3_1() throws Exception {
+        long projectId = 2L;
+        ResultActions resultActions = mvc.perform(
+                        put("/api/v1/projects/%d".formatted(projectId))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "post": {
+                                                "title": "수정된 프로젝트 제목",
+                                                "content": "수정된 프로젝트 내용",
+                                                "isViewed": true
+                                            },
+                                            "project": {
+                                                "deadlineDate": "2025-11-10T00:00:00",
+                                                "startedDate": "2025-11-12T00:00:00",
+                                                "endedDate": "2026-01-01T00:00:00",
+                                                "hirerType": "기업",
+                                                "employmentType": "정규직",
+                                                "salary": 6000000,
+                                                "personnel": 4,
+                                                "skillLevel": 3
+                                            },
+                                           "regionIds": [1,2],
+                                           "categoryIds": [1],
+                                           "skillIds": [1]
+                                        }
+                                        """)
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
+    }
+
+    @Test
     @DisplayName("프로젝트 삭제")
     @WithUserDetails("user1")
     void t4() throws Exception {
@@ -169,5 +269,24 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("delete"))
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.message").value("%d번 프로젝트 게시글이 삭제되었습니다.".formatted(projectId)));
+    }
+
+    @Test
+    @DisplayName("프로젝트 삭제 - 권한 없음 403-1")
+    @WithUserDetails("user2")
+    void t4_1() throws Exception {
+        long projectId = 2L;
+
+        ResultActions resultActions = mvc.perform(
+                        delete("/api/v1/projects/%d".formatted(projectId))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("권한이 없습니다."));
     }
 }
