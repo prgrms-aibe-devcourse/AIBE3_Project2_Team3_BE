@@ -1,6 +1,5 @@
 package com.pi.domain.application.application.dto;
 
-import com.pi.domain.application.application.entity.ApplicationStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
@@ -11,8 +10,8 @@ public record ApplicationWriteReqBody(
         Long postId,
 
         @NotNull
-        @Pattern(regexp = "DRAFT|APPLIED")
-        ApplicationStatus status,
+        @Pattern(regexp = "DRAFT|APPLIED", message = "상태 값은 DRAFT 또는 APPLIED 이어야 합니다.")
+        String status,
 
         String content
 ) {
