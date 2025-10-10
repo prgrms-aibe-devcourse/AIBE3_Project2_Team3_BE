@@ -22,6 +22,6 @@ public record ReviewDto (
                 r.getUser().getId(),
                 r.getRating(),
                 r.getComment()
-        )
+        );
     }
 }
