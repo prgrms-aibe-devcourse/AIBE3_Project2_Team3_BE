@@ -1,6 +1,6 @@
-package com.pi.domain.skill.skill.dto;
+package com.pi.domain.admin.skill.skill.dto;
 
-import com.pi.domain.skill.skill.entity.Skill;
+import com.pi.domain.admin.skill.skill.entity.Skill;
 
 public record SkillDto(
         Long id,

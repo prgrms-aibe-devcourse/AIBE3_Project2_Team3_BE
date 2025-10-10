@@ -1,6 +1,6 @@
-package com.pi.domain.region.region.dto;
+package com.pi.domain.admin.region.dto;
 
-import com.pi.domain.region.region.entity.Region;
+import com.pi.domain.admin.region.entity.Region;
 
 public record RegionDto(
         Long id,

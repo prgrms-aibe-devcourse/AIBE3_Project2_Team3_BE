@@ -1,4 +1,4 @@
-package com.pi.domain.skill.skill.entity;
+package com.pi.domain.admin.skill.skill.entity;
 
 import com.pi.domain.post.post.entity.PostSkill;
 import com.pi.global.jpa.entity.BaseEntity;

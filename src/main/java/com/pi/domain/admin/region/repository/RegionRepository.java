@@ -1,6 +1,6 @@
-package com.pi.domain.region.region.repository;
+package com.pi.domain.admin.region.repository;
 
-import com.pi.domain.region.region.entity.Region;
+import com.pi.domain.admin.region.entity.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

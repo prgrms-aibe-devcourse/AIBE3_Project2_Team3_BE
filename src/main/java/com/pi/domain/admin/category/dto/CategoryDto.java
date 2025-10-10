@@ -1,6 +1,6 @@
-package com.pi.domain.category.category.dto;
+package com.pi.domain.admin.category.dto;
 
-import com.pi.domain.category.category.entity.Category;
+import com.pi.domain.admin.category.entity.Category;
 
 public record CategoryDto(
         Long id,

@@ -1,6 +1,6 @@
-package com.pi.domain.category.category.entity;
+package com.pi.domain.admin.region.entity;
 
-import com.pi.domain.post.post.entity.PostCategory;
+import com.pi.domain.post.post.entity.PostRegion;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,22 +12,22 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Category extends BaseEntity {
+public class Region extends BaseEntity {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Category parent;
+    private Region parent;
 
     @OneToMany(mappedBy = "parent",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<Category> children = new ArrayList<>();
+    private List<Region> children = new ArrayList<>();
 
-    @OneToMany(mappedBy = "category")
-    private List<PostCategory> postCategories = new ArrayList<>();
+    @OneToMany(mappedBy = "region")
+    private List<PostRegion> postRegions = new ArrayList<>();
 
-    public void addChild(Category child) {
+    public void addChild(Region child) {
         if (child == null) return;
         // 사이클 방지: 자신이나 자신의 하위로는 이동 불가
         if (child == this || isAncestorOf(child)) {
@@ -45,8 +45,8 @@ public class Category extends BaseEntity {
         }
     }
 
-    private boolean isAncestorOf(Category node) {
-        for (Category p = this.parent; p != null; p = p.parent) {
+    private boolean isAncestorOf(Region node) {
+        for (Region p = this.parent; p != null; p = p.parent) {
             if (p == node) return true;
         }
         return false;
