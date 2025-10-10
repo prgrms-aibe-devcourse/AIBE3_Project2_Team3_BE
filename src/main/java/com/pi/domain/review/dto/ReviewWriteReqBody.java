@@ -1,4 +1,4 @@
-package com.pi.domain.review.review.dto;
+package com.pi.domain.review.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
