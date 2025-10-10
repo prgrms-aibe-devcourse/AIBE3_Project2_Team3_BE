@@ -1,9 +1,9 @@
 package com.pi.domain.chat.chat.repository;
 
-import com.pi.domain.chat.chat.entity.ChatMessage;
+import com.pi.domain.chat.chat.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ChatRepository extends JpaRepository<ChatMessage, Long> {
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 }
