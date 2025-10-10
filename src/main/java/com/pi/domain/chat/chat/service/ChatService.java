@@ -3,12 +3,15 @@ package com.pi.domain.chat.chat.service;
 import com.pi.domain.chat.chat.dto.ChatMessageRes;
 import com.pi.domain.chat.chat.entity.ChatMember;
 import com.pi.domain.chat.chat.entity.ChatMessage;
+import com.pi.domain.chat.chat.entity.ChatRole;
 import com.pi.domain.chat.chat.entity.ChatRoom;
 import com.pi.domain.chat.chat.repository.ChatMemberRepository;
 import com.pi.domain.chat.chat.repository.ChatMessageRepository;
 import com.pi.domain.chat.chat.repository.ChatRoomRepository;
+import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
+import com.pi.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +31,7 @@ public class ChatService {
     private final ChatMemberRepository chatMemberRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserService userService;
+    private final Rq rq;
 
     @Transactional
     public ChatMessageRes sendMessage(Long userId, Long roomId, String content) {
@@ -52,23 +56,30 @@ public class ChatService {
     }
 
     @Transactional
-    public void join(Long userId, Long roomId) {
+    public Long join(Long userId, Long roomId) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
         chatMemberRepository.findByChatRoomIdAndUser_IdAndEndedDateIsNull(roomId, userId)
                 .ifPresent(m -> { throw new IllegalStateException("이미 참여 중입니다."); });
+        User actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-0", "로그인이 필요합니다.");
+        }
 
-        ChatMember m = ChatMember.builder()
-                .chatRoom(room)
-                .user(room.getMembers().isEmpty()
-                        ? userService.getReferenceById(userId) // 예시: 필요 시 로딩. 실제로는 userService.getReferenceById(userId) 형태로 주입
-                        : null)
-                .startedDate(LocalDateTime.now())
-                .role(com.pi.domain.chat.chat.entity.ChatRole.MEMBER)
-                .build();
 
-        // user 참조는 반드시 userService.getReferenceById(userId)로 대체하십시오.
-        chatMemberRepository.save(m);
+        return chatMemberRepository
+                .findByChatRoomIdAndUserIdAndEndedDateIsNull(roomId, actor.getId())
+                .map(ChatMember::getId)
+                .orElseGet(() -> {
+                    ChatMember m = ChatMember.builder()
+                            .chatRoom(room)
+                            .user(actor)                    // ★ 반드시 세팅!
+                            .role(ChatRole.MEMBER)
+                            .startedDate(LocalDateTime.now())
+                            .build();
+                    chatMemberRepository.save(m);
+                    return m.getId();
+                });
     }
 
     @Transactional
