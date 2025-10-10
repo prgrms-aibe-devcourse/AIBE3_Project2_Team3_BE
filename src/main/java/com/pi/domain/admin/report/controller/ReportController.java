@@ -6,6 +6,7 @@ import com.pi.domain.admin.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class ReportController {
         return reportService.getAllReports();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "신고된 포스트 숨기기/보이기")
     @PatchMapping("/post/viewed")
 //    /api/v1/admin/reports/post/viewed?postId={id}&isViewed={true|false}
