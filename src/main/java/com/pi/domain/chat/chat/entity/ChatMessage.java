@@ -20,4 +20,10 @@ public class ChatMessage extends BaseEntity {
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
+
+    public ChatMessage(ChatMember chatMember, ChatRoom chatRoom, String content) {
+        this.chatMember = chatMember;
+        this.chatRoom = chatRoom;
+        this.content = content;
+    }
 }

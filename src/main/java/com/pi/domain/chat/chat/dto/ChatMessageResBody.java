@@ -2,7 +2,7 @@ package com.pi.domain.chat.chat.dto;
 
 import java.time.LocalDateTime;
 
-public record ChatMessageRes(
+public record ChatMessageResBody(
         Long MessageId, Long roomId, Long senderUserId,
         String content, LocalDateTime createdAt
 ) {

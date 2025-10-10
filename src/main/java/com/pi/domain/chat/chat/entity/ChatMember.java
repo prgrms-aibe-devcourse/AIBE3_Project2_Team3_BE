@@ -40,4 +40,12 @@ public class ChatMember extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20) // 권한
     private ChatRole role;
+
+    public ChatMember(ChatRoom chatRoom, User user, ChatRole role, LocalDateTime startedDate) {
+        this.chatRoom = chatRoom;
+        this.user = user;
+        this.role = role;
+        this.startedDate = startedDate;
+        chatRoom.getMembers().add(this);
+    }
 }

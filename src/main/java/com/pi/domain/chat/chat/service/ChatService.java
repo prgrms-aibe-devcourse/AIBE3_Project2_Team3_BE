@@ -1,6 +1,6 @@
 package com.pi.domain.chat.chat.service;
 
-import com.pi.domain.chat.chat.dto.ChatMessageRes;
+import com.pi.domain.chat.chat.dto.ChatMessageResBody;
 import com.pi.domain.chat.chat.entity.ChatMember;
 import com.pi.domain.chat.chat.entity.ChatMessage;
 import com.pi.domain.chat.chat.entity.ChatRole;
@@ -32,17 +32,14 @@ public class ChatService {
     private final Rq rq;
 
     @Transactional
-    public ChatMessageRes sendMessage(Long userId, Long roomId, String content) {
+    public ChatMessageResBody sendMessage(Long userId, Long roomId, String content) {
         ChatMember member = chatMemberRepository.findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, userId)
-                .orElseThrow(() -> new ServiceException("401-1", "방 참여자가 아닙니다."));
+                .orElseThrow(() -> new ServiceException("403-1", "방 참여자가 아닙니다."));
+
         ChatMessage saved = chatMessageRepository.save(
-                ChatMessage.builder()
-                        .chatMember(member)
-                        .chatRoom(member.getChatRoom())
-                        .content(content)
-                        .build()
+                new ChatMessage(member, member.getChatRoom(), content)
         );
-        ChatMessageRes dto = new ChatMessageRes(
+        ChatMessageResBody dto = new ChatMessageResBody(
                 saved.getId(),
                 roomId,
                 member.getUser().getId(),
@@ -63,21 +60,11 @@ public class ChatService {
         if (actor == null) {
             throw new ServiceException("401-0", "로그인이 필요합니다.");
         }
-
-
-        return chatMemberRepository
-                .findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, actor.getId())
-                .map(ChatMember::getId)
-                .orElseGet(() -> {
-                    ChatMember m = ChatMember.builder()
-                            .chatRoom(room)
-                            .user(actor)                    // ★ 반드시 세팅!
-                            .role(ChatRole.MEMBER)
-                            .startedDate(LocalDateTime.now())
-                            .build();
-                    chatMemberRepository.save(m);
-                    return m.getId();
-                });
+        ChatMember m = new ChatMember(
+                room, actor, ChatRole.MEMBER, LocalDateTime.now()
+        );
+        chatMemberRepository.save(m);
+        return m.getId();
     }
 
     @Transactional
@@ -89,9 +76,9 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ChatMessageRes> history(Long roomId, Pageable pageable) {
+    public Page<ChatMessageResBody> history(Long roomId, Pageable pageable) {
         return chatMessageRepository.findByChatRoomIdOrderByCreatedDateAsc(roomId, pageable)
-                .map(m -> new ChatMessageRes(
+                .map(m -> new ChatMessageResBody(
                         m.getId(), roomId, m.getChatMember().getUser().getId(),
                         m.getContent(), m.getCreatedDate()
                 ));

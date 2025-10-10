@@ -38,7 +38,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/findPw").permitAll()
                                 .requestMatchers("/api/*/adm/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
                                 .requestMatchers("/api/*/**").authenticated()
-                                .requestMatchers("/api/chat/**").authenticated()
+                                .requestMatchers("/api/v1/chat/**").authenticated()
                                 .anyRequest().permitAll()
 
                 )
