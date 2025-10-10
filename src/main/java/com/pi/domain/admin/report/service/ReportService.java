@@ -25,17 +25,17 @@ public class ReportService {
     @Transactional
     public ReportDto createReport(Long reporterId, ReportCreateReqBody req) {
         User reporter = userRepository.findById(reporterId)
-                .orElseThrow(() -> new IllegalArgumentException("신고자 정보가 없습니다."));
+                .get();
 
         User targetUser = null;
         Post post = null;
 
         if (req.reportType() == ReportType.USER) {
             targetUser = userRepository.findById(req.targetUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("대상 유저 정보가 없습니다."));
+                    .get();
         } else if (req.reportType() == ReportType.POST) {
             post = postRepository.findById(req.postId())
-                    .orElseThrow(() -> new IllegalArgumentException("게시물 정보가 없습니다."));
+                    .get();
             targetUser = post.getUser();
         }
 
@@ -54,5 +54,14 @@ public class ReportService {
         return reportRepository.findAll().stream()
                 .map(ReportDto::from)
                 .toList();
+    }
+
+    public void changePostViewedStatus(Long postId, boolean isViewed) {
+        if (reportRepository.existsByPostId(postId)) {
+            Post post = postRepository.findById(postId)
+                    .get();
+            post.modify(post.getTitle(), post.getContent(), isViewed);
+            postRepository.save(post);
+        }
     }
 }
