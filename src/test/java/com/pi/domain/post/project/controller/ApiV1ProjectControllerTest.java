@@ -307,6 +307,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(jsonPath("$.message").value("존재하지 않는 데이터입니다."));
     }
 
+    //추후 구현예정
     @Test
     @DisplayName("프로젝트 검색")
     @WithUserDetails("user1")

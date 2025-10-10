@@ -33,8 +33,6 @@ public record ProjectResponse(
     public static ProjectResponse fromPost(Post post) {
         Project project = post.getProject();
 
-        // UserDto, RegionDto, CategoryDto, SkillDto는 이미 존재한다고 가정
-
         return new ProjectResponse(
                 post.getId(),
                 post.getCreatedDate(),
@@ -43,9 +41,12 @@ public record ProjectResponse(
                 post.getContent(),
                 post.isViewed(),
                 UserDto.from(post.getUser()),
-                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion().getName())).toList(),
-                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory().getName())).toList(),
-                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill().getName())).toList(),
+                post.getPostRegions().stream()
+                        .map(pr -> new RegionDto(pr.getRegion())).toList(),
+                post.getPostCategories().stream()
+                        .map(pc -> new CategoryDto(pc.getCategory())).toList(),
+                post.getPostSkills().stream()
+                        .map(ps -> new SkillDto(ps.getSkill())).toList(),
 
                 // Project 정보
                 project.getDeadlineDate(),

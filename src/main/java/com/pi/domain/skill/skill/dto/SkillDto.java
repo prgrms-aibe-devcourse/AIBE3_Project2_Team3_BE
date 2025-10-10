@@ -13,10 +13,5 @@ public record SkillDto(
         );
     }
 
-    public SkillDto(String name) {
-        this(
-                null,
-                name
-        );
-    }
+    
 }

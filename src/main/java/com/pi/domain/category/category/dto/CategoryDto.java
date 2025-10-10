@@ -13,11 +13,5 @@ public record CategoryDto(
         );
     }
 
-    // 이름만 반환
-    public CategoryDto(String name) {
-        this(
-                null,
-                name
-        );
-    }
+
 }
