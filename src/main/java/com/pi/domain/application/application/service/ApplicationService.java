@@ -17,7 +17,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
-    public static final List<ApplicationStatus> EXCLUDED_STATUSES = List.of(ApplicationStatus.DRAFT, ApplicationStatus.CANCELED);
+    public static final List<ApplicationStatus> EXCLUDED_STATUSES = List.of(ApplicationStatus.DRAFT);
+
     private final ApplicationRepository applicationRepository;
 
     public long count() {

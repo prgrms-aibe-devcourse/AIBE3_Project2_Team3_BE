@@ -12,6 +12,7 @@ public record ApplicationGetResBody(
         LocalDateTime modifiedDate,
         long postId,
         String postTitle,
+//        String postStatus,
         long postUserId,
         String postUserNickname
 ) {
@@ -24,6 +25,7 @@ public record ApplicationGetResBody(
                 application.getModifiedDate(),
                 application.getPost().getId(),
                 application.getPost().getTitle(),
+//                application.getPost().getStatus().name(),
                 application.getPost().getUser().getId(),
                 application.getPost().getUser().getNickname()
         );
