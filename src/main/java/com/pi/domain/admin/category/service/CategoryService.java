@@ -1,7 +1,7 @@
 package com.pi.domain.admin.category.service;
 
 import com.pi.domain.admin.category.dto.CategoryCreateReqBody;
-import com.pi.domain.admin.category.dto.CategoryResBody;
+import com.pi.domain.admin.category.dto.CategoryDto;
 import com.pi.domain.admin.category.entity.Category;
 import com.pi.domain.admin.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,18 +40,18 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResBody> getCategoryTree() {
+    public List<CategoryDto> getCategoryTree() {
         List<Category> roots = categoryRepository.findByParentIsNull();
         return roots.stream()
                 .map(this::buildTree)
                 .collect(Collectors.toList());
     }
 
-    private CategoryResBody buildTree(Category category) {
-        List<CategoryResBody> children = categoryRepository.findByParentId(category.getId()).stream()
+    private CategoryDto buildTree(Category category) {
+        List<CategoryDto> children = categoryRepository.findByParentId(category.getId()).stream()
                 .map(this::buildTree)
                 .collect(Collectors.toList());
-        return new CategoryResBody(
+        return new CategoryDto(
                 category.getId(),
                 category.getName(),
                 category.getParent() != null ? category.getParent().getId() : null,

@@ -1,6 +1,6 @@
 package com.pi.domain.post.post.entity;
 
-import com.pi.domain.admin.skill.skill.entity.Skill;
+import com.pi.domain.admin.skill.entity.Skill;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

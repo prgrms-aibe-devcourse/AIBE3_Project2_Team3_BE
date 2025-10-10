@@ -3,7 +3,7 @@ package com.pi.domain.post.project.dto;
 import com.pi.domain.admin.category.dto.CategoryDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.admin.region.dto.RegionDto;
-import com.pi.domain.admin.skill.skill.dto.SkillDto;
+import com.pi.domain.admin.skill.dto.SkillDto;
 import com.pi.domain.user.user.dto.UserDto;
 
 import java.time.LocalDateTime;

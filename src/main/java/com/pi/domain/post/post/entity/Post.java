@@ -4,7 +4,7 @@ import com.pi.domain.admin.category.entity.Category;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.admin.region.entity.Region;
-import com.pi.domain.admin.skill.skill.entity.Skill;
+import com.pi.domain.admin.skill.entity.Skill;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;

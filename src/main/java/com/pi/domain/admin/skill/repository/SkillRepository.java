@@ -1,6 +1,6 @@
-package com.pi.domain.admin.skill.skill.repository;
+package com.pi.domain.admin.skill.repository;
 
-import com.pi.domain.admin.skill.skill.entity.Skill;
+import com.pi.domain.admin.skill.entity.Skill;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
 package com.pi.domain.admin.region.controller;
 
 import com.pi.domain.admin.region.dto.RegionCreateReqBody;
-import com.pi.domain.admin.region.dto.RegionResBody;
+import com.pi.domain.admin.region.dto.RegionDto;
 import com.pi.domain.admin.region.entity.Region;
 import com.pi.domain.admin.region.service.RegionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,14 +22,14 @@ public class RegionController {
 
     @Operation(summary = "지역 생성")
     @PostMapping
-    public RegionResBody createRegion(@RequestBody RegionCreateReqBody dto) {
+    public RegionDto createRegion(@RequestBody RegionCreateReqBody dto) {
         Region region = regionService.createRegion(dto);
-        return RegionResBody.from(region, List.of());
+        return RegionDto.from(region, List.of());
     }
 
     @GetMapping
     @Operation(summary = "전체 지역 트리 조회")
-    public List<RegionResBody> getRegionTree() {
+    public List<RegionDto> getRegionTree() {
         return regionService.getRegionTree();
     }
 

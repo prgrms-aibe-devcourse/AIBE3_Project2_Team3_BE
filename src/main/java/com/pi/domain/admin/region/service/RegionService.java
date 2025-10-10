@@ -1,7 +1,7 @@
 package com.pi.domain.admin.region.service;
 
 import com.pi.domain.admin.region.dto.RegionCreateReqBody;
-import com.pi.domain.admin.region.dto.RegionResBody;
+import com.pi.domain.admin.region.dto.RegionDto;
 import com.pi.domain.admin.region.entity.Region;
 import com.pi.domain.admin.region.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,18 +40,18 @@ public class RegionService {
     }
 
     @Transactional(readOnly = true)
-    public List<RegionResBody> getRegionTree() {
+    public List<RegionDto> getRegionTree() {
         List<Region> roots = regionRepository.findByParentIsNull();
         return roots.stream()
                 .map(this::buildTree)
                 .collect(Collectors.toList());
     }
 
-    private RegionResBody buildTree(Region region) {
-        List<RegionResBody> children = regionRepository.findByParentId(region.getId()).stream()
+    private RegionDto buildTree(Region region) {
+        List<RegionDto> children = regionRepository.findByParentId(region.getId()).stream()
                 .map(this::buildTree)
                 .collect(Collectors.toList());
-        return new RegionResBody(
+        return new RegionDto(
                 region.getId(),
                 region.getName(),
                 region.getParent() != null ? region.getParent().getId() : null,

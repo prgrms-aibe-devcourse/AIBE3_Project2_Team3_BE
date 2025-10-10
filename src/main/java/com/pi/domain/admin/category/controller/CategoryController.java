@@ -1,7 +1,7 @@
 package com.pi.domain.admin.category.controller;
 
 import com.pi.domain.admin.category.dto.CategoryCreateReqBody;
-import com.pi.domain.admin.category.dto.CategoryResBody;
+import com.pi.domain.admin.category.dto.CategoryDto;
 import com.pi.domain.admin.category.entity.Category;
 import com.pi.domain.admin.category.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,14 +22,14 @@ public class CategoryController {
 
     @Operation(summary = "카테고리 생성")
     @PostMapping
-    public CategoryResBody createCategory(@RequestBody CategoryCreateReqBody dto) {
+    public CategoryDto createCategory(@RequestBody CategoryCreateReqBody dto) {
         Category category = categoryService.createCategory(dto);
-        return CategoryResBody.from(category, List.of());
+        return CategoryDto.from(category, List.of());
     }
 
     @GetMapping
     @Operation(summary = "전체 카테고리 트리 조회")
-    public List<CategoryResBody> getCategoryTree() {
+    public List<CategoryDto> getCategoryTree() {
         return categoryService.getCategoryTree();
     }
 

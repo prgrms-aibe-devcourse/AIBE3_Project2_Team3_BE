@@ -10,7 +10,7 @@ import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.repository.ProjectRepository;
 import com.pi.domain.admin.region.repository.RegionRepository;
-import com.pi.domain.admin.skill.skill.repository.SkillRepository;
+import com.pi.domain.admin.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
