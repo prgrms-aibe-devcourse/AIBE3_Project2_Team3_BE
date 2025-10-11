@@ -11,6 +11,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
@@ -23,9 +24,7 @@ public class NotificationService {
     public List<NotificationDto> getItems(long userId) {
         return notificationRepository.findByUserIdOrderByCreatedDateDesc(userId)
                 .stream()
-                .map(notification -> new NotificationDto(
-                        (Notification) notification
-                ))
+                .map(notification -> new NotificationDto((Notification) notification))
                 .toList();
     }
 
