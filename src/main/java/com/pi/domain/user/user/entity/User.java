@@ -28,6 +28,8 @@ public class User extends BaseEntity {
     private String role;
     @Column(unique = true)
     private String email;
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 
     public User(String username, String password, String nickname, String email) {
         this.username = username;
