@@ -86,4 +86,8 @@ public class UserService {
         // 더티 체킹으로 저장은 되지만 명시적으로 작성
         // 지워도 작동은 동일하게 동작
     }
+
+    public User getReferenceById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
+    }
 }
