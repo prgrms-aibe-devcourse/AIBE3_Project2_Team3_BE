@@ -4,6 +4,8 @@ import com.pi.domain.answer.answer.dto.AnswerCreateReqBody;
 import com.pi.domain.answer.answer.service.AnswerService;
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.notification.notification.entity.Notification;
+import com.pi.domain.notification.notification.repository.NotificationRepository;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -50,6 +52,7 @@ public class NotProdInitData {
     private final UserRepository userRepository;
     private final QuestionService questionService;
     private final AnswerService answerService;
+    private final NotificationRepository notificationRepository;
     @Autowired
     @Lazy
     private NotProdInitData self;
@@ -62,6 +65,7 @@ public class NotProdInitData {
             self.work2();
             self.work3();
             self.work4();
+            self.work6();
         };
     }
 
@@ -125,6 +129,13 @@ public class NotProdInitData {
         if (skillRepository.count() == 0) {
             skillRepository.save(new Skill("Java"));
             skillRepository.save(new Skill("React"));
+        }
+    }
+
+    public void work6() {
+        if (notificationRepository.count() == 0) {
+            User user1 = userService.findByUsername("user1").get();
+            notificationRepository.save(new Notification(user1, "내용1"));
         }
     }
 }

@@ -3,7 +3,6 @@ package com.pi.domain.notification.notification.service;
 import com.pi.domain.notification.notification.dto.NotificationDto;
 import com.pi.domain.notification.notification.entity.Notification;
 import com.pi.domain.notification.notification.repository.NotificationRepository;
-import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +14,14 @@ import java.util.List;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
-    public NotificationDto read(User user, Long id) {
-
-        return null;
+    public Notification findById(Long id) {
+        return notificationRepository.findById(id).get();
     }
 
+
     @Transactional(readOnly = true)
-    public List<NotificationDto> getItems(User actor) {
-        return notificationRepository.findByUserIdOrderByCreatedDateDesc(actor.getId())
+    public List<NotificationDto> getItems(long userId) {
+        return notificationRepository.findByUserIdOrderByCreatedDateDesc(userId)
                 .stream()
                 .map(notification -> new NotificationDto(
                         (Notification) notification
@@ -30,17 +29,11 @@ public class NotificationService {
                 .toList();
     }
 
-
-    public void readAll() {
-    }
-
+    @Transactional
     public void delete(Long id) {
-    }
+        Notification notification = findById(id);
 
-    public Long countUnread() {
-    }
-
-    public void create(NotificationDto notificationDto) {
+        notificationRepository.delete(notification);
     }
 
 

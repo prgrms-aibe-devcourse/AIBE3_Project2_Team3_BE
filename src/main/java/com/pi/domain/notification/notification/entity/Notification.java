@@ -22,6 +22,7 @@ public class Notification extends BaseEntity {
     private Offer offer;
     @ManyToOne(fetch = FetchType.LAZY)
     private ChatMessage chatMessage;
+//    테이블 추가해야함
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Apply apply;
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -31,4 +32,8 @@ public class Notification extends BaseEntity {
 
     private String content;
 
+    public Notification(User user, String content) {
+        this.user = user;
+        this.content = content;
+    }
 }
