@@ -39,6 +39,9 @@ public class ChatMember extends BaseEntity {
     @Column(name = "role", nullable = false, length = 20) // 권한
     private ChatRole role;
 
+    @Column(name = "last_read_message_id")
+    private Long lastReadMessageId;
+
     public ChatMember(User user, ChatRole role, LocalDateTime startedDate) {
         this.user = user;
         this.role = role;

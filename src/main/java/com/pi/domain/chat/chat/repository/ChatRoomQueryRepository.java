@@ -1,6 +1,7 @@
 package com.pi.domain.chat.chat.repository;
 
 import com.pi.domain.chat.chat.dto.ChatMemberDto;
+import com.pi.domain.chat.chat.dto.ChatMessageDto;
 import com.pi.domain.chat.chat.dto.ChatRoomDto;
 import com.pi.domain.chat.chat.entity.MemberStatus;
 import com.pi.domain.chat.chat.entity.QChatMember;
@@ -8,6 +9,7 @@ import com.pi.domain.chat.chat.entity.QChatMessage;
 import com.pi.domain.chat.chat.entity.QChatRoom;
 import com.pi.domain.user.user.dto.UserDto;
 import com.pi.domain.user.user.entity.QUser;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -16,6 +18,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,81 +27,186 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Repository
 @RequiredArgsConstructor
 public class ChatRoomQueryRepository {
     private final JPAQueryFactory queryFactory;
 
+    @Getter
+    public static class RoomRow {
+        private final Long id;
+        private final String name;
+        private final LocalDateTime createdAt; // 방 생성시각 (마지막 메시지 없을 때 fallback)
+        private final Long memberCount;
+
+        public RoomRow(Long id, String name, LocalDateTime createdAt, Long memberCount) {
+            this.id = id;
+            this.name = name;
+            this.createdAt = createdAt;
+            this.memberCount = memberCount;
+        }
+    }
+
     public Page<ChatRoomDto> findRoomListForActiveUser(Long userId, Pageable pageable) {
         QChatRoom r = QChatRoom.chatRoom;
-        QChatMember mu = QChatMember.chatMember; // "me" in room
-        QChatMember cm = new QChatMember("cm");  // count members
-        QChatMessage m = QChatMessage.chatMessage;
+        QChatMember mu = QChatMember.chatMember;      // me in room
+        QChatMember cm = new QChatMember("cm");       // count members
+        QChatMessage m  = QChatMessage.chatMessage;
+        QUser u = QUser.user;
 
-        // 서브쿼리: 방의 마지막 메시지 시각 (없으면 null)
-        var lastMsgAtExpr =
-                JPAExpressions.select(m.createdDate.max())
-                        .from(m)
-                        .where(m.chatRoom.eq(r));
+        // 1) 페이지로 "내가 ACTIVE인" 방 목록 기본 메타만 가져오기
+        var memberCountExpr = JPAExpressions
+                .select(cm.count())
+                .from(cm)
+                .where(cm.chatRoom.eq(r)
+                        .and(cm.endedDate.isNull()));
 
-        // 서브쿼리: 활성 멤버 수
-        var memberCountExpr =
-                JPAExpressions.select(cm.count())
-                        .from(cm)
-                        .where(cm.chatRoom.eq(r)
-                                .and(cm.endedDate.isNull()));
-
-        // (선택) 아바타 프리뷰는 추후 조인/서브쿼리로 확장. 일단 빈 리스트.
-        var content = queryFactory
-                .select(Projections.constructor(ChatRoomDto.class,
+        List<RoomRow> roomRows = queryFactory
+                .select(Projections.constructor(RoomRow.class,
                         r.id,
                         r.name,
-                        Expressions.dateTimeTemplate(LocalDateTime.class, "coalesce({0}, {1})", lastMsgAtExpr, r.createdDate),
-                        memberCountExpr,
-                        Expressions.constant("ACTIVE"),
-                        // ✅ null 대신 빈 리스트 상수 (제네릭 명시)
-                        Expressions.constant(Collections.<UserDto>emptyList())
+                        r.createdDate,
+                        memberCountExpr
                 ))
                 .from(r)
                 .join(r.members, mu)
-                .where(mu.user.id.eq(userId)
-                        .and(mu.startedDate.isNotNull())
-                        .and(mu.endedDate.isNull()))
+                .where(
+                        mu.user.id.eq(userId),
+                        mu.startedDate.isNotNull(),
+                        mu.endedDate.isNull()
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(
-                        Expressions.dateTimeTemplate(LocalDateTime.class, "coalesce({0}, {1})", lastMsgAtExpr, r.createdDate).desc(),
-                        r.id.desc()
-                )
+                .orderBy(r.id.desc()) // 정렬 기준은 필요에 맞게 교체(예: 마지막 메시지 시각 DESC)
                 .fetch();
 
+        if (roomRows.isEmpty()) {
+            // total 계산만 해서 빈 페이지 반환
+            long total0 = ofNullable(queryFactory
+                    .select(r.id.countDistinct())
+                    .from(r)
+                    .join(r.members, mu)
+                    .where(
+                            mu.user.id.eq(userId),
+                            mu.startedDate.isNotNull(),
+                            mu.endedDate.isNull()
+                    )
+                    .fetchOne()).orElse(0L);
+            return new PageImpl<>(List.of(), pageable, total0);
+        }
+
+        // 방 ID들
+        List<Long> roomIds = roomRows.stream().map(RoomRow::getId).toList();
+
+        // 2) 방별 마지막 메시지 id (groupBy)
+        List<Tuple> lastIdTuples = queryFactory
+                .select(m.chatRoom.id, m.id.max())
+                .from(m)
+                .where(m.chatRoom.id.in(roomIds))
+                .groupBy(m.chatRoom.id)
+                .fetch();
+
+        Map<Long, Long> lastMsgIdByRoom = lastIdTuples.stream()
+                .collect(Collectors.toMap(
+                        t -> t.get(0, Long.class),
+                        t -> t.get(1, Long.class)
+                ));
+
+        // 3) 마지막 메시지 상세(보낸 유저 포함) 배치 조회 → roomId → ChatMessageDto 매핑
+        Map<Long, ChatMessageDto> lastMsgByRoom;
+        if (!lastMsgIdByRoom.isEmpty()) {
+            List<Long> lastIds = new ArrayList<>(new HashSet<>(lastMsgIdByRoom.values()));
+            // roomId도 함께 뽑아 매핑하기
+            List<Tuple> lastRows = queryFactory
+                    .select(m.chatRoom.id, m.id, u.id, u.nickname, u.profileImageUrl, m.content, m.createdDate)
+                    .from(m)
+                    .join(m.chatMember, cm)
+                    .join(cm.user, u)
+                    .where(m.id.in(lastIds))
+                    .fetch();
+
+            lastMsgByRoom = lastRows.stream().collect(Collectors.toMap(
+                    t -> t.get(m.chatRoom.id),
+                    t -> new ChatMessageDto(
+                            t.get(m.id),
+                            t.get(u.id),
+                            t.get(u.nickname),
+                            t.get(u.profileImageUrl),
+                            t.get(m.content),
+                            t.get(m.createdDate)
+                    )
+            ));
+        } else {
+            lastMsgByRoom = Collections.emptyMap();
+        }
+
+        // 4) 방별 미읽음 개수(unreadCount) 배치 조회
+        // 전제: ChatMessage.messageSeq, ChatMember.lastReadSeq 컬럼이 존재한다고 가정
+        Map<Long, Long> unreadByRoom = queryFactory
+                .select(m.chatRoom.id, m.id.count())
+                .from(m)
+                .join(mu).on(
+                        mu.chatRoom.eq(m.chatRoom)
+                                .and(mu.user.id.eq(userId))
+                                .and(mu.endedDate.isNull())
+                )
+                .where(
+                        m.chatRoom.id.in(roomIds)
+                                .and(mu.lastReadMessageId.isNull().or(m.id.gt(mu.lastReadMessageId)))
+                )
+                .groupBy(m.chatRoom.id)
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        t -> t.get(0, Long.class),
+                        t -> t.get(1, Long.class)
+                ));
+
+        // 5) DTO 조립 (마지막 메시지가 없으면 createdDate=방 생성시각으로 fallback)
+        List<ChatRoomDto> content = roomRows.stream().map(row -> {
+            ChatMessageDto last = lastMsgByRoom.get(row.getId());
+            if (last == null) {
+                // 메시지가 하나도 없으면: createdDate만 방 생성시각으로 채운 placeholder
+                last = new ChatMessageDto(
+                        null,          // id
+                        null,          // senderId
+                        null,          // senderNickname
+                        null,          // senderProfileImageUrl
+                        null,          // content
+                        row.getCreatedAt() // createdDate = 방 생성시간
+                );
+            }
+            long unread = unreadByRoom.getOrDefault(row.getId(), 0L);
+
+            return new ChatRoomDto(
+                    row.getId(),
+                    row.getName(),
+                    last,
+                    ofNullable(row.getMemberCount()).orElse(0L),
+                    "ACTIVE",
+                    Collections.<UserDto>emptyList(),  // avatarPreview는 추후 확장
+                    unread
+            );
+        }).toList();
+
+        // 6) total 계산
         Long total = queryFactory
                 .select(r.id.countDistinct())
                 .from(r)
                 .join(r.members, mu)
-                .where(mu.user.id.eq(userId)
-                        .and(mu.startedDate.isNotNull())
-                        .and(mu.endedDate.isNull()))
+                .where(
+                        mu.user.id.eq(userId),
+                        mu.startedDate.isNotNull(),
+                        mu.endedDate.isNull()
+                )
                 .fetchOne();
 
-        // avatarPreview null → 빈 리스트로 변환
-        List<ChatRoomDto> normalized = content.stream()
-                .map(it -> new ChatRoomDto(
-                        it.roomId(),
-                        it.roomName(),
-                        it.LastMessageSendedDate(),
-                        it.memberCount(),
-                        it.membershipStatus(), // 이미 "ACTIVE" 들어옴
-                        it.avatarPreview() == null ? List.of() : it.avatarPreview()
-                ))
-                .toList();
-
-        return new PageImpl<>(normalized, pageable, total == null ? 0 : total);
+        return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }
 
     public record _RoomDetailCore(
@@ -157,7 +265,7 @@ public class ChatRoomQueryRepository {
                         .and(mu.endedDate.isNull())) // 방에 ‘현재’ 속해 있어야 조회 허용(PENDING 포함)
                 .fetchOne();
 
-        return Optional.ofNullable(core);
+        return ofNullable(core);
     }
 
     // avatarPreview: 활성 멤버 상위 N명(예: 최근 입장순/유저ID순 등 단순 정렬)
