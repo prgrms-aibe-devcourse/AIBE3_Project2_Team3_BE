@@ -22,4 +22,5 @@ public record UserDto(
                 user.getRole()
         );
     }
+    
 }
