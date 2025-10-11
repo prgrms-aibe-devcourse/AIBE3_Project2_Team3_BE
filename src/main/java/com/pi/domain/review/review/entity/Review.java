@@ -22,7 +22,7 @@ public class Review extends BaseEntity {
     private Contract contract;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User writer;
+    private User user;
 
     @Column(nullable = false)
     private int rating;
@@ -32,9 +32,9 @@ public class Review extends BaseEntity {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Review(Contract contract, User writer, int rating, String comment) {
+    public Review(Contract contract, User user, int rating, String comment) {
         this.contract = contract;
-        this.writer = writer;
+        this.user = user;
         this.rating = rating;
         this.comment = comment;
     }
@@ -45,6 +45,6 @@ public class Review extends BaseEntity {
     }
 
     public boolean isOwnedBy(User actor) {
-        return this.writer.equals(actor);
+        return this.user.equals(actor);
     }
 }

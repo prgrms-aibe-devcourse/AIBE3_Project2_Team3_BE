@@ -13,7 +13,7 @@ public record ReviewDto(
     public ReviewDto(Review review) {
         this(
                 review.getId(),
-                review.getWriter().getNickname(),
+                review.getUser().getNickname(),
                 review.getRating(),
                 review.getComment(),
                 review.getCreatedAt()
