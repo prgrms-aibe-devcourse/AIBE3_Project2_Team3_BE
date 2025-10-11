@@ -35,7 +35,9 @@ public class ApiV1ChatRestController {
     }
 
     @GetMapping("/rooms")
-    public PagePayload<ChatRoomDto> list(Pageable pageable) {
+    public PagePayload<ChatRoomDto> list(
+            @ParameterObject @PageableDefault(size = 30, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         User actor = rq.getActor();
         return Ut.pageMapper.of(chatService.findRoomsForUser(actor, pageable));
     }
@@ -58,10 +60,10 @@ public class ApiV1ChatRestController {
     @PostMapping("/rooms/{roomId}/messages")
     public RsData<ChatMessageDto> sendMessage(
             @PathVariable Long roomId,
-            @RequestParam String message
+            @Valid @RequestBody ChatSendReqBody reqBody
     ){
         User actor = rq.getActor();
-        ChatMessageDto dto = chatService.sendMessage(actor, roomId, message);
+        ChatMessageDto dto = chatService.sendMessage(actor, roomId, reqBody.content());
         return new RsData<>("201-1", "메시지가 전송되었습니다.", dto);
     }
 

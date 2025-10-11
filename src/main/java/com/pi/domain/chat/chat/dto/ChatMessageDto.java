@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public record ChatMessageDto(
         Long id,
-        Long SenderId,
+        Long senderId,
         String senderNickname,
         String senderProfileImageUrl,
         String content,

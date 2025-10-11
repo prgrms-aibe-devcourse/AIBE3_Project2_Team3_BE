@@ -34,6 +34,8 @@ public class QChatMember extends EntityPathBase<ChatMember> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final NumberPath<Long> lastReadMessageId = createNumber("lastReadMessageId", Long.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedDate = _super.modifiedDate;
 

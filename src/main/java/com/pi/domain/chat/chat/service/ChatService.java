@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -54,8 +53,8 @@ public class ChatService {
         List<User> invitees = inviteeIds.isEmpty() ? List.of() : userRepository.findAllById(inviteeIds);
         for (User u : invitees) room.addMember(ChatMember.invited(room, u, ChatRole.MEMBER));
 
-        // 3) 방 생성 시간
-        LocalDateTime lastTime = room.getCreatedDate();
+        // 3) 마지막 메세지
+        ChatMessageDto lastMessage = new ChatMessageDto(null, null, null, null, null, room.getCreatedDate());
 
         // 4) 참여 중 기준 카운트
         long memberCount = chatMemberRepository.countByChatRoomIdAndEndedDateIsNull(room.getId());
@@ -68,14 +67,15 @@ public class ChatService {
                 .limit(3)
                 .map(UserDto::new)
                 .toList();
-        return new ChatRoomDto(room.getId(), room.getName(), lastTime, memberCount, "ACTIVE", preview);
+        return new ChatRoomDto(room.getId(), room.getName(), lastMessage, memberCount, "ACTIVE", preview, 0);
     }
 
     @Transactional
     public long nextSeq(Long roomId) {
         // TODO: Redis INCR or 별도 Counter 테이블/시퀀스
         // 임시로는 마지막 메시지 seq + 1 조회(경합 주의)
-        return Optional.ofNullable(chatMessageRepository.findMaxSeqByChatRoom_Id(roomId)).orElse(0L) + 1;
+        Long max = chatMessageRepository.findMaxMessageSeqByRoomId(roomId);
+        return (max == null ? 0L : max) + 1L;
     }
 
     @Transactional(readOnly = true)
