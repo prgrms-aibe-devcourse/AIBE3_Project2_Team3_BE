@@ -139,8 +139,9 @@ public class NotProdInitData {
         if (notificationRepository.count() == 0) {
             User user1 = userService.findByUsername("user1").get();
             Offer offer = offerService.findById(1L);
-            Notification n = notficationService.create(user1, "내용1");
+            Notification n = new Notification(user1, "내용1");
             n.addOffer(offer);
+            notificationRepository.save(n);
         }
     }
 }
