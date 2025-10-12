@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class NotificationSSRController {
     private final Rq rq;
 
     @GetMapping
-    @Operation(summary = "알림 페이지")
+    @Operation(summary = "알림 다건 조회 페이지")
     public String getItems(Model model) {
         User actor = rq.getActor();
         List<NotificationDto> notifications = notificationService.getItems(actor.getId());
@@ -36,7 +36,7 @@ public class NotificationSSRController {
 
     @PostMapping("/{id}/delete")
     @Operation(summary = "알림 삭제")
-    public String delete(@RequestParam Long id) {
+    public String delete(@PathVariable Long id) {
         notificationService.delete(id);
         return "redirect:/notifications";
     }

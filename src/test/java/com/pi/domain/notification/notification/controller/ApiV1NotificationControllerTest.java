@@ -1,6 +1,7 @@
 package com.pi.domain.notification.notification.controller;
 
 import com.pi.domain.notification.notification.service.NotificationService;
+import com.pi.global.rq.Rq;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,17 @@ public class ApiV1NotificationControllerTest {
     MockMvc mvc;
     @Autowired
     NotificationService notificationService;
+    @Autowired
+    Rq rq;
 
+//    @BeforeEach
+//    @WithUserDetails("user1")
+//    void setUp() {
+//        User user1 = rq.getActor();
+//        for (int i = 1; i <= 10; i++) {
+//            notificationService.create(user1, "내용" + i);
+//        }
+//    }
 
     @Test
     @DisplayName("알림 다건 조회")
@@ -36,15 +47,18 @@ public class ApiV1NotificationControllerTest {
                         get("/api/v1/notifications")
                 )
                 .andDo(print());
+
         resultActions
                 .andExpect(handler().handlerType(ApiV1NotificationController.class))
                 .andExpect(handler().methodName("getItems"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].content").value("내용1"))
-                .andExpect(jsonPath("$[0].type").value("OFFER"))
-                .andExpect(jsonPath("$[0].relatedEntityId").value(1))
-                .andExpect(jsonPath("$[0].title").value("새로운 제안이 도착했어요"));
+                .andExpect(jsonPath("content").isArray())
+                .andExpect(jsonPath("content[0].id").value(1))
+                .andExpect(jsonPath("content[0].type").value("OFFER"))
+                .andExpect(jsonPath("content[0].relatedEntityId").value(1))
+                .andExpect(jsonPath("content[0].title").value("새로운 제안이 도착했어요"))
+                .andExpect(jsonPath("content[0].content").value("내용1"))
+                .andExpect(jsonPath("page.size").value(8));
     }
 
     @Test

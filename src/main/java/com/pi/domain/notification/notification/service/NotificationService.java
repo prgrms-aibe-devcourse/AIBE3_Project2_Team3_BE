@@ -5,6 +5,8 @@ import com.pi.domain.notification.notification.entity.Notification;
 import com.pi.domain.notification.notification.repository.NotificationRepository;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -25,6 +27,10 @@ public class NotificationService {
         return notificationRepository.findById(id).get();
     }
 
+    @Transactional(readOnly = true)
+    public Page<Notification> getPage(Long userId, Pageable pageable) {
+        return notificationRepository.findByUserIdOrderByCreatedDateDesc(userId, pageable);
+    }
 
     @Transactional(readOnly = true)
     public List<NotificationDto> getItems(long userId) {
@@ -32,6 +38,12 @@ public class NotificationService {
                 .stream()
                 .map(notification -> new NotificationDto((Notification) notification))
                 .toList();
+    }
+
+    @Transactional
+    public Notification create(User user, String content) {
+        Notification notification = new Notification(user, content);
+        return notificationRepository.save(notification);
     }
 
     @Transactional
@@ -73,11 +85,6 @@ public class NotificationService {
         notificationRepository.save(notification);
 
         sendToClient(userId, content);
-    }
-
-    public Notification create(User user, String content) {
-        Notification notification = new Notification(user, content);
-        return notificationRepository.save(notification);
     }
 
 
