@@ -1,6 +1,6 @@
 package com.pi.domain.post.post.entity;
 
-import com.pi.domain.admin.category.entity.Category;
+import com.pi.domain.category.category.entity.Category;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

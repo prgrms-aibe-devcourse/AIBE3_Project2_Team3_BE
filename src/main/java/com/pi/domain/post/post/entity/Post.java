@@ -1,10 +1,10 @@
 package com.pi.domain.post.post.entity;
 
-import com.pi.domain.admin.category.entity.Category;
+import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.project.entity.Project;
-import com.pi.domain.admin.region.entity.Region;
-import com.pi.domain.admin.skill.entity.Skill;
+import com.pi.domain.region.region.entity.Region;
+import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;

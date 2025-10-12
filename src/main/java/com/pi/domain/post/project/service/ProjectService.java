@@ -1,6 +1,6 @@
 package com.pi.domain.post.project.service;
 
-import com.pi.domain.admin.category.repository.CategoryRepository;
+import com.pi.domain.category.category.repository.CategoryRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
@@ -9,8 +9,8 @@ import com.pi.domain.post.project.dto.ProjectModifyDto;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.repository.ProjectRepository;
-import com.pi.domain.admin.region.repository.RegionRepository;
-import com.pi.domain.admin.skill.repository.SkillRepository;
+import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
