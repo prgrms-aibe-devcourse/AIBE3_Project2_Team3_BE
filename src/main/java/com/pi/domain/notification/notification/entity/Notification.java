@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -30,6 +31,7 @@ public class Notification extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Review review;
 
+    @Setter
     private String content;
 
     public Notification(User user, String content) {

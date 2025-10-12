@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -32,6 +33,22 @@ public class ApiV1NotificationController {
     public RsData<Void> delete(@PathVariable Long id) {
         notificationService.delete(id);
         return new RsData<>("200-1", "알림이 삭제되었습니다.");
+    }
+
+    @GetMapping(value = "/subscribe", produces = "text/event-stream")
+    @Operation(summary = "알림 구독")
+    public SseEmitter subscribe() {
+        User actor = rq.getActor();
+        return notificationService.subscribe(actor.getId());
+    }
+
+    @PostMapping("/send")
+    @Operation(summary = "알림 저장 및 전송 -테스트용")
+    public RsData<Void> send(@RequestParam String message) {
+        User actor = rq.getActor();
+        notificationService.createAndNotify(actor.getId(), message);
+
+        return new RsData<>("200-1", "알림이 전송되었습니다.");
     }
 
 //
