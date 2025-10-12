@@ -1,6 +1,9 @@
 package com.pi.domain.chat.chat.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public record ChatSendReqBody(
-        Long roomId, String content
+        @NotBlank @Size(max = 4000) String content
 ) {
 }

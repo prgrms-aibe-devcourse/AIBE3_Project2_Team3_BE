@@ -45,7 +45,7 @@ public class ApiV1ProjectController {
         User actor = rq.getActor();
         Post post = projectService.create(actor, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("201-1", "%d번 프로젝트 게시글이 등록되었습니다.".formatted(post.getId()), new ProjectDto(post));
+        return new RsData<>("201-1", "프로젝트 게시글이 등록되었습니다.".formatted(post.getId()), new ProjectDto(post));
     }
 
     @GetMapping
@@ -82,7 +82,7 @@ public class ApiV1ProjectController {
         post.checkActorCanModify(actor);
         projectService.modify(post, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("200-1", "%d번 프로젝트 게시글이 수정되었습니다.".formatted(post.getId()), new ProjectDto(post));
+        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.".formatted(post.getId()), new ProjectDto(post));
     }
 
     @DeleteMapping("/{id}")
@@ -96,7 +96,7 @@ public class ApiV1ProjectController {
         post.checkActorCanDelete(actor);
         postService.delete(post);
 
-        return new RsData<>("200-1", "%d번 프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
+        return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
 
     @GetMapping("/search")

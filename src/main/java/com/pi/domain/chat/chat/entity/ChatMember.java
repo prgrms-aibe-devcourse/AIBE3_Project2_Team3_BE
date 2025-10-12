@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "chat_members",
         uniqueConstraints = {
@@ -31,7 +29,7 @@ public class ChatMember extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "started_date", nullable = false) // 입장시간
+    @Column(name = "started_date") // 입장시간
     private LocalDateTime startedDate;
 
     @Column(name = "ended_date") // 퇴장시간(현재 참여 중이면 null)
@@ -41,11 +39,38 @@ public class ChatMember extends BaseEntity {
     @Column(name = "role", nullable = false, length = 20) // 권한
     private ChatRole role;
 
-    public ChatMember(ChatRoom chatRoom, User user, ChatRole role, LocalDateTime startedDate) {
-        this.chatRoom = chatRoom;
+    @Column(name = "last_read_message_id")
+    private Long lastReadMessageId;
+
+    public ChatMember(User user, ChatRole role, LocalDateTime startedDate) {
         this.user = user;
         this.role = role;
         this.startedDate = startedDate;
-        chatRoom.getMembers().add(this);
     }
+
+    /** 초대(PENDING): 아직 입장 안 함 */
+    public static ChatMember invited(ChatRoom room, User user, ChatRole role) {
+        ChatMember m = new ChatMember(user, role, null);
+        room.addMember(m);                // 양방향 일관성 보장
+        return m;
+    }
+
+    /** 즉시 참여(ACTIVE) */
+    public static ChatMember joined(ChatRoom room, User user, ChatRole role) {
+        ChatMember m = new ChatMember(user, role, LocalDateTime.now());
+        room.addMember(m);                // 양방향 일관성 보장
+        return m;
+    }
+
+    /** 수락(초대 → 입장) */
+    public void accept() {
+        if (this.startedDate == null) this.startedDate = LocalDateTime.now();
+    }
+
+    /** 퇴장 */
+    public void leave() {
+        if (this.endedDate == null) this.endedDate = LocalDateTime.now();
+    }
+
+    void setChatRoom(ChatRoom room) { this.chatRoom = room; }
 }
