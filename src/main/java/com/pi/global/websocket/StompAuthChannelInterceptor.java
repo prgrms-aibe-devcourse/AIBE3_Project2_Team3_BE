@@ -30,6 +30,10 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor acc = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (acc != null && StompCommand.CONNECT.equals(acc.getCommand())) {
+            if (acc.getUser() != null) {
+                // 필터에서 인증 성공 → Principal 존재 → 통과
+                return message;
+            }
             String token = acc.getFirstNativeHeader("Authorization"); // "Bearer xxx"
             if (token == null || token.isBlank()) {
                 throw new IllegalArgumentException("Missing Authorization header");

@@ -63,7 +63,7 @@ public class ApiV1ChatRestController {
             @Valid @RequestBody ChatSendReqBody reqBody
     ){
         User actor = rq.getActor();
-        ChatMessageDto dto = chatService.sendMessage(actor, roomId, reqBody.content());
+        ChatMessageDto dto = chatService.sendMessage(actor.getId(), roomId, reqBody.content());
         return new RsData<>("201-1", "메시지가 전송되었습니다.", dto);
     }
 

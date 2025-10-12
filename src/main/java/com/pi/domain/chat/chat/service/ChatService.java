@@ -124,7 +124,8 @@ public class ChatService {
         return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
     }
 
-    public ChatMessageDto sendMessage(User actor, Long roomId, String content) {
+    @Transactional
+    public ChatMessageDto sendMessage(Long actorId, Long roomId, String content) {
         if (content.isBlank()) throw new IllegalArgumentException("메시지 내용이 비어 있습니다.");
 
         // 1) 방 존재 확인 (지연 로딩만 필요하면 getReferenceById도 가능)
@@ -133,7 +134,7 @@ public class ChatService {
 
         // 2) ACTIVE 멤버 가드
         ChatMember me = chatMemberRepository
-                .findByChatRoom_IdAndUser_IdAndStartedDateIsNotNullAndEndedDateIsNull(roomId, actor.getId())
+                .findByChatRoom_IdAndUser_IdAndStartedDateIsNotNullAndEndedDateIsNull(roomId, actorId)
                 .orElseThrow(() -> new ServiceException("403-2", "방에 참여 중인 멤버만 메시지를 보낼 수 있습니다."));
 
         // 3) 저장
