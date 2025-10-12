@@ -10,7 +10,6 @@ import com.pi.domain.application.application.service.ApplicationService;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
-import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
@@ -19,6 +18,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,11 +27,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import static com.pi.domain.application.application.service.ApplicationService.EXCLUDED_STATUSES;
-
 @RestController
 @RequestMapping("/api/v1/post-owner/applications")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "ApiV1PostOwnerApplicationController", description = "게시글 작성자용 API 구직 컨트롤러")
 public class ApiV1PostOwnerApplicationController {
     private final Rq rq;
@@ -48,9 +47,7 @@ public class ApiV1PostOwnerApplicationController {
     ) {
         User actor = rq.getActor();
         Post post = projectService.findById(postId);
-        if (!actor.getUsername().equals(post.getUser().getUsername())) {
-            throw new ServiceException("403-1", "%d번 게시글의 구직 조회 권한이 없습니다.".formatted(post.getId()));
-        }
+        post.checkActorCanReadApplication(actor);
 
         Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatusForPostOwner(postId, status, pageable)
                 .map(PostOwnerApplicationWithUserDto::new);
@@ -67,9 +64,8 @@ public class ApiV1PostOwnerApplicationController {
         Application application = applicationService.findById(id);
         User postUser = application.getPost().getUser();
         application.checkActorCanRead(actor, postUser);
-        if (EXCLUDED_STATUSES.contains(application.getStatus())) {
-            throw new ServiceException("403-1", "DRAFT 또는 CANCELED 상태의 구직 조회 권한이 없습니다.");
-        }
+
+        applicationService.validateStatusForRead(application.getStatus());
 
         return new PostOwnerApplicationGetResBody(application);
     }
@@ -91,7 +87,7 @@ public class ApiV1PostOwnerApplicationController {
         applicationService.updateStatus(application, reqBody.status(), false);
 
         return new RsData<>(
-                "200-2",
+                "200-1",
                 "%d번 구직 상태가 수정되었습니다.".formatted(id),
                 new PostOwnerApplicationModifyResBody(application.getStatus())
         );
