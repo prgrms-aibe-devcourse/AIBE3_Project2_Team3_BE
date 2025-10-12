@@ -27,7 +27,7 @@ public class AwsS3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public List<String> uploadFile(List<MultipartFile> files) throws IOException {
+    public List<String> uploadFiles(List<MultipartFile> files) {
         List<String> fileUrls = new ArrayList<>();
         for (MultipartFile file : files) {
             String fileKey = generateUniqueFileName(file.getOriginalFilename());
@@ -37,7 +37,7 @@ public class AwsS3Service {
         return fileUrls;
     }
 
-    public List<String> uploadFile(List<MultipartFile> files, String directoryName) throws IOException {
+    public List<String> uploadFiles(List<MultipartFile> files, String directoryName) {
         List<String> fileUrls = new ArrayList<>();
         for (MultipartFile file : files) {
             String fileKey = directoryName + "/" + generateUniqueFileName(file.getOriginalFilename());
@@ -62,13 +62,16 @@ public class AwsS3Service {
         amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileKey));
     }
 
-    private String upload(MultipartFile file, String fileKey) throws IOException {
+    private String upload(MultipartFile file, String fileKey) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
 
         try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucket, fileKey, inputStream, objectMetadata));
+        } catch (IOException e) {
+            log.error("S3 파일 업로드 실패", e);
+            throw new RuntimeException("S3 파일 업로드 실패", e);
         }
 
         return amazonS3.getUrl(bucket, fileKey).toString();
@@ -78,7 +81,7 @@ public class AwsS3Service {
         return UUID.randomUUID() + "_" + originalFileName;
     }
 
-    private String getFileKey(String fileUrl) {
+    public String getFileKey(String fileUrl) {
         String delimiter = ".com/";
         int index = fileUrl.indexOf(delimiter);
         if (index == -1) {
@@ -89,5 +92,10 @@ public class AwsS3Service {
 
     private String getOriginalFileName(String fileKey) {
         return fileKey.substring(fileKey.indexOf("_") + 1);
+    }
+
+    public String getOriginalFileNameFromUrl(String fileUrl) {
+        String fileKey = getFileKey(fileUrl);
+        return getOriginalFileName(fileKey);
     }
 }

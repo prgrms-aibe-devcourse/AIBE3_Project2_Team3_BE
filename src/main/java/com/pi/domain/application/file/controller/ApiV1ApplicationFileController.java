@@ -1,45 +1,40 @@
 package com.pi.domain.application.file.controller;
 
+import com.pi.domain.application.file.service.ApplicationFileService;
 import com.pi.global.s3.AwsS3DownloadDto;
 import com.pi.global.s3.AwsS3Service;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/api/v1/applications/{applicationId}/files")
 @RequiredArgsConstructor
 @Slf4j
-public class TestApplicationFileController {
+@Tag(name = "ApiV1ApplicationFileController", description = "API 구직 파일 컨트롤러")
+public class ApiV1ApplicationFileController {
     private static final String AWS_S3_DIRECTORY = "test";
 
+    private final ApplicationFileService applicationFileService;
     private final AwsS3Service awsS3Service;
 
-    @PostMapping("/upload")
-    public ResponseEntity<List<String>> uploadFile(List<MultipartFile> files) {
-        log.info("파일 저장 컨트롤러 실행");
-        try {
-            return ResponseEntity.ok(awsS3Service.uploadFile(files, AWS_S3_DIRECTORY));
-        } catch (Exception e) {
-            log.error("파일 업로드 실패", e);
-            return ResponseEntity.status(400).build();
-        }
-    }
+    @GetMapping("/{id}")
+    @Operation(summary = "파일 다운로드")
+    public ResponseEntity<Resource> downloadFile(@PathVariable long applicationId, @PathVariable long id) {
+        String fileUrl = applicationFileService.findById(id).getUrl();
 
-    @GetMapping("/download")
-    public ResponseEntity<Resource> downloadFile(@RequestParam String fileUrl) {
         AwsS3DownloadDto fileData = awsS3Service.getDownloadData(fileUrl);
         String encodedFileName = URLEncoder.encode(fileData.fileName(), StandardCharsets.UTF_8);
 
@@ -47,17 +42,5 @@ public class TestApplicationFileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
                 .contentType(MediaType.parseMediaType(fileData.contentType()))
                 .body(fileData.resource());
-    }
-
-    @DeleteMapping("/upload")
-    public ResponseEntity deleteFile(@RequestParam String fileKey) {
-        log.info("파일 삭제 컨트롤러 실행");
-        try {
-            awsS3Service.deleteFile(fileKey);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            log.error("파일 삭제 실패", e);
-            return ResponseEntity.status(400).build();
-        }
     }
 }

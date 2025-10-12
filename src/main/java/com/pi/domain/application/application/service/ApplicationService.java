@@ -7,19 +7,24 @@ import com.pi.domain.application.application.repository.ApplicationRepository;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
+import com.pi.global.s3.AwsS3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
     public static final List<ApplicationStatus> EXCLUDED_STATUSES = List.of(ApplicationStatus.DRAFT);
+    private static final String AWS_S3_DIRECTORY = "application";
 
     private final ApplicationRepository applicationRepository;
+    private final AwsS3Service awsS3Service;
 
     public long count() {
         return applicationRepository.count();
@@ -62,25 +67,30 @@ public class ApplicationService {
         return application;
     }
 
-    public Application createOrUpdate(Post post, User actor, ApplicationWriteReqBody reqBody) {
-        Long id = reqBody.id();
+    public Application createOrUpdate(Post post, User actor, ApplicationWriteReqBody reqBody, List<MultipartFile> files) {
         ApplicationStatus status = ApplicationStatus.valueOf(reqBody.status());
         String content = reqBody.content();
 
-        if (id == null || id == 0) {
-            if (applicationRepository.existsByPostIdAndUserId(post.getId(), actor.getId())) {
-                throw new ServiceException("409-1", "이미 존재하는 데이터입니다.");
-            }
+        Optional<Application> existingApplication = applicationRepository.findByPostIdAndUserId(post.getId(), actor.getId());
 
-            return create(post, actor, status, content);
+        Application application;
+        if (existingApplication.isEmpty()) {
+            application = create(post, actor, status, content);
+        } else {
+            application = existingApplication.get();
+            User user = application.getUser();
+            application.checkActorCanModify(actor, user);
+            application = update(application, status, content);
+
+            application.getFiles().clear();
         }
 
-        Application existingApplication = findById(id);
+        if (files != null && !files.isEmpty()) {
+            List<String> fileUrls = awsS3Service.uploadFiles(files, AWS_S3_DIRECTORY);
+            fileUrls.forEach(application::addApplicationFile);
+        }
 
-        User user = existingApplication.getUser();
-        existingApplication.checkActorCanModify(actor, user);
-
-        return update(existingApplication, status, content);
+        return application;
     }
 
     public void updateStatus(Application application, ApplicationStatus status, boolean isApplicant) {
@@ -88,6 +98,12 @@ public class ApplicationService {
     }
 
     public void delete(Application application) {
+        List<String> fileKeys = application.getFiles().stream()
+                .map(file -> awsS3Service.getFileKey(file.getUrl()))
+                .toList();
+
         applicationRepository.delete(application);
+
+        fileKeys.forEach(awsS3Service::deleteFile);
     }
 }

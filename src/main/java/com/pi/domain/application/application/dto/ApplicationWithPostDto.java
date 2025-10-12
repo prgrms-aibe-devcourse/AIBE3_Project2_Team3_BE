@@ -11,7 +11,6 @@ public record ApplicationWithPostDto(
         LocalDateTime createdDate,
         long postId,
         String postTitle,
-//        String postStatus,
         long postUserId,
         String postUserNickname
 ) {
@@ -22,7 +21,6 @@ public record ApplicationWithPostDto(
                 application.getCreatedDate(),
                 post.getId(),
                 post.getTitle(),
-//                post.getStatus().name(),
                 post.getUser().getId(),
                 post.getUser().getNickname()
         );

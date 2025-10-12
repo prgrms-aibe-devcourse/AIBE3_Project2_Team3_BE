@@ -1,8 +1,10 @@
 package com.pi.domain.application.application.dto;
 
 import com.pi.domain.application.application.entity.Application;
+import com.pi.domain.application.file.dto.ApplicationFileDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ApplicationGetResBody(
         long id,
@@ -12,11 +14,11 @@ public record ApplicationGetResBody(
         LocalDateTime modifiedDate,
         long postId,
         String postTitle,
-//        String postStatus,
         long postUserId,
-        String postUserNickname
+        String postUserNickname,
+        List<ApplicationFileDto> files
 ) {
-    public ApplicationGetResBody(Application application) {
+    public ApplicationGetResBody(Application application, List<ApplicationFileDto> files) {
         this(
                 application.getId(),
                 application.getStatus().name(),
@@ -25,9 +27,9 @@ public record ApplicationGetResBody(
                 application.getModifiedDate(),
                 application.getPost().getId(),
                 application.getPost().getTitle(),
-//                application.getPost().getStatus().name(),
                 application.getPost().getUser().getId(),
-                application.getPost().getUser().getNickname()
+                application.getPost().getUser().getNickname(),
+                files
         );
     }
 }
