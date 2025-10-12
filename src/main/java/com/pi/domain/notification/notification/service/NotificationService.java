@@ -3,6 +3,7 @@ package com.pi.domain.notification.notification.service;
 import com.pi.domain.notification.notification.dto.NotificationDto;
 import com.pi.domain.notification.notification.entity.Notification;
 import com.pi.domain.notification.notification.repository.NotificationRepository;
+import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,12 +66,18 @@ public class NotificationService {
         }
     }
 
-    public void createAndNotify(Long userId, String content) {
-        Notification notification = new Notification();
+    public void createAndNotify(User user, String content) {
+        Notification notification = new Notification(user, content);
         notification.setContent(content);
+        Long userId = user.getId();
         notificationRepository.save(notification);
 
         sendToClient(userId, content);
+    }
+
+    public Notification create(User user, String content) {
+        Notification notification = new Notification(user, content);
+        return notificationRepository.save(notification);
     }
 
 

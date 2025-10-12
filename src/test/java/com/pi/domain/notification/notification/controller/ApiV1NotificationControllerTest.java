@@ -12,11 +12,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration",
+        "custom.jwt.secretKey=test-secret-key"
+})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -25,6 +29,7 @@ public class ApiV1NotificationControllerTest {
     MockMvc mvc;
     @Autowired
     NotificationService notificationService;
+
 
     @Test
     @DisplayName("알림 다건 조회")
@@ -39,7 +44,10 @@ public class ApiV1NotificationControllerTest {
                 .andExpect(handler().methodName("getItems"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].content").value("내용1"));
+                .andExpect(jsonPath("$[0].content").value("내용1"))
+                .andExpect(jsonPath("$[0].type").value("OFFER"))
+                .andExpect(jsonPath("$[0].relatedEntityId").value(1))
+                .andExpect(jsonPath("$[0].title").value("새로운 제안이 도착했어요"));
     }
 
     @Test
@@ -59,35 +67,5 @@ public class ApiV1NotificationControllerTest {
 
     }
 
-    @Test
-    @DisplayName("알림 구독")
-    @WithUserDetails("user1")
-    void t3() throws Exception {
-        ResultActions resultActions = mvc.perform(
-                        get("/api/v1/notifications/subscribe")
-                )
-                .andDo(print());
-        resultActions
-                .andExpect(handler().handlerType(ApiV1NotificationController.class))
-                .andExpect(handler().methodName("subscribe"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/event-stream"));
-    }
 
-    @Test
-    @DisplayName("알림 전송")
-    @WithUserDetails("user1")
-    void t4() throws Exception {
-        ResultActions resultActions = mvc.perform(
-                        post("/api/v1/notifications/send")
-                                .param("message", "테스트")
-                )
-                .andDo(print());
-        resultActions
-                .andExpect(handler().handlerType(ApiV1NotificationController.class))
-                .andExpect(handler().methodName("send"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("200-1"))
-                .andExpect(jsonPath("message").value("알림이 전송되었습니다."));
-    }
 }

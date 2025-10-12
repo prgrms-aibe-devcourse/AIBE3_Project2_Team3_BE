@@ -6,6 +6,8 @@ import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
 import com.pi.domain.notification.notification.entity.Notification;
 import com.pi.domain.notification.notification.repository.NotificationRepository;
+import com.pi.domain.notification.notification.service.NotificationService;
+import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -53,6 +55,7 @@ public class NotProdInitData {
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final NotificationRepository notificationRepository;
+    private final NotificationService notficationService;
     @Autowired
     @Lazy
     private NotProdInitData self;
@@ -135,7 +138,9 @@ public class NotProdInitData {
     public void work6() {
         if (notificationRepository.count() == 0) {
             User user1 = userService.findByUsername("user1").get();
-            notificationRepository.save(new Notification(user1, "내용1"));
+            Offer offer = offerService.findById(1L);
+            Notification n = notficationService.create(user1, "내용1");
+            n.addOffer(offer);
         }
     }
 }
