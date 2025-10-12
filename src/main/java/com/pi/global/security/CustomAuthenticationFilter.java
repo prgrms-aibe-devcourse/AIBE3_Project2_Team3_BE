@@ -29,7 +29,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         // 1) API 보호 대상이 아니면 패스
-        if (!request.getRequestURI().startsWith("/api/")) {
+        String uri = request.getRequestURI();
+        boolean needsAuth = uri.startsWith("/api/") || uri.startsWith("/ws/");
+        if (!needsAuth) {
             filterChain.doFilter(request, response);
             return;
         }
