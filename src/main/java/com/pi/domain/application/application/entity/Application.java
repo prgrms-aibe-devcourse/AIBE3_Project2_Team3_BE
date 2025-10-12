@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
@@ -47,6 +48,24 @@ public class Application extends BaseEntity {
         this.user = user;
         this.status = status;
         this.content = content;
+    }
+
+    public ApplicationFile addApplicationFile(String fileUrl) {
+        ApplicationFile applicationFile = new ApplicationFile(this, fileUrl);
+        files.add(applicationFile);
+
+        return applicationFile;
+    }
+
+    public Optional<ApplicationFile> findApplicationFileById(long fileId) {
+        return files.stream()
+                .filter(file -> file.getId() == fileId)
+                .findFirst();
+    }
+
+    public boolean deleteApplicationFile(ApplicationFile applicationFile) {
+        if (applicationFile == null) return false;
+        return files.remove(applicationFile);
     }
 
     public void modify(ApplicationStatus status, String content) {

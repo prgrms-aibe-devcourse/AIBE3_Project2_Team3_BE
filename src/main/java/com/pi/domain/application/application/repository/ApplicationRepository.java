@@ -22,5 +22,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     Page<Application> findAllByPostIdAndStatusNotIn(long postId, List<ApplicationStatus> excludedStatuses, Pageable pageable);
 
-    boolean existsByPostIdAndUserId(long postId, long userId);
+    Optional<Application> findByPostIdAndUserId(long postId, long userId);
 }
