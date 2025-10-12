@@ -9,6 +9,7 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.s3.AwsS3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ApplicationService {
     public static final List<ApplicationStatus> EXCLUDED_STATUSES = List.of(ApplicationStatus.DRAFT);
     private static final String AWS_S3_DIRECTORY = "application";
@@ -50,9 +52,7 @@ public class ApplicationService {
             return applicationRepository.findAllByPostIdAndStatusNotIn(postId, EXCLUDED_STATUSES, pageable);
         }
 
-        if (EXCLUDED_STATUSES.contains(status)) {
-            throw new ServiceException("400-1", "허용되지 않는 상태값입니다.");
-        }
+        validateStatusForRead(status);
 
         return applicationRepository.findAllByPostIdAndStatus(postId, status, pageable);
     }
@@ -105,5 +105,12 @@ public class ApplicationService {
         applicationRepository.delete(application);
 
         fileKeys.forEach(awsS3Service::deleteFile);
+    }
+
+    public void validateStatusForRead(ApplicationStatus status) {
+        if (EXCLUDED_STATUSES.contains(status)) {
+            log.warn("{} 상태의 구직 조회 권한 없음.", status);
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
     }
 }

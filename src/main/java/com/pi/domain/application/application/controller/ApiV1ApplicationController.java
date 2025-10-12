@@ -88,13 +88,9 @@ public class ApiV1ApplicationController {
             @Valid @RequestPart ApplicationWriteReqBody reqBody,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        Post post = projectService.findById(reqBody.postId());
-
         User actor = rq.getActor();
-        User PostUser = post.getUser();
-        if (actor.getUsername().equals(PostUser.getUsername())) {
-            throw new ServiceException("403-2", "본인이 등록한 게시글에는 지원할 수 없습니다.");
-        }
+        Post post = projectService.findById(reqBody.postId());
+        post.checkActorCanWriteApplication(actor);
 
         Application application = applicationService.createOrUpdate(post, actor, reqBody, files);
 
@@ -113,7 +109,6 @@ public class ApiV1ApplicationController {
             @Valid @RequestBody ApplicationModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
-
         Application application = applicationService.findById(id);
 
         User user = application.getUser();
@@ -136,12 +131,13 @@ public class ApiV1ApplicationController {
         application.checkActorCanDelete(actor);
 
         if (application.getStatus() != ApplicationStatus.DRAFT) {
-            throw new ServiceException("400-1", "제출된 구직은 삭제할 수 없습니다.");
+            log.warn("제출된 구직({})은 삭제 불가", application.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
 
         applicationService.delete(application);
 
-        return new RsData<>("200-3",
+        return new RsData<>("200-1",
                 "%d번 구직이 삭제되었습니다.".formatted(id)
         );
     }

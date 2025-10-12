@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class Application extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private Post post;
@@ -75,26 +77,30 @@ public class Application extends BaseEntity {
 
     public void modifyStatus(ApplicationStatus status, boolean isApplicant) {
         if (!this.status.canTransitionTo(status, isApplicant)) {
-            throw new ServiceException("400-1", "현재 상태(%s)에서 %s로 변경할 수 없습니다.".formatted(this.status, status));
+            log.warn("{} 상태에서 {}(으)로 변경 불가", this.status, status);
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
         this.status = status;
     }
 
     public void checkActorCanRead(User actor, User user) {
         if (isDifferentUser(actor, user)) {
-            throw new ServiceException("403-1", "%d번 구직 조회 권한이 없습니다.".formatted(getId()));
+            log.warn("구직({}) 읽기 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
         }
     }
 
     public void checkActorCanModify(User actor, User user) {
         if (isDifferentUser(actor, user)) {
-            throw new ServiceException("403-3", "%d번 구직 수정 권한이 없습니다.".formatted(getId()));
+            log.warn("구직({}) 수정 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
         }
     }
 
     public void checkActorCanDelete(User actor) {
         if (isNotOwner(actor)) {
-            throw new ServiceException("403-4", "%d번 구직 삭제 권한이 없습니다.".formatted(getId()));
+            log.warn("구직({}) 삭제 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
         }
     }
 
