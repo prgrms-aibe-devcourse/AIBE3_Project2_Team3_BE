@@ -30,7 +30,7 @@ public class ApiV1AdmRegionController {
     }
 
     @GetMapping
-    @Operation(summary = "전체 지역 트리 조회")
+    @Operation(summary = "전체 지역 조회")
     public Page<RegionDto> getRegions(Pageable pageable) {
         return regionService.getRegions(pageable);
     }

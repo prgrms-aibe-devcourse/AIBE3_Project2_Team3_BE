@@ -30,7 +30,7 @@ public class ApiV1AdmCategoryController {
     }
 
     @GetMapping
-    @Operation(summary = "전체 카테고리 트리 조회")
+    @Operation(summary = "전체 카테고리 조회")
     public Page<CategoryDto> getCategories(Pageable pageable) {
         return categoryService.getCategories(pageable);
     }
