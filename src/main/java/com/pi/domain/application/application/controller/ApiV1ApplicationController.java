@@ -98,7 +98,7 @@ public class ApiV1ApplicationController {
         );
     }
 
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     @Operation(summary = "수정")
     public RsData<ApplicationModifyResBody> modifyStatus(

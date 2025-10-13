@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,7 +42,7 @@ public class ApiV1OfferController {
     @Transactional(readOnly = true)
     @Operation(summary = "다건 조회")
     public PagePayload<OfferWithPostDto> getMyItems(
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();

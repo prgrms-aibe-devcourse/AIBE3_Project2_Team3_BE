@@ -27,8 +27,11 @@ public class OfferService {
         return offerRepository.findFirstByOrderByIdDesc().get();
     }
 
-    public Page<Offer> findAllByUserIdAndStatus(long id, OfferStatus status, Pageable pageable) {
-        return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
+    public Page<Offer> findAllByUserIdAndStatus(long userId, OfferStatus status, Pageable pageable) {
+        if (status == null) {
+            return offerRepository.findAllByUserId(userId, pageable);
+        }
+        return offerRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 
     public Page<Offer> findAllByPostIdAndStatus(Long postId, OfferStatus status, Pageable pageable) {
