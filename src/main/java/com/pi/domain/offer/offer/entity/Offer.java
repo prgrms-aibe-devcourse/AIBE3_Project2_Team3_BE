@@ -1,6 +1,6 @@
 package com.pi.domain.offer.offer.entity;
 
-import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Table(name = "offers", indexes = {
         @Index(name = "idx_offers_created_date", columnList = "createdDate")
@@ -18,15 +20,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Offer extends BaseEntity {
-    @ManyToOne
-    private Freelancer freelancer;
+    @ManyToOne(fetch = LAZY)
+    private Post post;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     private User user;
 
     @Enumerated(EnumType.STRING)
     @Setter
     private OfferStatus status;
+
+    private int amount;
 
     private boolean isOwner(User actor) {
         return actor.getUsername().equals(user.getUsername());
@@ -42,5 +46,9 @@ public class Offer extends BaseEntity {
         if (!isOwner(actor)) {
             throw new ServiceException("403-1", "%d번 구인 삭제 권한이 없습니다.".formatted(getId()));
         }
+    }
+
+    public Offer(Post post, User user, OfferStatus offerStatus) {
+        super();
     }
 }

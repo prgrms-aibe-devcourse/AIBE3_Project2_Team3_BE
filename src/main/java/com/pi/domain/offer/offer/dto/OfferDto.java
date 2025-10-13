@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record OfferDto(
         long id,
+        int amount,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         long freelancerId,
@@ -15,9 +16,10 @@ public record OfferDto(
     public OfferDto(Offer offer) {
         this(
                 offer.getId(),
+                offer.getAmount(),
                 offer.getCreatedDate(),
                 offer.getModifiedDate(),
-                offer.getFreelancer().getId(),
+                offer.getPost().getId(),
                 offer.getUser().getId(),
                 offer.getStatus().name()
         );

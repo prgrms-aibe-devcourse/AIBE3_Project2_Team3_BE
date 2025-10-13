@@ -5,7 +5,7 @@ spring:
     import: optional:file:.env[.properties]
   profiles:
     active: dev
-    include: secret
+    include: secret, s3
   output:
     ansi:
       enabled: always
@@ -36,3 +36,7 @@ spring:
           starttls:
             enable: true
             required: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB

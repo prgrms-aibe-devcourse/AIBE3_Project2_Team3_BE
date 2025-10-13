@@ -100,8 +100,7 @@ public class NotProdInitData {
         User user2 = userService.findByUsername("user2").get();
         Post post1 = freelancerService.findById(1L);
         Freelancer freelancer1 = post1.getFreelancer();
-
-        offerService.create(freelancer1, user2);
+        offerService.create(freelancer1.getPost(), user2, 2);
     }
 
     @Transactional

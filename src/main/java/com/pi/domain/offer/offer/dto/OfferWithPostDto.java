@@ -2,11 +2,13 @@ package com.pi.domain.offer.offer.dto;
 
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
 public record OfferWithPostDto(
         long offerId,
+        int amount,
         String offerStatus,
         LocalDateTime offerCreatedDate,
         long postId,
@@ -14,14 +16,15 @@ public record OfferWithPostDto(
         String postUserNickname,
         String postTitle
 ) {
-    public OfferWithPostDto(Offer offer, Post post) {
+    public OfferWithPostDto(Offer offer, Post post, User user) {
         this(
                 offer.getId(),
+                offer.getAmount(),
                 offer.getStatus().name(),
                 offer.getCreatedDate(),
                 post.getId(),
-                post.getUser().getId(),
-                post.getUser().getNickname(),
+                user.getId(),
+                user.getNickname(),
                 post.getTitle()
         );
     }

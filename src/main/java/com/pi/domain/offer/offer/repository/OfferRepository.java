@@ -15,5 +15,5 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     Page<Offer> findAllByUserIdAndStatus(long userId, OfferStatus status, Pageable page);
 
-    Page<Offer> findAllByFreelancerIdAndStatus(Long freelancerId, OfferStatus status, Pageable page);
+    Page<Offer> findAllByPostIdAndStatus(Long postId, OfferStatus status, Pageable page);
 }
