@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 public record PostOwnerApplicationWithUserDto(
         long id,
         String status,
+        long salary,
+        int period,
         LocalDateTime createdDate,
         long userId,
         String userNickname
@@ -16,6 +18,8 @@ public record PostOwnerApplicationWithUserDto(
         this(
                 application.getId(),
                 application.getStatus().name(),
+                application.getSalary(),
+                application.getPeriod(),
                 application.getCreatedDate(),
                 user.getId(),
                 user.getNickname()

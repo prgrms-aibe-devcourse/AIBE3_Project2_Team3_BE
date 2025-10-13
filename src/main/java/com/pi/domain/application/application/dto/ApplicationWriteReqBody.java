@@ -9,6 +9,8 @@ public record ApplicationWriteReqBody(
         @NotNull
         @Pattern(regexp = "DRAFT|APPLIED", message = "상태 값은 DRAFT 또는 APPLIED 이어야 합니다.")
         String status,
-        String content
+        String content,
+        Long salary,
+        int period
 ) {
 }

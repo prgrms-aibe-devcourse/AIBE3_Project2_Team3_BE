@@ -10,6 +10,8 @@ public record ApplicationWriteResBody(
         long userId,
         String status,
         String content,
+        long salary,
+        int period,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate
 ) {
@@ -20,6 +22,8 @@ public record ApplicationWriteResBody(
                 application.getUser().getId(),
                 application.getStatus().name(),
                 application.getContent(),
+                application.getSalary(),
+                application.getPeriod(),
                 application.getCreatedDate(),
                 application.getModifiedDate()
         );

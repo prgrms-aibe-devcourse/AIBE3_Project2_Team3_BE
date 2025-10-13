@@ -12,6 +12,8 @@ public record ApplicationDto(
         long userId,
         String status,
         String content,
+        long salary,
+        int period,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         List<ApplicationFileDto> files
@@ -23,6 +25,8 @@ public record ApplicationDto(
                 application.getUser().getId(),
                 application.getStatus().name(),
                 application.getContent(),
+                application.getSalary(),
+                application.getPeriod(),
                 application.getCreatedDate(),
                 application.getModifiedDate(),
                 files

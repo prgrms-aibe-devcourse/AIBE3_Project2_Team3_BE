@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 public record ApplicationWithPostDto(
         long id,
         String status,
+        long salary,
+        int period,
         LocalDateTime createdDate,
         long postId,
         String postTitle,
@@ -18,6 +20,8 @@ public record ApplicationWithPostDto(
         this(
                 application.getId(),
                 application.getStatus().name(),
+                application.getSalary(),
+                application.getPeriod(),
                 application.getCreatedDate(),
                 post.getId(),
                 post.getTitle(),

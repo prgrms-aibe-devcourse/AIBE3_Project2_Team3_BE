@@ -42,6 +42,10 @@ public class Application extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private long salary;
+
+    private int period;
+
     @OneToMany(mappedBy = "application", fetch = LAZY, cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private List<ApplicationFile> files = new ArrayList<>();
 

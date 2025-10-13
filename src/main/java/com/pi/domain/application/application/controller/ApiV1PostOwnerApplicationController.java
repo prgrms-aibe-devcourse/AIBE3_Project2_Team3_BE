@@ -1,15 +1,20 @@
 package com.pi.domain.application.application.controller;
 
-import com.pi.domain.application.application.dto.*;
+import com.pi.domain.application.application.dto.ApplicationModifyReqBody;
+import com.pi.domain.application.application.dto.ApplicationModifyResBody;
+import com.pi.domain.application.application.dto.PostOwnerApplicationGetResBody;
+import com.pi.domain.application.application.dto.PostOwnerApplicationWithUserDto;
 import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.service.ApplicationService;
+import com.pi.domain.application.file.dto.ApplicationFileDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
+import com.pi.global.s3.AwsS3Service;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +38,7 @@ public class ApiV1PostOwnerApplicationController {
     private final Rq rq;
     private final ApplicationService applicationService;
     private final ProjectService projectService;
+    private final AwsS3Service awsS3Service;
 
     @GetMapping("/post/{postId}")
     @Transactional(readOnly = true)
@@ -64,7 +70,17 @@ public class ApiV1PostOwnerApplicationController {
 
         applicationService.validateStatusForRead(application.getStatus());
 
-        return new PostOwnerApplicationGetResBody(application);
+        return new PostOwnerApplicationGetResBody(
+                application,
+                application.getUser(),
+                application.getFiles().stream()
+                        .map(file -> new ApplicationFileDto(
+                                file.getId(),
+                                file.getUrl(),
+                                awsS3Service.getOriginalFileNameFromUrl(file.getUrl())
+                        ))
+                        .toList()
+        );
     }
 
     @PutMapping("/{id}")
