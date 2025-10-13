@@ -36,7 +36,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         // 2) 화이트리스트 패스
-        if (List.of("/api/v1/users/login", "/api/v1/users/logout", "/api/v1/users/join")
+        if (List.of("/api/v1/users/login", "/api/v1/users/logout", "/api/v1/users/join", "/api/v1/users/findPw")
                 .contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
