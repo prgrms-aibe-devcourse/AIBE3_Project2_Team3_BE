@@ -41,6 +41,6 @@ public class Review extends BaseEntity {
     }
 
     public boolean isOwnedBy(User actor) {
-        return this.user.equals(actor);
+        return this.user.getId().equals(actor.getId());
     }
 }

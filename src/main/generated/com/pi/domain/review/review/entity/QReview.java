@@ -26,10 +26,6 @@ public class QReview extends EntityPathBase<Review> {
 
     public final StringPath comment = createString("comment");
 
-    public final com.pi.domain.contract.contract.entity.QContract contract;
-
-    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
-
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
@@ -38,6 +34,8 @@ public class QReview extends EntityPathBase<Review> {
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedDate = _super.modifiedDate;
+
+    public final com.pi.domain.post.post.entity.QPost post;
 
     public final NumberPath<Integer> rating = createNumber("rating", Integer.class);
 
@@ -61,7 +59,7 @@ public class QReview extends EntityPathBase<Review> {
 
     public QReview(Class<? extends Review> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.contract = inits.isInitialized("contract") ? new com.pi.domain.contract.contract.entity.QContract(forProperty("contract"), inits.get("contract")) : null;
+        this.post = inits.isInitialized("post") ? new com.pi.domain.post.post.entity.QPost(forProperty("post"), inits.get("post")) : null;
         this.user = inits.isInitialized("user") ? new com.pi.domain.user.user.entity.QUser(forProperty("user")) : null;
     }
 
