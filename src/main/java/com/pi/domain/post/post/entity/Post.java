@@ -3,6 +3,7 @@ package com.pi.domain.post.post.entity;
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.project.entity.Project;
+import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.user.user.entity.User;
@@ -39,6 +40,9 @@ public class Post extends BaseEntity {
     private List<PostCategory> postCategories = new ArrayList<>();
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostSkill> postSkills = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private ProjectStatus status;
 
     public Post(User user, String title, String content) {
         this.user = user;
@@ -97,6 +101,10 @@ public class Post extends BaseEntity {
         });
     }
 
+    public void changeState(ProjectStatus newState) {
+        this.status = newState;
+    }
+
     private boolean isNotOwner(User actor) {
         return !actor.getUsername().equals(user.getUsername());
     }
@@ -119,4 +127,5 @@ public class Post extends BaseEntity {
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
+
 }

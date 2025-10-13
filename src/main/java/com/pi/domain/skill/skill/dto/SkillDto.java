@@ -13,4 +13,6 @@ public record SkillDto(
     public static SkillDto from(Skill skill) {
         return new SkillDto(skill.getId(), skill.getName());
     }
+
+    
 }

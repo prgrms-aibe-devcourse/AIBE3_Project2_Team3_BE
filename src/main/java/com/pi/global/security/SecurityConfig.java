@@ -29,6 +29,7 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers("favicon.ico").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/ws/**").permitAll()
                                 // 게시글 다건 단건, 댓글 다건 단건 요청 권한을 전체 허용하겠다.
                                 // \\d+ -> 숫자가 한 자리 이상 연속된 것 (ex. 1, 23, 123)
                                 .requestMatchers(HttpMethod.GET, "/api/*/posts/{id:\\d+}",
@@ -39,7 +40,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/findPw").permitAll()
                                 .requestMatchers("/api/*/adm/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
                                 .requestMatchers("/api/*/**").authenticated()
+                                .requestMatchers("/api/v1/chat/**").authenticated()
                                 .anyRequest().permitAll()
+
                 )
                 .headers(
                         headers -> headers

@@ -22,10 +22,14 @@ public class Region extends BaseEntity {
     @OneToMany(mappedBy = "parent",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<Region> children = new ArrayList<>();
+    private final List<Region> children = new ArrayList<>();
 
     @OneToMany(mappedBy = "region")
-    private List<PostRegion> postRegions = new ArrayList<>();
+    private final List<PostRegion> postRegions = new ArrayList<>();
+
+    public Region(String name) {
+        this.name = name;
+    }
 
     public void addChild(Region child) {
         if (child == null) return;

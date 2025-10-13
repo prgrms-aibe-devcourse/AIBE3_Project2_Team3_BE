@@ -10,7 +10,8 @@ public record UserDto(
         LocalDateTime modifiedDate,
         String nickname,
         String email,
-        String role
+        String role,
+        String profileImageUrl
 ) {
     public UserDto(User user) {
         this(
@@ -19,7 +20,8 @@ public record UserDto(
                 user.getModifiedDate(),
                 user.getNickname(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                user.getProfileImageUrl()
         );
     }
 }
