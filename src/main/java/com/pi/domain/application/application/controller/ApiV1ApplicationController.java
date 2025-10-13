@@ -119,7 +119,7 @@ public class ApiV1ApplicationController {
         applicationService.update(application, reqBody, files);
 
         return new RsData<>("200-1",
-                "%d번 구직 상태가 수정되었습니다.".formatted(id),
+                "%d번 구직이 수정되었습니다.".formatted(id),
                 new ApplicationModifyResBody(application.getStatus())
         );
     }

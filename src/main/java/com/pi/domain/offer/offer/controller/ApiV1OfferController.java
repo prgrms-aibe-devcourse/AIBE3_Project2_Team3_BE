@@ -100,7 +100,7 @@ public class ApiV1OfferController {
 
         return new RsData<>(
                 "200-1",
-                "%d번 구인 상태가 수정되었습니다.".formatted(id),
+                "%d번 구인이 수정되었습니다.".formatted(id),
                 new OfferDto(offer)
         );
     }
