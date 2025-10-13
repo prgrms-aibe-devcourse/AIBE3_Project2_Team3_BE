@@ -64,13 +64,14 @@ public class SecurityConfig {
                                             response.setContentType("application/json;charset=UTF-8");
 
                                             response.setStatus(401);
-                                            RsData<Void> rsData = new RsData<>("401-1", "로그인 후 이용해주세요.");
-                                            if (rsData != null) {
-                                                response.getWriter().write(Ut.json.toString(rsData));
-                                            } else {
-                                                // RsData가 null이라면 빈 메시지나 기본 오류 메시지를 보낼 수 있습니다.
-                                                response.getWriter().write("{\"message\": \"Authentication required\"}");
-                                            }
+                                            response.getWriter().write(
+                                                    Ut.json.toString(
+                                                            new RsData<Void>(
+                                                                    "401-1",
+                                                                    "로그인 후 이용해주세요."
+                                                            )
+                                                    )
+                                            );
                                         }
                                 )
                                 .accessDeniedHandler(

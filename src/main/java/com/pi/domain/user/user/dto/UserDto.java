@@ -20,7 +20,7 @@ public record UserDto(
                 user.getModifiedDate(),
                 user.getNickname(),
                 user.getEmail(),
-                user.getRole(),
+                user.getRole().getDescription(),
                 user.getProfileImageUrl()
         );
     }

@@ -1,6 +1,7 @@
 package com.pi.domain.user.user.service;
 
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.entity.UserRole;
 import com.pi.domain.user.user.repository.UserRepository;
 import com.pi.global.exception.ServiceException;
 import jakarta.transaction.Transactional;
@@ -15,7 +16,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final AuthTokenService authTokenService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -35,10 +35,6 @@ public class UserService {
         user.modify(nickname);
     }
 
-    public String genAccessToken(User user) {
-        return authTokenService.genAccessToken(user);
-    }
-
     public void checkPassword(User user, String password) {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ServiceException("401-1", "비밀번호가 일치 하지 않습니다.");
@@ -46,12 +42,16 @@ public class UserService {
     }
 
     public User join(String username, String password, String nickname, String email) {
+        return join(username, password, nickname, email, UserRole.ROLE_USER);
+    }
+
+    public User join(String username, String password, String nickname, String email, UserRole role) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
                     throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
                 });
         password = passwordEncoder.encode(password);
-        User user = new User(username, password, nickname, email);
+        User user = new User(username, password, nickname, email, role);
         return userRepository.save(user);
     }
 
@@ -87,7 +87,7 @@ public class UserService {
         // 지워도 작동은 동일하게 동작
     }
 
-    public User getReferenceById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
+    public User getById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
     }
 }

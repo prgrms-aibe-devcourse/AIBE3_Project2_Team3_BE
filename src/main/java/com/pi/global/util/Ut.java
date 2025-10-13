@@ -109,6 +109,14 @@ public class Ut {
                 return defaultValue;
             }
         }
+
+        public static <T> T parse(String json, Class<T> type) {
+            try {
+                return objectMapper.readValue(json, type);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid JSON", e);
+            }
+        }
     }
 
     public static class cmd {
