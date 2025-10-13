@@ -4,8 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 public enum ApplicationStatus {
-    DRAFT("임시저장"),
-    APPLIED("제출"),
+    PENDING("대기"),
     ACCEPTED("수락"),
     REJECTED("거절");
 
@@ -19,19 +18,14 @@ public enum ApplicationStatus {
         return description;
     }
 
-    public static final Map<ApplicationStatus, Set<ApplicationStatus>> APPLICANT_TRANSITIONS = Map.of(
-            DRAFT, Set.of(DRAFT, APPLIED)
-    );
-
     public static final Map<ApplicationStatus, Set<ApplicationStatus>> POST_OWNER_TRANSITIONS = Map.of(
-            APPLIED, Set.of(ACCEPTED, REJECTED),
+            PENDING, Set.of(PENDING, ACCEPTED, REJECTED),
             ACCEPTED, Set.of(REJECTED),
             REJECTED, Set.of(ACCEPTED)
     );
 
-    public boolean canTransitionTo(ApplicationStatus next, boolean isApplicant) {
-        Map<ApplicationStatus, Set<ApplicationStatus>> rules =
-                isApplicant ? APPLICANT_TRANSITIONS : POST_OWNER_TRANSITIONS;
+    public boolean canTransitionTo(ApplicationStatus next) {
+        Map<ApplicationStatus, Set<ApplicationStatus>> rules = POST_OWNER_TRANSITIONS;
         return rules.getOrDefault(this, Set.of()).contains(next);
     }
 }

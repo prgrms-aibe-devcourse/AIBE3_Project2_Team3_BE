@@ -36,15 +36,18 @@ public class Application extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private User user;
 
+    @Column(columnDefinition = "VARCHAR(255) DEFAULT 'PENDING'")
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private long salary;
+    @Column(columnDefinition = "BIGINT UNSIGNED DEFAULT 0")
+    private long salary = 0;
 
-    private int period;
+    @Column(columnDefinition = "INT UNSIGNED DEFAULT 0")
+    private int period = 0;
 
     @OneToMany(mappedBy = "application", fetch = LAZY, cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private List<ApplicationFile> files = new ArrayList<>();
@@ -54,6 +57,14 @@ public class Application extends BaseEntity {
         this.user = user;
         this.status = status;
         this.content = content;
+    }
+
+    public Application(Post post, User user, String content, long salary, int period) {
+        this.post = post;
+        this.user = user;
+        this.content = content;
+        this.salary = salary;
+        this.period = period;
     }
 
     public ApplicationFile addApplicationFile(String fileUrl) {
@@ -74,13 +85,14 @@ public class Application extends BaseEntity {
         return files.remove(applicationFile);
     }
 
-    public void modify(ApplicationStatus status, String content) {
-        modifyStatus(status, true);
-        this.content = content;
+    public void modify(String content, Long salary, Integer period) {
+        this.content = content == null ? this.content : content;
+        this.salary = salary == null ? this.salary : salary;
+        this.period = period == null ? this.period : period;
     }
 
-    public void modifyStatus(ApplicationStatus status, boolean isApplicant) {
-        if (!this.status.canTransitionTo(status, isApplicant)) {
+    public void modifyStatus(ApplicationStatus status) {
+        if (!this.status.canTransitionTo(status)) {
             log.warn("{} 상태에서 {}(으)로 변경 불가", this.status, status);
             throw new ServiceException("400-1", "잘못된 요청입니다.");
         }

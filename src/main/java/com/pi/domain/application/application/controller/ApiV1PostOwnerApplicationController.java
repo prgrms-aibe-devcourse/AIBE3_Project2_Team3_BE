@@ -1,8 +1,8 @@
 package com.pi.domain.application.application.controller;
 
-import com.pi.domain.application.application.dto.ApplicationModifyReqBody;
 import com.pi.domain.application.application.dto.ApplicationModifyResBody;
 import com.pi.domain.application.application.dto.PostOwnerApplicationGetResBody;
+import com.pi.domain.application.application.dto.PostOwnerApplicationModifyReqBody;
 import com.pi.domain.application.application.dto.PostOwnerApplicationWithUserDto;
 import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
@@ -11,6 +11,7 @@ import com.pi.domain.application.file.dto.ApplicationFileDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
+import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
@@ -68,8 +69,6 @@ public class ApiV1PostOwnerApplicationController {
         User postUser = application.getPost().getUser();
         application.checkActorCanRead(actor, postUser);
 
-        applicationService.validateStatusForRead(application.getStatus());
-
         return new PostOwnerApplicationGetResBody(
                 application,
                 application.getUser(),
@@ -88,7 +87,7 @@ public class ApiV1PostOwnerApplicationController {
     @Operation(summary = "상태 수정")
     public RsData<ApplicationModifyResBody> modifyStatus(
             @PathVariable long id,
-            @Valid @RequestBody ApplicationModifyReqBody reqBody
+            @Valid @RequestBody PostOwnerApplicationModifyReqBody reqBody
     ) {
         User actor = rq.getActor();
 
@@ -97,7 +96,11 @@ public class ApiV1PostOwnerApplicationController {
         User user = application.getPost().getUser();
         application.checkActorCanModify(actor, user);
 
-        applicationService.updateStatus(application, reqBody.status(), false);
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            log.warn("수락/거절된 구직({})은 수정 불가", application.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        applicationService.updateStatus(application, reqBody.status());
 
         return new RsData<>(
                 "200-1",

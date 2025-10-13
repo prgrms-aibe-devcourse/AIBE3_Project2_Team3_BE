@@ -83,7 +83,7 @@ public class ApiV1ApplicationController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    @Operation(summary = "등록 (임시저장 또는 제출)")
+    @Operation(summary = "등록")
     public RsData<ApplicationWriteResBody> write(
             @Valid @RequestPart ApplicationWriteReqBody reqBody,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -92,7 +92,7 @@ public class ApiV1ApplicationController {
         Post post = projectService.findById(reqBody.postId());
         post.checkActorCanWriteApplication(actor);
 
-        Application application = applicationService.createOrUpdate(post, actor, reqBody, files);
+        Application application = applicationService.create(post, actor, reqBody, files);
 
         return new RsData<>(
                 "201-1",
@@ -101,12 +101,13 @@ public class ApiV1ApplicationController {
         );
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    @Operation(summary = "상태 수정")
+    @Operation(summary = "수정")
     public RsData<ApplicationModifyResBody> modifyStatus(
             @PathVariable long id,
-            @Valid @RequestBody ApplicationModifyReqBody reqBody
+            @Valid @RequestPart ApplicationModifyReqBody reqBody,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
         Application application = applicationService.findById(id);
@@ -114,7 +115,11 @@ public class ApiV1ApplicationController {
         User user = application.getUser();
         application.checkActorCanModify(actor, user);
 
-        applicationService.updateStatus(application, reqBody.status(), true);
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            log.warn("수락/거절된 구직({})은 수정 불가", application.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        applicationService.update(application, reqBody, files);
 
         return new RsData<>("200-1",
                 "%d번 구직 상태가 수정되었습니다.".formatted(id),
@@ -130,10 +135,10 @@ public class ApiV1ApplicationController {
         Application application = applicationService.findById(id);
         application.checkActorCanDelete(actor);
 
-        if (application.getStatus() != ApplicationStatus.DRAFT) {
-            log.warn("제출된 구직({})은 삭제 불가", application.getId());
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
-        }
+//        if (application.getStatus() != ApplicationStatus.DRAFT) {
+//            log.warn("제출된 구직({})은 삭제 불가", application.getId());
+//            throw new ServiceException("400-1", "잘못된 요청입니다.");
+//        }
 
         applicationService.delete(application);
 
