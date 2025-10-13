@@ -39,7 +39,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/*/users/login", "/api/*/users/logout").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/join").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/findPw").permitAll()
-                                .requestMatchers("/api/*/adm/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
+                                .requestMatchers("/api/*/admin/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
                                 .requestMatchers("/api/*/**").authenticated()
                                 .requestMatchers("/api/v1/chat/**").authenticated()
                                 .anyRequest().permitAll()
@@ -71,14 +71,6 @@ public class SecurityConfig {
                                                 // RsData가 null이라면 빈 메시지나 기본 오류 메시지를 보낼 수 있습니다.
                                                 response.getWriter().write("{\"message\": \"Authentication required\"}");
                                             }
-//                                            response.getWriter().write(
-//                                                    Ut.json.toString(
-//                                                            new RsData<Void>(
-//                                                                    "401-1",
-//                                                                    "로그인 후 이용해주세요."
-//                                                            )
-//                                                    )
-//                                            );
                                         }
                                 )
                                 .accessDeniedHandler(
