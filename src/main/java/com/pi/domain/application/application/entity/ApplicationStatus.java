@@ -20,7 +20,7 @@ public enum ApplicationStatus {
     }
 
     public static final Map<ApplicationStatus, Set<ApplicationStatus>> APPLICANT_TRANSITIONS = Map.of(
-            DRAFT, Set.of(APPLIED)
+            DRAFT, Set.of(DRAFT, APPLIED)
     );
 
     public static final Map<ApplicationStatus, Set<ApplicationStatus>> POST_OWNER_TRANSITIONS = Map.of(
