@@ -80,6 +80,13 @@ public class ApiV1ChatRestController {
         return new RsData<>("200-1", "채팅방 초대를 수락했습니다.");
     }
 
+    @PostMapping("/rooms/{roomId}/invites/refuse")
+    public RsData<Void> refuse(@PathVariable Long roomId) {
+        User actor = rq.getActor();
+        chatService.refuse(actor.getId(), roomId);
+        return new RsData<>("200-1", "채팅방 초대를 거절했습니다.");
+    }
+
     @PostMapping("/rooms/{roomId}/leave")
     public RsData<Void> leave(@PathVariable Long roomId) {
         User actor = rq.getActor();
@@ -88,7 +95,7 @@ public class ApiV1ChatRestController {
     }
 
     @GetMapping("/rooms/{roomId}/members")
-    public PagePayload<ChatMemberDto> getMessages(
+    public PagePayload<ChatMemberDto> getMembers(
             @PathVariable Long roomId,
             @RequestParam(defaultValue = "ALL") String status,
             @ParameterObject @PageableDefault(size = 30, sort = "id", direction = Sort.Direction.DESC) Pageable pageable

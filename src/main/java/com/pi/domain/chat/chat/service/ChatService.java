@@ -165,6 +165,16 @@ public class ChatService {
 //        eventPublisher.publishEvent(new InviteAcceptedEvent(roomId, userId));
     }
 
+    @Transactional
+    public void refuse(Long userId, Long roomId) {
+        ChatMember m = chatMemberRepository
+                .findByChatRoom_IdAndUser_IdAndStartedDateIsNullAndEndedDateIsNull(roomId, userId)
+                .orElseThrow(() -> new ServiceException("404-1", "초대/멤버십을 찾을 수 없습니다."));
+        if (m.getStartedDate() == null) {
+            m.refuse();
+        }
+    }
+
     /** 방 떠나기 */
     @Transactional
     public void leave(Long userId, Long roomId) {
