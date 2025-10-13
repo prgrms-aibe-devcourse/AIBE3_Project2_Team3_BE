@@ -101,7 +101,7 @@ public class ApiV1ApplicationController {
     @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     @Operation(summary = "수정")
-    public RsData<ApplicationModifyResBody> modifyStatus(
+    public RsData<ApplicationModifyResBody> modify(
             @PathVariable long id,
             @Valid @RequestPart ApplicationModifyReqBody reqBody,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -120,7 +120,7 @@ public class ApiV1ApplicationController {
 
         return new RsData<>("200-1",
                 "%d번 구직이 수정되었습니다.".formatted(id),
-                new ApplicationModifyResBody(application.getStatus())
+                new ApplicationModifyResBody(application)
         );
     }
 

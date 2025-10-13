@@ -1,9 +1,6 @@
 package com.pi.domain.application.application.controller;
 
-import com.pi.domain.application.application.dto.ApplicationModifyResBody;
-import com.pi.domain.application.application.dto.PostOwnerApplicationGetResBody;
-import com.pi.domain.application.application.dto.PostOwnerApplicationModifyReqBody;
-import com.pi.domain.application.application.dto.PostOwnerApplicationWithUserDto;
+import com.pi.domain.application.application.dto.*;
 import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.service.ApplicationService;
@@ -85,7 +82,7 @@ public class ApiV1PostOwnerApplicationController {
     @PutMapping("/{id}")
     @Transactional
     @Operation(summary = "상태 수정")
-    public RsData<ApplicationModifyResBody> modifyStatus(
+    public RsData<PostOwnerApplicationModifyResBody> modifyStatus(
             @PathVariable long id,
             @Valid @RequestBody PostOwnerApplicationModifyReqBody reqBody
     ) {
@@ -105,7 +102,7 @@ public class ApiV1PostOwnerApplicationController {
         return new RsData<>(
                 "200-1",
                 "%d번 구직 상태가 수정되었습니다.".formatted(id),
-                new ApplicationModifyResBody(application.getStatus())
+                new PostOwnerApplicationModifyResBody(application.getStatus().name())
         );
     }
 }
