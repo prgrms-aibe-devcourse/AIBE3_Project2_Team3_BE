@@ -1,5 +1,6 @@
 package com.pi.domain.user.user.service;
 
+import com.pi.global.util.Ut;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,6 +32,25 @@ public class RefreshTokenStore {
         redis.delete(keyRefresh(jti));
         redis.opsForSet().remove(keyUserSessions(userId), jti);
     }
+
+    public void revoke(String refreshPlain) {
+        if (refreshPlain == null || refreshPlain.isBlank()) return;
+
+        String jti = Ut.jwt.sha256(refreshPlain); // 저장 규칙과 동일하게
+        String kRefresh = keyRefresh(jti);
+
+        // RT:{jti} -> userId 읽기 (없을 수 있음)
+        String userIdStr = redis.opsForValue().get(kRefresh);
+        // 먼저 jti 키 삭제
+        redis.delete(kRefresh);
+
+        // 역집합에서 제거
+        if (userIdStr != null) {
+            long userId = Long.parseLong(userIdStr);
+            redis.opsForSet().remove(keyUserSessions(userId), jti);
+        }
+    }
+
 
     public void revokeAllForUser(long userId) {
         String k = keyUserSessions(userId);
