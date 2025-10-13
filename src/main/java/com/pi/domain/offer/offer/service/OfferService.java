@@ -31,8 +31,8 @@ public class OfferService {
         return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
     }
 
-    public Page<Offer> findAllByFreelancerIdAndStatus(Long freelancerId, OfferStatus status, Pageable pageable) {
-        return offerRepository.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
+    public Page<Offer> findAllByPostIdAndStatus(Long postId, OfferStatus status, Pageable pageable) {
+        return offerRepository.findAllByPostIdAndStatus(postId, status, pageable);
     }
 
     public Offer create(Post post, User user, int amount) {

@@ -57,7 +57,7 @@ public class ApiV1OfferController {
         Post post = freelancerService.findById(freelancerId);
         post.checkActorCanReadOffer(actor);
 
-        Page<OfferWithUserDto> dtoPage = offerService.findAllByFreelancerIdAndStatus(freelancerId, status, pageable)
+        Page<OfferWithUserDto> dtoPage = offerService.findAllByPostIdAndStatus(freelancerId, status, pageable)
                 .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
