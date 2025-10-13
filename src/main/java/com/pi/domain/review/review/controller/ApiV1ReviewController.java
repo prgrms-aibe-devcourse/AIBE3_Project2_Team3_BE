@@ -10,6 +10,8 @@ import com.pi.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/reviews")
 @RequiredArgsConstructor
@@ -18,13 +20,13 @@ public class ApiV1ReviewController {
     private final ReviewService reviewService;
     private final Rq rq;
 
-    @PostMapping("/{contractId}")
+    @PostMapping("/{postId}")
     public RsData<ReviewDto> create(
-            @PathVariable Long contractId,
+            @PathVariable Long postId,
             @RequestBody ReviewReqBody reqBody
     ) {
         User actor = rq.getActor();
-        Review review = reviewService.create(actor, contractId, reqBody.rating(), reqBody.comment());
+        Review review = reviewService.create(actor, postId, reqBody.rating(), reqBody.comment());
         return new RsData<>("200-1", "리뷰가 작성되었습니다.", new ReviewDto(review));
     }
 
@@ -49,5 +51,17 @@ public class ApiV1ReviewController {
     public RsData<ReviewDto> getOne(@PathVariable Long reviewId) {
         Review review = reviewService.findById(reviewId);
         return new RsData<>("200-4", "리뷰 조회 성공", new ReviewDto(review));
+    }
+
+    @GetMapping("/freelancer/{freelancerId}/reviews")
+    public RsData<List<ReviewDto>> getFreelancerReviews(@PathVariable Long freelancerId) {
+        List<ReviewDto> reviews = reviewService.findReviewsByFreelancer(freelancerId);
+        return new RsData<>("200-5", "프리랜서 리뷰 조회 성공", reviews);
+    }
+
+    @GetMapping("/project/{projectId}/reviews")
+    public RsData<List<ReviewDto>> getProjectReviews(@PathVariable Long projectId) {
+        List<ReviewDto> reviews = reviewService.findReviewsByProject(projectId);
+        return new RsData<>("200-6", "프로젝트 리뷰 조회 성공", reviews);
     }
 }

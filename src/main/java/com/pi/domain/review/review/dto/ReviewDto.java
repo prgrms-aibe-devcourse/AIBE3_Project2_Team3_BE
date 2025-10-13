@@ -5,18 +5,24 @@ import java.time.LocalDateTime;
 
 public record ReviewDto(
         Long id,
-        String writerNickname,
         int rating,
+        String userNickname,
+        String targetNickname,
         String comment,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt,
+        Long postId
 ) {
     public ReviewDto(Review review) {
         this(
                 review.getId(),
-                review.getUser().getNickname(),
                 review.getRating(),
+                review.getUser().getNickname(),
+                review.getPost().getUser().getNickname(),
                 review.getComment(),
-                review.getCreatedAt()
+                review.getCreatedDate(),
+                review.getModifiedDate(),
+                review.getPost().getId()
         );
     }
 }
