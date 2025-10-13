@@ -52,4 +52,9 @@ public class Category extends BaseEntity {
         }
         return false;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }
