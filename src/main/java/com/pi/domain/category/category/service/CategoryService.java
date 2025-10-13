@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,21 +46,9 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CategoryDto> getCategoryTree(Pageable pageable) {
-        return categoryRepository.findByParentIsNull(pageable)
-                .map(this::buildTree);
-    }
-
-    private CategoryDto buildTree(Category category) {
-        List<CategoryDto> children = categoryRepository.findByParentId(category.getId()).stream()
-                .map(this::buildTree)
-                .collect(Collectors.toList());
-        return new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getParent() != null ? category.getParent().getId() : null,
-                children
-        );
+    public Page<CategoryDto> getCategories(Pageable pageable) {
+        return categoryRepository.findAll(pageable)
+                .map(category -> CategoryDto.from(category, List.of()));
     }
 
     @Transactional

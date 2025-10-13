@@ -8,7 +8,7 @@ public record ReportDto(
         Long reporterId,
         Long targetUserId,
         Long postId,
-//        Long reviewId,
+        Long reviewId,
         String comment,
         ReportType reportType
 ) {
@@ -18,7 +18,7 @@ public record ReportDto(
                 report.getReporter().getId(),
                 report.getTargetUser() != null ? report.getTargetUser().getId() : null,
                 report.getPost() != null ? report.getPost().getId() : null,
-//                report.getReview() != null ? report.getReview().getId() : null,
+                report.getReview() != null ? report.getReview().getId() : null,
                 report.getComments(),
                 report.getReportType()
         );

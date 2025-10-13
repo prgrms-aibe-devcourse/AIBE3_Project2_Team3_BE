@@ -31,8 +31,8 @@ public class ApiV1AdmRegionController {
 
     @GetMapping
     @Operation(summary = "전체 지역 트리 조회")
-    public Page<RegionDto> getRegionTree(Pageable pageable) {
-        return regionService.getRegionTree(pageable);
+    public Page<RegionDto> getRegions(Pageable pageable) {
+        return regionService.getRegions(pageable);
     }
 
     @DeleteMapping("/{id}")

@@ -41,6 +41,8 @@ public class QReport extends EntityPathBase<Report> {
 
     public final EnumPath<ReportType> reportType = createEnum("reportType", ReportType.class);
 
+    public final com.pi.domain.review.review.entity.QReview review;
+
     public final com.pi.domain.user.user.entity.QUser targetUser;
 
     public QReport(String variable) {
@@ -63,6 +65,7 @@ public class QReport extends EntityPathBase<Report> {
         super(type, metadata, inits);
         this.post = inits.isInitialized("post") ? new com.pi.domain.post.post.entity.QPost(forProperty("post"), inits.get("post")) : null;
         this.reporter = inits.isInitialized("reporter") ? new com.pi.domain.user.user.entity.QUser(forProperty("reporter")) : null;
+        this.review = inits.isInitialized("review") ? new com.pi.domain.review.review.entity.QReview(forProperty("review"), inits.get("review")) : null;
         this.targetUser = inits.isInitialized("targetUser") ? new com.pi.domain.user.user.entity.QUser(forProperty("targetUser")) : null;
     }
 

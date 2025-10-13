@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,22 +41,11 @@ public class RegionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<RegionDto> getRegionTree(Pageable pageable) {
-        return regionRepository.findByParentIsNull(pageable)
-                .map(this::buildTree);
+    public Page<RegionDto> getRegions(Pageable pageable) {
+        return regionRepository.findAll(pageable)
+                .map(region -> RegionDto.from(region, List.of()));
     }
 
-    private RegionDto buildTree(Region region) {
-        List<RegionDto> children = regionRepository.findByParentId(region.getId()).stream()
-                .map(this::buildTree)
-                .collect(Collectors.toList());
-        return new RegionDto(
-                region.getId(),
-                region.getName(),
-                region.getParent() != null ? region.getParent().getId() : null,
-                children
-        );
-    }
 
     @Transactional
     public void deleteRegion(Long id) {

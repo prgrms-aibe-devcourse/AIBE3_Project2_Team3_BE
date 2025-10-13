@@ -6,7 +6,7 @@ public record ReportCreateReqBody(
         Long reporterId,
         Long targetUserId,
         Long postId,
-//        Long reviewId,
+        Long reviewId,
         String comment,
         ReportType reportType
 ) {}

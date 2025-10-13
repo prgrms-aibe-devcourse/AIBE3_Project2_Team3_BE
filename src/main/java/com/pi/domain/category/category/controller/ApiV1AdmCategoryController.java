@@ -31,8 +31,8 @@ public class ApiV1AdmCategoryController {
 
     @GetMapping
     @Operation(summary = "전체 카테고리 트리 조회")
-    public Page<CategoryDto> getCategoryTree(Pageable pageable) {
-        return categoryService.getCategoryTree(pageable);
+    public Page<CategoryDto> getCategories(Pageable pageable) {
+        return categoryService.getCategories(pageable);
     }
 
     @Operation(summary = "카테고리 삭제")
