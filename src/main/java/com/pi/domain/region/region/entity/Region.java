@@ -27,8 +27,9 @@ public class Region extends BaseEntity {
     @OneToMany(mappedBy = "region")
     private final List<PostRegion> postRegions = new ArrayList<>();
 
-    public Region(String name) {
+    public Region(String name, Region parent) {
         this.name = name;
+        this.parent = parent;
     }
 
     public void addChild(Region child) {
