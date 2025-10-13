@@ -4,6 +4,7 @@ import com.pi.domain.offer.offer.entity.OfferStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record OfferModifyReqBody(
-        @NotNull OfferStatus status
+        @NotNull OfferStatus status,
+        int amount
 ) {
 }

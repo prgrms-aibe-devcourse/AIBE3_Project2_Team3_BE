@@ -3,7 +3,7 @@ package com.pi.domain.offer.offer.service;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.repository.OfferRepository;
-import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,8 +35,8 @@ public class OfferService {
         return offerRepository.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
     }
 
-    public Offer create(Freelancer freelancer, User user) {
-        Offer offer = new Offer(freelancer, user, OfferStatus.REQUESTED);
+    public Offer create(Post post, User user, int amount) {
+        Offer offer = new Offer(post, user, OfferStatus.REQUESTED, amount);
 
         return offerRepository.save(offer);
     }

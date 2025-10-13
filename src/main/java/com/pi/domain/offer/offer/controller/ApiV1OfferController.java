@@ -4,12 +4,13 @@ import com.pi.domain.offer.offer.dto.*;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
-import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
+import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
+import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,30 +33,22 @@ public class ApiV1OfferController {
 
     @GetMapping("/my")
     @Transactional(readOnly = true)
-    @Operation(summary = "본인이 등록한 구인 조회")
-    public RsData<PagedResBody<OfferWithPostDto>> getMyOffers(
+    @Operation(summary = "본인이 등록한 구인 다건 조회")
+    public PagePayload<OfferWithPostDto> getMyOffers(
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();
-        Page<Offer> pagedOffers = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable);
+        Page<OfferWithPostDto> dtoPage = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
+                .map(offer -> new OfferWithPostDto(offer, offer.getPost(), offer.getUser()));
 
-        return new RsData<>(
-                "200-1",
-                "%d번 사용자의 구인이 조회되었습니다.".formatted(actor.getId()),
-                new PagedResBody<>(
-                        pagedOffers.getContent().stream()
-                                .map(offer -> new OfferWithPostDto(offer, offer.getFreelancer().getPost()))
-                                .toList()
-                        , pagedOffers
-                )
-        );
+        return Ut.pageMapper.of(dtoPage);
     }
 
     @GetMapping("/freelancer/{freelancerId}")
     @Transactional(readOnly = true)
-    @Operation(summary = "프리랜서의 구인 조회")
-    public RsData<PagedResBody<OfferWithUserDto>> getOffersForFreelancer(
+    @Operation(summary = "프리랜서의 구인 다건 조회")
+    public PagePayload<OfferWithUserDto> getOffersForFreelancer(
             @PathVariable Long freelancerId,
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
@@ -64,18 +57,10 @@ public class ApiV1OfferController {
         Post post = freelancerService.findById(freelancerId);
         post.checkActorCanReadOffer(actor);
 
-        Page<Offer> pagedOffers = offerService.findAllByFreelancerIdAndStatus(freelancerId, status, pageable);
+        Page<OfferWithUserDto> dtoPage = offerService.findAllByFreelancerIdAndStatus(freelancerId, status, pageable)
+                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
 
-        return new RsData<>(
-                "200-1",
-                "%d번 프리랜서의 구인이 조회되었습니다.".formatted(post.getId()),
-                new PagedResBody<>(
-                        pagedOffers.getContent().stream()
-                                .map(OfferWithUserDto::new)
-                                .toList()
-                        , pagedOffers
-                )
-        );
+        return Ut.pageMapper.of(dtoPage);
     }
 
     @PostMapping
@@ -83,9 +68,9 @@ public class ApiV1OfferController {
     @Operation(summary = "등록")
     public RsData<OfferDto> write(@Valid @RequestBody OfferWriteReqBody reqBody) {
         User actor = rq.getActor();
-        Freelancer freelancer = freelancerService.findById(reqBody.freelancerId()).getFreelancer();
+        Post post = freelancerService.findById(reqBody.freelancerId());
 
-        Offer offer = offerService.create(freelancer, actor);
+        Offer offer = offerService.create(post, actor, reqBody.amount());
 
         return new RsData<>(
                 "201-1",
@@ -104,7 +89,7 @@ public class ApiV1OfferController {
         Offer offer = offerService.findById(id);
 
         User actor = rq.getActor();
-        User freelancerUser = offer.getFreelancer().getPost().getUser();
+        User freelancerUser = offer.getPost().getUser();
         offer.checkActorCanModify(actor, freelancerUser);
 
         offerService.update(offer, reqBody.status());
