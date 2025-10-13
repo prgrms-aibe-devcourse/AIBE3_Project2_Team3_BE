@@ -23,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/freelancers")
 @RequiredArgsConstructor
@@ -93,5 +95,23 @@ public class ApiV1FreelancerController {
 
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
     }
+
+    @GetMapping("")
+    public RsData<Page<FreelancerDto>> getFreelancers(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String skill,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Integer minSalary,
+            @RequestParam(required = false) Integer maxSalary,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<FreelancerDto> freelancers = freelancerService.searchFreelancers(
+                category, region, skill, title, minSalary, maxSalary, pageable
+        );
+        return new RsData<>("200-1", "프리랜서 검색 결과입니다.", freelancers);
+    }
+
+
 }
 

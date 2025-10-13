@@ -1,6 +1,7 @@
 package com.pi.domain.post.freelancer.service;
 
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -95,4 +97,22 @@ public class FreelancerService {
 
         return postRepository.save(post);
     }
+
+    @Transactional(readOnly = true)
+    public Page<FreelancerDto> searchFreelancers(
+            String category,
+            String region,
+            String skill,
+            String title,
+            Integer minSalary,
+            Integer maxSalary,
+            Pageable pageable
+    ) {
+        Page<Freelancer> result = freelancerRepository.searchFreelancers(
+                category, region, skill, title, minSalary, maxSalary, pageable
+        );
+
+        return result.map(FreelancerDto::new);
+    }
+
 }
