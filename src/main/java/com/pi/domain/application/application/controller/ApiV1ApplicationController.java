@@ -62,14 +62,14 @@ public class ApiV1ApplicationController {
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     @Operation(summary = "단건 조회")
-    public ApplicationGetResBody getItem(@PathVariable Long id) {
+    public ApplicationDto getItem(@PathVariable Long id) {
         User actor = rq.getActor();
 
         Application application = applicationService.findById(id);
         User user = application.getUser();
         application.checkActorCanRead(actor, user);
 
-        return new ApplicationGetResBody(
+        return new ApplicationDto(
                 application,
                 application.getFiles().stream()
                         .map(file -> new ApplicationFileDto(

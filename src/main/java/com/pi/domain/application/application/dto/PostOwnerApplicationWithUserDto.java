@@ -1,6 +1,7 @@
 package com.pi.domain.application.application.dto;
 
 import com.pi.domain.application.application.entity.Application;
+import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -11,13 +12,13 @@ public record PostOwnerApplicationWithUserDto(
         long userId,
         String userNickname
 ) {
-    public PostOwnerApplicationWithUserDto(Application application) {
+    public PostOwnerApplicationWithUserDto(Application application, User user) {
         this(
                 application.getId(),
                 application.getStatus().name(),
                 application.getCreatedDate(),
-                application.getUser().getId(),
-                application.getUser().getNickname()
+                user.getId(),
+                user.getNickname()
         );
     }
 }

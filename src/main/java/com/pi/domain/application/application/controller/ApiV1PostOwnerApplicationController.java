@@ -1,9 +1,6 @@
 package com.pi.domain.application.application.controller;
 
-import com.pi.domain.application.application.dto.ApplicationModifyReqBody;
-import com.pi.domain.application.application.dto.PostOwnerApplicationGetResBody;
-import com.pi.domain.application.application.dto.PostOwnerApplicationModifyResBody;
-import com.pi.domain.application.application.dto.PostOwnerApplicationWithUserDto;
+import com.pi.domain.application.application.dto.*;
 import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.service.ApplicationService;
@@ -50,7 +47,7 @@ public class ApiV1PostOwnerApplicationController {
         post.checkActorCanReadApplication(actor);
 
         Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatusForPostOwner(postId, status, pageable)
-                .map(PostOwnerApplicationWithUserDto::new);
+                .map(application -> new PostOwnerApplicationWithUserDto(application, application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -73,7 +70,7 @@ public class ApiV1PostOwnerApplicationController {
     @PutMapping("/{id}")
     @Transactional
     @Operation(summary = "상태 수정")
-    public RsData<PostOwnerApplicationModifyResBody> modifyStatus(
+    public RsData<ApplicationModifyResBody> modifyStatus(
             @PathVariable long id,
             @Valid @RequestBody ApplicationModifyReqBody reqBody
     ) {
@@ -89,7 +86,7 @@ public class ApiV1PostOwnerApplicationController {
         return new RsData<>(
                 "200-1",
                 "%d번 구직 상태가 수정되었습니다.".formatted(id),
-                new PostOwnerApplicationModifyResBody(application.getStatus())
+                new ApplicationModifyResBody(application.getStatus())
         );
     }
 }
