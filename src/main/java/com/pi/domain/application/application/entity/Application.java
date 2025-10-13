@@ -62,6 +62,7 @@ public class Application extends BaseEntity {
     public Application(Post post, User user, String content, long salary, int period) {
         this.post = post;
         this.user = user;
+        this.status = ApplicationStatus.PENDING;
         this.content = content;
         this.salary = salary;
         this.period = period;

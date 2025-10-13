@@ -53,7 +53,7 @@ public class ApiV1PostOwnerApplicationController {
         Post post = projectService.findById(postId);
         post.checkActorCanReadApplication(actor);
 
-        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatusForPostOwner(postId, status, pageable)
+        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatus(postId, status, pageable)
                 .map(application -> new PostOwnerApplicationWithUserDto(application, application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
@@ -93,11 +93,11 @@ public class ApiV1PostOwnerApplicationController {
 
         Application application = applicationService.findById(id);
 
-        User user = application.getPost().getUser();
-        application.checkActorCanModify(actor, user);
+        User postUser = application.getPost().getUser();
+        application.checkActorCanModify(actor, postUser);
 
-        if (application.getStatus() != ApplicationStatus.PENDING) {
-            log.warn("수락/거절된 구직({})은 수정 불가", application.getId());
+        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
+            log.warn("수락된 구직({})은 수정 불가", application.getId());
             throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
         applicationService.updateStatus(application, reqBody.status());

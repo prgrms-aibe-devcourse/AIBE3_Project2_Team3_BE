@@ -9,7 +9,7 @@ public record OfferDto(
         int amount,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
-        long freelancerId,
+        long postId,
         long userId,
         String status
 ) {

@@ -44,7 +44,7 @@ public class ApplicationService {
         return applicationRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 
-    public Page<Application> findAllByPostIdAndStatusForPostOwner(long postId, ApplicationStatus status, Pageable pageable) {
+    public Page<Application> findAllByPostIdAndStatus(long postId, ApplicationStatus status, Pageable pageable) {
         if (status == null) return applicationRepository.findAllByPostId(postId, pageable);
         return applicationRepository.findAllByPostIdAndStatus(postId, status, pageable);
     }

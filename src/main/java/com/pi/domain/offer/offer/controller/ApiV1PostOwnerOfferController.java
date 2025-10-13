@@ -1,9 +1,6 @@
 package com.pi.domain.offer.offer.controller;
 
-import com.pi.domain.offer.offer.dto.OfferDto;
-import com.pi.domain.offer.offer.dto.OfferModifyReqBody;
-import com.pi.domain.offer.offer.dto.OfferWithPostDto;
-import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
+import com.pi.domain.offer.offer.dto.*;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
@@ -28,25 +25,29 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/offers")
+@RequestMapping("/api/v1/post-owner/offers")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "ApiV1OfferController", description = "API 구인 컨트롤러")
-public class ApiV1OfferController {
+@Tag(name = "ApiV1PostOwnerOfferController", description = "게시글 작성자용 API 구인 컨트롤러")
+public class ApiV1PostOwnerOfferController {
     private final Rq rq;
     private final OfferService offerService;
     private final FreelancerService freelancerService;
 
-    @GetMapping
+    @GetMapping("/post/{postId}")
     @Transactional(readOnly = true)
     @Operation(summary = "다건 조회")
-    public PagePayload<OfferWithPostDto> getMyItems(
+    public PagePayload<OfferWithUserDto> getItems(
+            @PathVariable Long postId,
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();
-        Page<OfferWithPostDto> dtoPage = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
-                .map(offer -> new OfferWithPostDto(offer, offer.getPost(), offer.getUser()));
+        Post post = freelancerService.findById(postId);
+        post.checkActorCanReadOffer(actor);
+
+        Page<OfferWithUserDto> dtoPage = offerService.findAllByPostIdAndStatus(postId, status, pageable)
+                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -54,68 +55,38 @@ public class ApiV1OfferController {
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     @Operation(summary = "단건 조회")
-    public OfferDto getMyItem(@PathVariable Long id) {
+    public OfferDto getItem(@PathVariable Long id) {
         User actor = rq.getActor();
         Offer offer = offerService.findById(id);
-        User user = offer.getUser();
-        offer.checkActorCanRead(actor, user);
+        User postUser = offer.getPost().getUser();
+        offer.checkActorCanRead(actor, postUser);
 
         return new OfferDto(offer);
     }
 
-    @PostMapping
-    @Transactional
-    @Operation(summary = "등록")
-    public RsData<OfferDto> write(@Valid @RequestBody OfferWriteReqBody reqBody) {
-        User actor = rq.getActor();
-        Post post = freelancerService.findById(reqBody.postId());
-        post.checkActorIsNotOwner(actor);
-
-        Offer offer = offerService.create(post, actor, reqBody.amount());
-
-        return new RsData<>(
-                "201-1",
-                "%d번 구인이 등록되었습니다.".formatted(offer.getId()),
-                new OfferDto(offer)
-        );
-    }
-
     @PutMapping("/{id}")
     @Transactional
-    @Operation(summary = "수정")
-    public RsData<OfferDto> modify(
+    @Operation(summary = "상태 수정")
+    public RsData<PostOwnerOfferModifyResBody> modifyStatus(
             @PathVariable long id,
-            @Valid @RequestBody OfferModifyReqBody reqBody
+            @Valid @RequestBody PostOwnerOfferModifyReqBody reqBody
     ) {
         Offer offer = offerService.findById(id);
 
         User actor = rq.getActor();
-        offer.checkActorCanModify(actor);
+        User postUser = offer.getPost().getUser();
+        offer.checkActorCanModifyStatus(actor, postUser);
 
-        if (offer.getStatus() != OfferStatus.PENDING) {
-            log.warn("수락/거절된 구인({})은 수정 불가", offer.getId());
+        if (offer.getStatus() == OfferStatus.ACCEPTED) {
+            log.warn("수락된 구인({})은 수정 불가", offer.getId());
             throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
-        offerService.update(offer, reqBody.amount());
+        offerService.updateStatus(offer, reqBody.status());
 
         return new RsData<>(
                 "200-1",
                 "%d번 구인 상태가 수정되었습니다.".formatted(id),
-                new OfferDto(offer)
+                new PostOwnerOfferModifyResBody(offer)
         );
-    }
-
-    @Transactional
-    @DeleteMapping("/{id}")
-    @Operation(summary = "삭제")
-    public RsData<Void> delete(@PathVariable Long id) {
-        Offer offer = offerService.findById(id);
-
-        User actor = rq.getActor();
-        offer.checkActorCanDelete(actor);
-
-        offerService.delete(offer);
-
-        return new RsData<>("200-1", "%d번 구인이 삭제되었습니다.".formatted(id));
     }
 }

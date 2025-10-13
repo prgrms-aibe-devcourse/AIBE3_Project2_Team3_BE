@@ -115,7 +115,7 @@ public class Post extends BaseEntity {
         return !actor.getUsername().equals(user.getUsername());
     }
 
-    public void checkActorCanWriteApplication(User actor) {
+    public void checkActorIsNotOwner(User actor) {
         if (isOwner(actor)) {
             log.warn("본인({})이 등록한 게시글({})에 지원 불가", actor.getUsername(), id);
             throw new ServiceException("403-1", "권한이 없습니다.");

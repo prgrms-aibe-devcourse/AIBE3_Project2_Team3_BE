@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -19,6 +20,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class Offer extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private Post post;
@@ -26,29 +28,55 @@ public class Offer extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private User user;
 
+    @Column(columnDefinition = "VARCHAR(255) DEFAULT 'PENDING'")
     @Enumerated(EnumType.STRING)
     @Setter
     private OfferStatus status;
 
-    private int amount;
+    @Column(columnDefinition = "INT UNSIGNED DEFAULT 1")
+    @Setter
+    private int amount = 1;
 
-    private boolean isOwner(User actor) {
-        return actor.getUsername().equals(user.getUsername());
+    public Offer(Post post, User user, int amount) {
+        this.post = post;
+        this.user = user;
+        this.status = OfferStatus.PENDING;
+        this.amount = amount;
     }
 
-    public void checkActorCanModify(User actor, User freelancerUser) {
-        if (!actor.getUsername().equals(freelancerUser.getUsername())) {
-            throw new ServiceException("403-1", "%d번 구인 상태 수정 권한이 없습니다.".formatted(getId()));
+    public void checkActorCanRead(User actor, User user) {
+        if (isDifferentUser(actor, user)) {
+            log.warn("구인({}) 조회 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
+        }
+    }
+
+    public void checkActorCanModify(User actor) {
+        if (isNotOwner(actor)) {
+            log.warn("구인({}) 수정 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
+        }
+    }
+
+    public void checkActorCanModifyStatus(User actor, User postUser) {
+        if (isDifferentUser(actor, postUser)) {
+            log.warn("구인({}) 상태 수정 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
         }
     }
 
     public void checkActorCanDelete(User actor) {
-        if (!isOwner(actor)) {
-            throw new ServiceException("403-1", "%d번 구인 삭제 권한이 없습니다.".formatted(getId()));
+        if (isNotOwner(actor)) {
+            log.warn("구인({}) 삭제 권한 없음. 사용자: {}", getId(), actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
         }
     }
 
-    public Offer(Post post, User user, OfferStatus offerStatus) {
-        super();
+    private boolean isNotOwner(User actor) {
+        return !actor.getUsername().equals(this.user.getUsername());
+    }
+
+    private boolean isDifferentUser(User actor, User user) {
+        return !actor.getUsername().equals(user.getUsername());
     }
 }

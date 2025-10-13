@@ -5,7 +5,6 @@ import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.service.ApplicationService;
 import com.pi.domain.application.file.dto.ApplicationFileDto;
-import com.pi.domain.application.file.service.ApplicationFileService;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
@@ -38,11 +37,9 @@ import java.util.List;
 @Slf4j
 @Tag(name = "ApiV1ApplicationController", description = "API 구직 컨트롤러")
 public class ApiV1ApplicationController {
-    private static final String AWS_S3_DIRECTORY = "application";
     private final Rq rq;
     private final ApplicationService applicationService;
     private final ProjectService projectService;
-    private final ApplicationFileService applicationFileService;
     private final AwsS3Service awsS3Service;
 
     @GetMapping
@@ -62,7 +59,7 @@ public class ApiV1ApplicationController {
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     @Operation(summary = "단건 조회")
-    public ApplicationDto getItem(@PathVariable Long id) {
+    public ApplicationDto getMyItem(@PathVariable Long id) {
         User actor = rq.getActor();
 
         Application application = applicationService.findById(id);
@@ -90,7 +87,7 @@ public class ApiV1ApplicationController {
     ) {
         User actor = rq.getActor();
         Post post = projectService.findById(reqBody.postId());
-        post.checkActorCanWriteApplication(actor);
+        post.checkActorIsNotOwner(actor);
 
         Application application = applicationService.create(post, actor, reqBody, files);
 
@@ -134,11 +131,6 @@ public class ApiV1ApplicationController {
         User actor = rq.getActor();
         Application application = applicationService.findById(id);
         application.checkActorCanDelete(actor);
-
-//        if (application.getStatus() != ApplicationStatus.DRAFT) {
-//            log.warn("제출된 구직({})은 삭제 불가", application.getId());
-//            throw new ServiceException("400-1", "잘못된 요청입니다.");
-//        }
 
         applicationService.delete(application);
 

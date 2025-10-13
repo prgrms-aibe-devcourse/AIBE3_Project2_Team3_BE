@@ -32,17 +32,22 @@ public class OfferService {
     }
 
     public Page<Offer> findAllByPostIdAndStatus(Long postId, OfferStatus status, Pageable pageable) {
+        if (status == null) return offerRepository.findAllByPostId(postId, pageable);
         return offerRepository.findAllByPostIdAndStatus(postId, status, pageable);
     }
 
     public Offer create(Post post, User user, int amount) {
-        Offer offer = new Offer(post, user, OfferStatus.REQUESTED, amount);
+        Offer offer = new Offer(post, user, amount);
 
         return offerRepository.save(offer);
     }
 
-    public void update(Offer offer, OfferStatus status) {
-        offer.setStatus(status);
+    public void update(Offer offer, int amount) {
+        offer.setAmount(amount);
+    }
+
+    public void updateStatus(Offer offer, String status) {
+        offer.setStatus(OfferStatus.valueOf(status));
     }
 
     public void delete(Offer offer) {
