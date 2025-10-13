@@ -43,3 +43,6 @@ db_dev.trace.db
 
 .env
 application-secret.yml
+
+# QueryDSL generated
+/src/main/generated/
