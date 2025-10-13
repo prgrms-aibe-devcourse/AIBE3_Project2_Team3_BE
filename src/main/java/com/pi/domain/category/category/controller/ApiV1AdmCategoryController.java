@@ -4,11 +4,15 @@ import com.pi.domain.category.category.dto.CategoryCreateReqBody;
 import com.pi.domain.category.category.dto.CategoryDto;
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.service.CategoryService;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +35,10 @@ public class ApiV1AdmCategoryController {
 
     @GetMapping
     @Operation(summary = "전체 카테고리 조회")
-    public Page<CategoryDto> getCategories(Pageable pageable) {
-        return categoryService.getCategories(pageable);
+    public PagePayload<CategoryDto> getCategories(
+            @ParameterObject @PageableDefault(size = 30, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return Ut.pageMapper.of(categoryService.getCategories(pageable));
     }
 
     @Operation(summary = "카테고리 삭제")

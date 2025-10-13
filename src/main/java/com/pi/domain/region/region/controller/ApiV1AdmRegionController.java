@@ -4,11 +4,15 @@ import com.pi.domain.region.region.dto.RegionCreateReqBody;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.service.RegionService;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +35,10 @@ public class ApiV1AdmRegionController {
 
     @GetMapping
     @Operation(summary = "전체 지역 조회")
-    public Page<RegionDto> getRegions(Pageable pageable) {
-        return regionService.getRegions(pageable);
+    public PagePayload<RegionDto> getRegions(
+            @ParameterObject @PageableDefault(size = 30, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return Ut.pageMapper.of(regionService.getRegions(pageable));
     }
 
     @DeleteMapping("/{id}")

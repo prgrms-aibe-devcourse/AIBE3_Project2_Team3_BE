@@ -4,11 +4,15 @@ import com.pi.domain.skill.skill.dto.SkillCreateReqBody;
 import com.pi.domain.skill.skill.dto.SkillDto;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.service.SkillService;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +33,10 @@ public class ApiV1AdmSkillController {
 
     @Operation(summary = "전체 스킬 조회")
     @GetMapping
-    public Page<SkillDto> getSkills(Pageable pageable) {
-        return skillService.getSkills(pageable);
+    public PagePayload<SkillDto> getSkills(
+            @ParameterObject @PageableDefault(size = 30, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return Ut.pageMapper.of(skillService.getSkills(pageable));
     }
 
     @Operation(summary = "스킬 삭제")
