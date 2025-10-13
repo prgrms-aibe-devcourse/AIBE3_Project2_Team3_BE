@@ -6,11 +6,13 @@ import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
-import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyDto;
+import com.pi.domain.post.project.dto.ProjectSearchDto;
+import com.pi.domain.post.project.dto.ProjectSearchReqDto;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.entity.ProjectStatus;
+import com.pi.domain.post.project.repository.ProjectQueryRepository;
 import com.pi.domain.post.project.repository.ProjectRepository;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
@@ -25,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,6 +37,7 @@ public class ProjectService {
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
+    private final ProjectQueryRepository projectQueryRepository;
 
     public long count() {
         return projectRepository.count();
@@ -43,6 +45,11 @@ public class ProjectService {
 
     public Post findById(Long id) {
         return postRepository.findByProjectIsNotNullAndId(id).get();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProjectSearchDto> searchProjects(ProjectSearchReqDto condition, Pageable pageable) {
+        return projectQueryRepository.searchProjects(condition, pageable);
     }
 
     public Page<Post> getPage(Pageable pageable, String searchKeyword) {
@@ -105,31 +112,6 @@ public class ProjectService {
         project.changeStatus(status);
     }
 
-    @Transactional(readOnly = true)
-    public List<ProjectDto> searchProjects(
-            ProjectStatus status,
-            List<Long> regionIds,
-            List<Long> categoryIds,
-            List<Long> skillIds,
-            String keyword
-    ) {
-        Boolean isOngoing = null;
-        if (status != null) {
-            isOngoing = (status == ProjectStatus.ONGOING);
-        }
-
-        return projectRepository.search(
-                        isOngoing,
-                        regionIds,
-                        categoryIds,
-                        skillIds,
-                        keyword,
-                        LocalDateTime.now()
-                )
-                .stream()
-                .map(ProjectDto::new)
-                .toList();
-    }
 
     // 연관관계
     private void addRelations(Post post, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {

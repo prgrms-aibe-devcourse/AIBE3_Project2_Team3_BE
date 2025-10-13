@@ -1,10 +1,16 @@
 package com.pi.domain.post.project.controller;
 
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.repository.SkillRepository;
+import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.service.UserService;
+import com.pi.global.rq.Rq;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +22,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,6 +47,10 @@ public class ApiV1ProjectControllerTest {
     private CategoryRepository categoryRepository;
     @Autowired
     private SkillRepository skillRepository;
+    @Autowired
+    private Rq rq;
+    @Autowired
+    private UserService userService;
 
 
     @Test
@@ -80,7 +93,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("write"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
-                .andExpect(jsonPath("$.message").value("%d번 프로젝트 게시글이 등록되었습니다.".formatted(post.getId())))
+                .andExpect(jsonPath("$.message").value("프로젝트 게시글이 등록되었습니다."))
                 .andExpect(jsonPath("$.data.id").value(post.getId()))
                 .andExpect(jsonPath("$.data.title").value("프로젝트 제목"))
                 .andExpect(jsonPath("$.data.salary").value(5000000))
@@ -129,6 +142,30 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(jsonPath("$.message").value("post.title-NotBlank-must not be blank"));
     }
 
+    //검색을 위한 데이터 추가
+    @BeforeEach
+    void beforeEach() {
+
+        User actor = userService.findByUsername("user1").orElseThrow();
+        projectService.create(
+                actor,
+                new PostWriteDto("프로젝트", "내용", true),
+                new ProjectWriteDto(
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusMonths(1),
+                        "기업",
+                        "정규직",
+                        5000000L,
+                        3,
+                        2
+                ),
+                List.of(1L),
+                List.of(1L),
+                List.of(1L)
+        );
+    }
+
     @Test
     @DisplayName("프로젝트 단건 조회")
     @WithUserDetails("user1")
@@ -148,19 +185,28 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(jsonPath("$.title").value("프로젝트"));
     }
 
+
     @Test
-    @DisplayName("프로젝트 다건 조회")
+    @DisplayName("프로젝트 다건 조회, 검색")
     @WithUserDetails("user1")
     void t2_1() throws Exception {
         ResultActions resultActions = mvc.perform(
                         get("/api/v1/projects")
+                                .param("keyword", "프로젝트")
                 )
                 .andDo(print());
 
         resultActions
                 .andExpect(handler().handlerType(ApiV1ProjectController.class))
                 .andExpect(handler().methodName("getItems"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageInfo.page").value(0))
+                .andExpect(jsonPath("$.pageInfo.size").value(5))
+                .andExpect(jsonPath("$.pageInfo.totalElements").value(2))
+                .andExpect(jsonPath("$.pageInfo.totalPages").value(1))
+                .andExpect(jsonPath("$.data[0].title").value("프로젝트"))
+                .andExpect(jsonPath("$.data[1].title").value("프로젝트"));
+
     }
 
     @Test
@@ -204,7 +250,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().methodName("modify"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.message").value("%d번 프로젝트 게시글이 수정되었습니다.".formatted(post.getId())))
+                .andExpect(jsonPath("$.message").value("프로젝트 게시글이 수정되었습니다."))
                 .andExpect(jsonPath("$.data.title").value("수정된 프로젝트 제목"))
                 .andExpect(jsonPath("$.data.salary").value(6000000));
     }
@@ -264,7 +310,7 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().handlerType(ApiV1ProjectController.class))
                 .andExpect(handler().methodName("delete"))
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.message").value("%d번 프로젝트 게시글이 삭제되었습니다.".formatted(projectId)));
+                .andExpect(jsonPath("$.message").value("프로젝트 게시글이 삭제되었습니다."));
     }
 
     @Test
@@ -303,24 +349,6 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(jsonPath("$.message").value("존재하지 않는 데이터입니다."));
     }
 
-    @Test
-    @DisplayName("프로젝트 검색")
-    @WithUserDetails("user1")
-    void t5() throws Exception {
-        ResultActions resultActions = mvc.perform(
-                        get("/api/v1/projects/search")
-                                .param("status", "모집중")
-                                .param("region", "서울")
-                                .param("keyword", "프로젝트")
-                )
-                .andDo(print());
-        resultActions
-                .andExpect(handler().handlerType(ApiV1ProjectController.class))
-                .andExpect(handler().methodName("getProjects"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("프로젝트"))
-                .andExpect(jsonPath("$[0].regions[0].name").value("서울"));
-    }
 
     @Test
     @DisplayName("프로젝트 상태 변경 ")
