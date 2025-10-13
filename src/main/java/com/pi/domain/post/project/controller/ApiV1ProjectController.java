@@ -2,7 +2,10 @@ package com.pi.domain.post.project.controller;
 
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
-import com.pi.domain.post.project.dto.*;
+import com.pi.domain.post.project.dto.ProjectDto;
+import com.pi.domain.post.project.dto.ProjectModifyReqBody;
+import com.pi.domain.post.project.dto.ProjectSearchReqDto;
+import com.pi.domain.post.project.dto.ProjectWriteReqBody;
 import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
@@ -47,11 +50,11 @@ public class ApiV1ProjectController {
     @GetMapping
     @Transactional
     @Operation(summary = "프로젝트 글 다건 조회")
-    public PagePayload<ProjectSearchDto> getItems(
+    public PagePayload<ProjectDto> getItems(
             @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @ModelAttribute ProjectSearchReqDto searchCondition
     ) {
-        Page<ProjectSearchDto> dtoPage = projectService.searchProjects(searchCondition, pageable);
+        Page<ProjectDto> dtoPage = projectService.searchProjects(searchCondition, pageable);
         return Ut.pageMapper.of(dtoPage);
     }
 
@@ -95,17 +98,7 @@ public class ApiV1ProjectController {
         return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
 //
-//    @GetMapping("/search")
-//    @Operation(summary = "프로젝트 글 검색 및 다건조회")
-//    public List<ProjectDto> getProjects(
-//            @RequestParam(required = false) List<Long> regionIds,
-//            @RequestParam(required = false) List<Long> categoryIds,
-//            @RequestParam(required = false) List<Long> skillIds,
-//            @RequestParam(required = false) String keyword
-//    ) {
 //
-//
-//    }
 
     @PatchMapping("/{id}/status")
     @Transactional

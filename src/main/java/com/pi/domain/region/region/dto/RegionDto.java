@@ -2,6 +2,7 @@ package com.pi.domain.region.region.dto;
 
 import com.pi.domain.region.region.entity.Region;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record RegionDto(
@@ -26,6 +27,10 @@ public record RegionDto(
                 region.getParent() != null ? region.getParent().getId() : null,
                 children
         );
+    }
+
+    public <T> RegionDto(Long id, String name, Long parentId) {
+        this(id, name, parentId, new ArrayList<>());
     }
 
     public static RegionDto from(Region region, List<RegionDto> children) {

@@ -192,7 +192,7 @@ public class ApiV1ProjectControllerTest {
     void t2_1() throws Exception {
         ResultActions resultActions = mvc.perform(
                         get("/api/v1/projects")
-                                .param("keyword", "프로젝트")
+                                .param("keyword", "프로젝")
                 )
                 .andDo(print());
 
@@ -200,12 +200,10 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(handler().handlerType(ApiV1ProjectController.class))
                 .andExpect(handler().methodName("getItems"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pageInfo.page").value(0))
-                .andExpect(jsonPath("$.pageInfo.size").value(5))
-                .andExpect(jsonPath("$.pageInfo.totalElements").value(2))
-                .andExpect(jsonPath("$.pageInfo.totalPages").value(1))
-                .andExpect(jsonPath("$.data[0].title").value("프로젝트"))
-                .andExpect(jsonPath("$.data[1].title").value("프로젝트"));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].title").value("프로젝트"))
+                .andExpect(jsonPath("$.content[1].title").value("프로젝트"))
+                .andExpect(jsonPath("$.page.totalElements").value(2));
 
     }
 

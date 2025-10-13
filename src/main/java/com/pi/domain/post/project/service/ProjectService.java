@@ -6,8 +6,8 @@ import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
+import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyDto;
-import com.pi.domain.post.project.dto.ProjectSearchDto;
 import com.pi.domain.post.project.dto.ProjectSearchReqDto;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
@@ -48,7 +48,7 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProjectSearchDto> searchProjects(ProjectSearchReqDto condition, Pageable pageable) {
+    public Page<ProjectDto> searchProjects(ProjectSearchReqDto condition, Pageable pageable) {
         return projectQueryRepository.searchProjects(condition, pageable);
     }
 
