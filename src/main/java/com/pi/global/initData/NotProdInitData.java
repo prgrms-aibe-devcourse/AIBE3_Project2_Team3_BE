@@ -26,6 +26,7 @@ import com.pi.domain.region.region.service.RegionService;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.entity.UserRole;
 import com.pi.domain.user.user.repository.UserRepository;
 import com.pi.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -78,8 +79,8 @@ public class NotProdInitData {
     public void work1() {
         if (userService.count() > 0) return;
 
-        User userSystem = userService.join("system", "1234", "시스템", "system@test.com");
-        User userAdmin = userService.join("admin", "1234", "관리자", "admin@test.com");
+        User userSystem = userService.join("system", "1234", "시스템", "system@test.com", UserRole.ROLE_ADMIN);
+        User userAdmin = userService.join("admin", "1234", "관리자", "admin@test.com", UserRole.ROLE_ADMIN);
         User user1 = userService.join("user1", "1234", "유저1", "user1@test.com");
         User user2 = userService.join("user2", "1234", "유저2", "user2@test.com");
         User user3 = userService.join("user3", "1234", "유저3", "user3@test.com");

@@ -36,6 +36,12 @@ spring:
           starttls:
             enable: true
             required: true
+  data:
+    redis:
+      host: ${SPRING__REDIS__HOST}
+      port: ${SPRING__REDIS__PORT}
+      timeout: 10000
+      password: ${SPRING__REDIS__PASSWORD}
   servlet:
     multipart:
       max-file-size: 5MB
