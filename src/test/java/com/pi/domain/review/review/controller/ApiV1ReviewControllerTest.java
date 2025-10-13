@@ -46,11 +46,6 @@ public class ApiV1ReviewControllerTest {
     @DisplayName("리뷰 작성")
     @WithUserDetails("user1")
     void t1() throws Exception {
-//        Post post = postRepository.save(new Post("테스트 게시글", "테스트 내용", userRepository.findByUsername("user1").orElseThrow()));
-//        User user1 = userRepository.findByUsername("user1").orElseThrow();
-//        User user2 = userRepository.findByUsername("user2").orElseThrow(); // 상대방 유저
-//        Contract contract = contractRepository.save(new Contract(post1, user1, user2,"IN_PROGRESS"));
-
         mvc.perform(post("/api/v1/reviews/{contractId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""

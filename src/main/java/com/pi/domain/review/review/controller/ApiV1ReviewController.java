@@ -53,13 +53,13 @@ public class ApiV1ReviewController {
         return new RsData<>("200-4", "리뷰 조회 성공", new ReviewDto(review));
     }
 
-    @GetMapping("/freelancer/{freelancerId}/reviews")
+    @GetMapping("/freelancer/{freelancerId}")
     public RsData<List<ReviewDto>> getFreelancerReviews(@PathVariable Long freelancerId) {
         List<ReviewDto> reviews = reviewService.findReviewsByFreelancer(freelancerId);
         return new RsData<>("200-5", "프리랜서 리뷰 조회 성공", reviews);
     }
 
-    @GetMapping("/project/{projectId}/reviews")
+    @GetMapping("/project/{projectId}")
     public RsData<List<ReviewDto>> getProjectReviews(@PathVariable Long projectId) {
         List<ReviewDto> reviews = reviewService.findReviewsByProject(projectId);
         return new RsData<>("200-6", "프로젝트 리뷰 조회 성공", reviews);
