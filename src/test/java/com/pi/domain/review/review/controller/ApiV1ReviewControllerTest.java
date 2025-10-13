@@ -52,6 +52,10 @@ public class ApiV1ReviewControllerTest {
     @MockBean
     private com.pi.global.s3.AwsS3Config awsS3Config;
 
+    @MockBean
+    private com.pi.domain.user.user.service.RefreshTokenStore refreshTokenStore;
+
+
     private Long savedReviewId;
 
     @BeforeEach
