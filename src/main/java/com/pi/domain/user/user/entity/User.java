@@ -25,7 +25,7 @@ public class User extends BaseEntity {
     @Setter
     private String password;
     private String nickname;
-    private String role;
+    private UserRole role;
     @Column(unique = true)
     private String email;
     @Column(name = "profile_image_url")
@@ -36,17 +36,25 @@ public class User extends BaseEntity {
         this.password = password;
         this.nickname = nickname;
         this.email = email;
-        this.role = "ROLE_USER";
+        this.role = UserRole.ROLE_USER;
+    }
+
+    public User(String username, String password, String nickname, String email, UserRole role) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.email = email;
+        this.role = role;
     }
 
     public User(long id, String username, String nickname) {
         this.id = id;
         this.username = username;
         this.nickname = nickname;
-        this.role = "ROLE_USER";
+        this.role = UserRole.ROLE_USER;
     }
 
-    public User(long id, String username, String nickname, String role) {
+    public User(long id, String username, String nickname, UserRole role) {
         this.id = id;
         this.username = username;
         this.nickname = nickname;
@@ -77,12 +85,14 @@ public class User extends BaseEntity {
     }
 
     public boolean isAdmin() {
-        if ("admin".equals(username)) return true;
+        if (role.equals(UserRole.ROLE_ADMIN)) return true;
         return false;
     }
 
     public List<String> getAuthoritiesStringList() {
         List<String> authorities = new ArrayList<>();
+        // 기본 사용자 권한은 항상 포함
+        authorities.add("ROLE_USER");
         if (isAdmin()) {
             authorities.add("ROLE_ADMIN");
         }

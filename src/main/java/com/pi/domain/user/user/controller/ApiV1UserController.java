@@ -83,7 +83,7 @@ public class ApiV1UserController {
                 user,
                 reqBody.password()
         );
-        String accessToken = userService.genAccessToken(user);
+        String accessToken = authTokenService.genAccessToken(user);
         String refreshToken = authTokenService.issueRefresh(user);
 
         rq.setCookie("accessToken", accessToken);
