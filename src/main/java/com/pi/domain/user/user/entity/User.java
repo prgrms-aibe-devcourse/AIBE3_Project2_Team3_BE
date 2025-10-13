@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +31,12 @@ public class User extends BaseEntity {
     private String email;
     @Column(name = "profile_image_url")
     private String profileImageUrl;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name = "deleted_date")
+    private LocalDateTime deletedDate;
 
     public User(String username, String password, String nickname, String email) {
         this.username = username;
@@ -61,8 +68,9 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void modify(String nickname) {
+    public void modify(String nickname, String email) {
         this.nickname = nickname;
+        this.email = email;
     }
 
     public void checkActorCanModify(User actor) {
@@ -97,5 +105,10 @@ public class User extends BaseEntity {
             authorities.add("ROLE_ADMIN");
         }
         return authorities;
+    }
+
+    public void deleteSoft() {
+        this.deleted = true;
+        this.deletedDate = LocalDateTime.now();
     }
 }
