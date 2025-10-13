@@ -7,6 +7,8 @@ import com.pi.domain.region.region.service.RegionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +31,8 @@ public class ApiV1AdmRegionController {
 
     @GetMapping
     @Operation(summary = "전체 지역 트리 조회")
-    public List<RegionDto> getRegionTree() {
-        return regionService.getRegionTree();
+    public Page<RegionDto> getRegionTree(Pageable pageable) {
+        return regionService.getRegionTree(pageable);
     }
 
     @DeleteMapping("/{id}")

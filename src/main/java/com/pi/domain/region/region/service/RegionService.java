@@ -5,6 +5,8 @@ import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +42,9 @@ public class RegionService {
     }
 
     @Transactional(readOnly = true)
-    public List<RegionDto> getRegionTree() {
-        List<Region> roots = regionRepository.findByParentIsNull();
-        return roots.stream()
-                .map(this::buildTree)
-                .collect(Collectors.toList());
+    public Page<RegionDto> getRegionTree(Pageable pageable) {
+        return regionRepository.findByParentIsNull(pageable)
+                .map(this::buildTree);
     }
 
     private RegionDto buildTree(Region region) {

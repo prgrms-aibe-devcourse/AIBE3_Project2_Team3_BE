@@ -7,10 +7,10 @@ import com.pi.domain.skill.skill.service.SkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @PreAuthorize("hasRole('ADMIN')")
 @RestController
@@ -29,8 +29,8 @@ public class ApiV1AdmSkillController {
 
     @Operation(summary = "전체 스킬 조회")
     @GetMapping
-    public List<SkillDto> getSkills() {
-        return skillService.getSkills();
+    public Page<SkillDto> getSkills(Pageable pageable) {
+        return skillService.getSkills(pageable);
     }
 
     @Operation(summary = "스킬 삭제")

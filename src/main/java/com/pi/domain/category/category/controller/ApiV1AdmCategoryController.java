@@ -7,6 +7,8 @@ import com.pi.domain.category.category.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +31,8 @@ public class ApiV1AdmCategoryController {
 
     @GetMapping
     @Operation(summary = "전체 카테고리 트리 조회")
-    public List<CategoryDto> getCategoryTree() {
-        return categoryService.getCategoryTree();
+    public Page<CategoryDto> getCategoryTree(Pageable pageable) {
+        return categoryService.getCategoryTree(pageable);
     }
 
     @Operation(summary = "카테고리 삭제")

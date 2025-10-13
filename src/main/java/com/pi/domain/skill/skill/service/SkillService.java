@@ -5,10 +5,10 @@ import com.pi.domain.skill.skill.dto.SkillDto;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +22,9 @@ public class SkillService {
     }
 
     @Transactional(readOnly = true)
-    public List<SkillDto> getSkills() {
-        return skillRepository.findAll()
-                .stream()
-                .map(SkillDto::from)
-                .toList();
+    public Page<SkillDto> getSkills(Pageable pageable) {
+        return skillRepository.findAll(pageable)
+                .map(SkillDto::from);
     }
 
     @Transactional

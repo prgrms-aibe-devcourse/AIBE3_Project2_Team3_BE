@@ -18,6 +18,7 @@ import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.service.QuestionService;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.region.region.service.RegionService;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
@@ -50,6 +51,7 @@ public class NotProdInitData {
     private final UserRepository userRepository;
     private final QuestionService questionService;
     private final AnswerService answerService;
+    private final RegionService regionService;
     @Autowired
     @Lazy
     private NotProdInitData self;
