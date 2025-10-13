@@ -19,8 +19,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
-@Tag(name = "NotificationSSRController", description = "SSR 알림 뷰 컨트롤러")
-public class NotificationSSRController {
+@Tag(name = "NotificationSSEController", description = "SSE 알림 뷰 컨트롤러")
+public class NotificationSSEController {
     private final NotificationService notificationService;
     private final Rq rq;
 
