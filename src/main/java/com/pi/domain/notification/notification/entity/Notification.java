@@ -1,7 +1,6 @@
 package com.pi.domain.notification.notification.entity;
 
 import com.pi.domain.chat.chat.entity.ChatMessage;
-import com.pi.domain.contract.contract.entity.Contract;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.review.review.entity.Review;
 import com.pi.domain.user.user.entity.User;
@@ -28,8 +27,8 @@ public class Notification extends BaseEntity {
     //    테이블 추가 필요
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Apply apply;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Contract contract;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    private Contract contract;
     @ManyToOne(fetch = FetchType.LAZY)
     private Review review;
 
@@ -53,7 +52,7 @@ public class Notification extends BaseEntity {
         this.review = review;
     }
 
-    public void addContract(Contract contract) {
-        this.contract = contract;
-    }
+//    public void addContract(Contract contract) {
+//        this.contract = contract;
+//    }
 }

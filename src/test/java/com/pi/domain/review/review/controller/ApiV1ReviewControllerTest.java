@@ -5,7 +5,6 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
 import com.pi.domain.review.review.entity.Review;
 import com.pi.domain.review.review.repository.ReviewRepository;
-import com.pi.domain.review.review.service.ReviewService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +35,6 @@ public class ApiV1ReviewControllerTest {
     private MockMvc mvc;
 
     @Autowired
-    private ReviewService reviewService;
-
-    @Autowired
     private PostRepository postRepository;
 
     @Autowired
@@ -47,10 +43,16 @@ public class ApiV1ReviewControllerTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    private Long savedReviewId;
-
     @MockBean
     private JavaMailSender javaMailSender;
+
+    @MockBean
+    private com.pi.global.s3.AwsS3Service awsS3Service;
+
+    @MockBean
+    private com.pi.global.s3.AwsS3Config awsS3Config;
+
+    private Long savedReviewId;
 
     @BeforeEach
     void setUp() {
@@ -133,23 +135,27 @@ public class ApiV1ReviewControllerTest {
     @DisplayName("프리랜서 리뷰 전체 조회")
     @WithUserDetails("user1")
     void t5() throws Exception {
-        mvc.perform(get("/api/v1/reviews/freelancer/{freelancerId}", 1))
+        mvc.perform(get("/api/v1/reviews/freelancer/{freelancerId}", 1)
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-5"))
                 .andExpect(jsonPath("$.message").value("프리랜서 리뷰 조회 성공"))
-                .andExpect(jsonPath("$.data").isArray());
+                .andExpect(jsonPath("$.data.content").isArray());
     }
 
     @Test
     @DisplayName("프로젝트 리뷰 전체 조회")
     @WithUserDetails("user1")
     void t6() throws Exception {
-        mvc.perform(get("/api/v1/reviews/project/{projectId}", 1))
+        mvc.perform(get("/api/v1/reviews/project/{projectId}", 1)
+                .param("page", "0")
+                .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-6"))
                 .andExpect(jsonPath("$.message").value("프로젝트 리뷰 조회 성공"))
-                .andExpect(jsonPath("$.data").isArray());
+                .andExpect(jsonPath("$.data.content").isArray());
     }
 }

@@ -8,10 +8,10 @@ import com.pi.domain.review.review.repository.ReviewRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,17 +60,13 @@ public class ReviewService {
         return reviewRepository.findById(id).get();
     }
 
-    public List<ReviewDto> findReviewsByFreelancer(Long freelancerId) {
-        return reviewRepository.findByPost_Freelancer_Id(freelancerId)
-                .stream()
-                .map(ReviewDto::new)
-                .toList();
+    public Page<ReviewDto> findReviewsByFreelancer(Long freelancerId, Pageable pageable) {
+        return reviewRepository.findByPost_Freelancer_Id(freelancerId, pageable)
+                .map(ReviewDto::new);
     }
 
-    public List<ReviewDto> findReviewsByProject(Long projectId) {
-        return reviewRepository.findByPost_Project_Id(projectId)
-                .stream()
-                .map(ReviewDto::new)
-                .toList();
+    public Page<ReviewDto> findReviewsByProject(Long projectId, Pageable pageable) {
+        return reviewRepository.findByPost_Project_Id(projectId, pageable)
+                .map(ReviewDto::new);
     }
 }

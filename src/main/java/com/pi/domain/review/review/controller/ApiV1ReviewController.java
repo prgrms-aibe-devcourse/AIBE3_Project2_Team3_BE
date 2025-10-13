@@ -6,11 +6,14 @@ import com.pi.domain.review.review.entity.Review;
 import com.pi.domain.review.review.service.ReviewService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
+import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
+import com.pi.global.util.Ut;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reviews")
@@ -54,14 +57,20 @@ public class ApiV1ReviewController {
     }
 
     @GetMapping("/freelancer/{freelancerId}")
-    public RsData<List<ReviewDto>> getFreelancerReviews(@PathVariable Long freelancerId) {
-        List<ReviewDto> reviews = reviewService.findReviewsByFreelancer(freelancerId);
-        return new RsData<>("200-5", "프리랜서 리뷰 조회 성공", reviews);
+    public RsData<PagePayload<ReviewDto>> getFreelancerReviews(
+            @PathVariable Long freelancerId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
+        Page<ReviewDto> reviews = reviewService.findReviewsByFreelancer(freelancerId, pageable);
+        return new RsData<>("200-5", "프리랜서 리뷰 조회 성공", Ut.pageMapper.of(reviews));
     }
 
     @GetMapping("/project/{projectId}")
-    public RsData<List<ReviewDto>> getProjectReviews(@PathVariable Long projectId) {
-        List<ReviewDto> reviews = reviewService.findReviewsByProject(projectId);
-        return new RsData<>("200-6", "프로젝트 리뷰 조회 성공", reviews);
+    public RsData<PagePayload<ReviewDto>> getProjectReviews(
+            @PathVariable Long projectId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
+        Page<ReviewDto> reviews = reviewService.findReviewsByProject(projectId, pageable);
+        return new RsData<>("200-6", "프로젝트 리뷰 조회 성공", Ut.pageMapper.of(reviews));
     }
 }
