@@ -28,7 +28,7 @@ public class Offer extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private User user;
 
-    @Column(columnDefinition = "VARCHAR(255) DEFAULT 'PENDING'")
+    @Column(columnDefinition = "VARCHAR(255) DEFAULT 'ACCEPTED'")
     @Enumerated(EnumType.STRING)
     @Setter
     private OfferStatus status;
@@ -40,7 +40,7 @@ public class Offer extends BaseEntity {
     public Offer(Post post, User user, int amount) {
         this.post = post;
         this.user = user;
-        this.status = OfferStatus.PENDING;
+        this.status = OfferStatus.ACCEPTED;
         this.amount = amount;
     }
 
