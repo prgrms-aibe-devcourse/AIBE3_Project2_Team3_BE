@@ -1,7 +1,8 @@
 package com.pi.domain.chat.chat.entity;
 
 public enum MemberStatus {
-    ACTIVE("수락"), PENDING("대기"), LEFT("떠남"), NONE("없음"), ALL("전체");
+    ACTIVE("수락"), PENDING("대기"), LEFT("떠남"),
+    REFUSE("거절"), NONE("없음"), ALL("전체");
 
     private final String description;
 

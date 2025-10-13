@@ -7,10 +7,11 @@ public record SkillDto(
         String name
 ) {
     public SkillDto(Skill skill) {
-        this(
-                skill.getId(),
-                skill.getName()
-        );
+        this(skill.getId(), skill.getName());
+    }
+
+    public static SkillDto from(Skill skill) {
+        return new SkillDto(skill.getId(), skill.getName());
     }
 
     

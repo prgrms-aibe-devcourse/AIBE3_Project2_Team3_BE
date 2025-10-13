@@ -62,10 +62,20 @@ public class ChatMember extends BaseEntity {
         return m;
     }
 
+    @Transient
+    public MemberStatus getStatus() {
+        if (endedDate == null) {
+            return (startedDate == null) ? MemberStatus.PENDING : MemberStatus.ACTIVE;
+        } return startedDate == null ? MemberStatus.REFUSE : MemberStatus.LEFT;
+    }
+
     /** 수락(초대 → 입장) */
     public void accept() {
         if (this.startedDate == null) this.startedDate = LocalDateTime.now();
     }
+
+    /** 거절 */
+    public void refuse() { if (this.endedDate == null) this.endedDate = LocalDateTime.now(); }
 
     /** 퇴장 */
     public void leave() {

@@ -4,6 +4,10 @@ import com.pi.domain.answer.answer.dto.AnswerCreateReqBody;
 import com.pi.domain.answer.answer.service.AnswerService;
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.notification.notification.entity.Notification;
+import com.pi.domain.notification.notification.repository.NotificationRepository;
+import com.pi.domain.notification.notification.service.NotificationService;
+import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -18,6 +22,7 @@ import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.service.QuestionService;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.region.region.service.RegionService;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
@@ -50,6 +55,9 @@ public class NotProdInitData {
     private final UserRepository userRepository;
     private final QuestionService questionService;
     private final AnswerService answerService;
+    private final NotificationRepository notificationRepository;
+    private final NotificationService notficationService;
+    private final RegionService regionService;
     @Autowired
     @Lazy
     private NotProdInitData self;
@@ -62,6 +70,7 @@ public class NotProdInitData {
             self.work2();
             self.work3();
             self.work4();
+            self.work6();
         };
     }
 
@@ -91,8 +100,7 @@ public class NotProdInitData {
         User user2 = userService.findByUsername("user2").get();
         Post post1 = freelancerService.findById(1L);
         Freelancer freelancer1 = post1.getFreelancer();
-
-        offerService.create(freelancer1, user2);
+        offerService.create(freelancer1.getPost(), user2, 2);
     }
 
     @Transactional
@@ -125,6 +133,16 @@ public class NotProdInitData {
         if (skillRepository.count() == 0) {
             skillRepository.save(new Skill("Java"));
             skillRepository.save(new Skill("React"));
+        }
+    }
+
+    public void work6() {
+        if (notificationRepository.count() == 0) {
+            User user1 = userService.findByUsername("user1").get();
+            Offer offer = offerService.findById(1L);
+            Notification n = new Notification(user1, "내용1");
+            n.addOffer(offer);
+            notificationRepository.save(n);
         }
     }
 }

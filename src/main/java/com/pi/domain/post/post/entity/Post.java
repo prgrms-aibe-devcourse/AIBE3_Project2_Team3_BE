@@ -13,6 +13,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@Slf4j
 public class Post extends BaseEntity {
     @ManyToOne
     private User user;
@@ -105,13 +107,32 @@ public class Post extends BaseEntity {
         this.status = newState;
     }
 
+    private boolean isOwner(User actor) {
+        return actor.getUsername().equals(user.getUsername());
+    }
+
     private boolean isNotOwner(User actor) {
         return !actor.getUsername().equals(user.getUsername());
     }
 
+    public void checkActorCanWriteApplication(User actor) {
+        if (isOwner(actor)) {
+            log.warn("본인({})이 등록한 게시글({})에 지원 불가", actor.getUsername(), id);
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
+    }
+
+    public void checkActorCanReadApplication(User actor) {
+        if (isNotOwner(actor)) {
+            log.warn("{}번 게시글의 구직 조회 권한 없음. 사용자: {}", id, actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
+    }
+
     public void checkActorCanReadOffer(User actor) {
         if (isNotOwner(actor)) {
-            throw new ServiceException("403-1", "구인 조회 권한이 없습니다.");
+            log.warn("{}번 게시글의 구인 조회 권한 없음. 사용자: {}", id, actor.getUsername());
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
     }
 
