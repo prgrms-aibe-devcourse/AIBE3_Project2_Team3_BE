@@ -4,9 +4,9 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.reaction.reaction.entity.Reaction;
 import com.pi.domain.user.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 
-@Controller
+@Repository
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     boolean existsByPostAndUser(Post post, User user);
 
