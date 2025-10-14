@@ -11,9 +11,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -55,7 +58,6 @@ public class ApiV1ReviewControllerTest {
     @MockBean
     private com.pi.domain.user.user.service.RefreshTokenStore refreshTokenStore;
 
-
     private Long savedReviewId;
 
     @BeforeEach
@@ -67,6 +69,14 @@ public class ApiV1ReviewControllerTest {
 
         if (postRepository.findById(2L).isEmpty()) {
             postRepository.save(new Post(user, "작성용 제목", "작성용 내용", true));
+        }
+    }
+
+    @TestConfiguration
+    static class DisableInitDataConfig {
+        @Bean
+        public ApplicationRunner notProdInitDataApplicationRunner() {
+            return args -> { };
         }
     }
 

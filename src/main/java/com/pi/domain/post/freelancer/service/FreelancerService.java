@@ -11,7 +11,6 @@ import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
-import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.repository.SkillRepository;
@@ -47,6 +46,12 @@ public class FreelancerService {
             return postRepository.findByFreelancerIsNotNull(pageable);
         }
         return postRepository.findByFreelancerIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FreelancerDto> getMyFreelancers(User user, Pageable pageable) {
+        Page<Post> posts = postRepository.findByFreelancerIsNotNullAndUser_Id(user.getId(), pageable);
+        return posts.map(FreelancerDto::new);
     }
 
     public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {

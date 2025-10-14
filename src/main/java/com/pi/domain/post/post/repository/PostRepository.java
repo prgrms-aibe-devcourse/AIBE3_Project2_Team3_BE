@@ -17,6 +17,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     Page<Post> findByFreelancerIsNotNullAndTitleContainingIgnoreCase(Pageable pageable, String title);
 
+    Page<Post> findByFreelancerIsNotNullAndUser_Id(Long userId, Pageable pageable);
+
     Optional<Post> findByProjectIsNotNullAndId(Long id);
 
     Page<Post> findByProjectIsNotNull(Pageable pageable);

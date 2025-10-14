@@ -73,6 +73,18 @@ public class ApiV1FreelancerController {
         return new FreelancerDto(post);
     }
 
+    @GetMapping("/my")
+    @Transactional
+    @Operation(summary = "내가 작성한 프리랜서 글 조회")
+    public PagePayload<FreelancerDto> getMyFreelancers(
+            @ParameterObject @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        User actor = rq.getActor();
+        var page = freelancerService.getMyFreelancers(actor, pageable);
+        return Ut.pageMapper.of(page);
+    }
+
+
     @PutMapping("/{id}")
     @Transactional
     @Operation(summary = "프리랜서 글 수정")
