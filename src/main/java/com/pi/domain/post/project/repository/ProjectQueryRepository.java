@@ -73,6 +73,8 @@ public class ProjectQueryRepository {
         private String authorEmail;
         private String authorRole;
         private String authorProfileImageUrl;
+        private Integer viewCount;
+        private Integer likeCount;
     }
 
     public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
@@ -103,7 +105,9 @@ public class ProjectQueryRepository {
                         user.nickname,
                         user.email,
                         user.role.stringValue(),
-                        user.profileImageUrl
+                        user.profileImageUrl,
+                        post.viewCount,
+                        post.likeCount
                 ))
                 .from(post)
                 .join(post.project, project)
@@ -161,7 +165,9 @@ public class ProjectQueryRepository {
                         p.getEmploymentType(),
                         p.getSalary(),
                         p.getPersonnel(),
-                        p.getSkillLevel()
+                        p.getSkillLevel(),
+                        p.getViewCount(),
+                        p.getLikeCount()
                 ))
                 .toList();
 
