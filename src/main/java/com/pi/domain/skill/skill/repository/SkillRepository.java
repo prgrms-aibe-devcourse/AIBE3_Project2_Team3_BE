@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
-    Page<Skill> findAll(Pageable pageable);
+    Page<Skill> findByNameContainingIgnoreCase(String q, Pageable pageable);
 }

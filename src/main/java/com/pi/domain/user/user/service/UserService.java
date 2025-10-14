@@ -1,6 +1,7 @@
 package com.pi.domain.user.user.service;
 
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.entity.UserRole;
 import com.pi.domain.user.user.repository.UserRepository;
 import com.pi.global.exception.ServiceException;
 import jakarta.transaction.Transactional;
@@ -15,7 +16,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final AuthTokenService authTokenService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -31,12 +31,9 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void modify(User user, String nickname) {
-        user.modify(nickname);
-    }
-
-    public String genAccessToken(User user) {
-        return authTokenService.genAccessToken(user);
+    @Transactional
+    public void modify(User user, String nickname, String email) {
+        user.modify(nickname, email);
     }
 
     public void checkPassword(User user, String password) {
@@ -46,12 +43,16 @@ public class UserService {
     }
 
     public User join(String username, String password, String nickname, String email) {
+        return join(username, password, nickname, email, UserRole.ROLE_USER);
+    }
+
+    public User join(String username, String password, String nickname, String email, UserRole role) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
                     throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
                 });
         password = passwordEncoder.encode(password);
-        User user = new User(username, password, nickname, email);
+        User user = new User(username, password, nickname, email, role);
         return userRepository.save(user);
     }
 
@@ -87,7 +88,29 @@ public class UserService {
         // 지워도 작동은 동일하게 동작
     }
 
-    public User getReferenceById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
+    public User getById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
+    }
+
+    @Transactional
+    public void deleteMe(long userId, String password) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ServiceException("404-1", "회원이 존재하지 않습니다."));
+
+        // 이미 탈퇴 처리된 계정 방지
+        if (user.isDeleted()) {
+            throw new ServiceException("400-9", "이미 탈퇴 처리된 계정입니다.");
+        }
+
+        // 비밀번호 재확인
+        if (password == null || password.isBlank() || !passwordEncoder.matches(password, user.getPassword())) {
+            throw new ServiceException("401-1", "비밀번호가 일치하지 않습니다.");
+        }
+
+        // 도메인 참조 검토:
+        // - 작성글/댓글 등은 유지(작성자 표시만 “탈퇴회원”)
+        // - 강제 삭제 필요하면 cascade/on delete 세팅 먼저 확인
+        user.deleteSoft();
+        userRepository.save(user);
     }
 }

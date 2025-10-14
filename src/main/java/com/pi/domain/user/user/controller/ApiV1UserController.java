@@ -3,13 +3,16 @@ package com.pi.domain.user.user.controller;
 import com.pi.domain.user.user.dto.*;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.service.AuthTokenService;
+import com.pi.domain.user.user.service.RefreshTokenStore;
 import com.pi.domain.user.user.service.UserService;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.RsData;
+import com.pi.global.security.SecurityUser;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApiV1UserController {
     private final UserService userService;
     private final AuthTokenService authTokenService;
+    private final RefreshTokenStore refreshTokenStore;
     private final Rq rq;
 
     @GetMapping("/me")
@@ -40,7 +44,9 @@ public class ApiV1UserController {
         User actor = rq.getActor();
         User user = userService.findByUsername(actor.getUsername()).get();
         user.checkActorCanModify(actor);
-        userService.modify(user, reqBody.nickname());
+        userService.modify(user, reqBody.nickname(), reqBody.email());
+        String newAccess = authTokenService.genAccessToken(user);
+        rq.setCookie("accessToken", newAccess);
 
         return new RsData<>(
                 "200-1",
@@ -83,7 +89,7 @@ public class ApiV1UserController {
                 user,
                 reqBody.password()
         );
-        String accessToken = userService.genAccessToken(user);
+        String accessToken = authTokenService.genAccessToken(user);
         String refreshToken = authTokenService.issueRefresh(user);
 
         rq.setCookie("accessToken", accessToken);
@@ -99,6 +105,10 @@ public class ApiV1UserController {
     @Transactional
     @DeleteMapping("/logout")
     public RsData<Void> logout() {
+        String refreshPlain = rq.getCookieValue("refreshToken", null);
+        if (refreshPlain != null && !refreshPlain.isBlank()) {
+            refreshTokenStore.revoke(refreshPlain);
+        }
 
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
@@ -107,6 +117,18 @@ public class ApiV1UserController {
                 "200-1",
                 "로그아웃 되었습니다."
         );
+    }
+
+    @DeleteMapping("/logout/all")
+    public RsData<Void> logoutAll() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof SecurityUser su) {
+            refreshTokenStore.revokeAllForUser(su.getId());
+            refreshTokenStore.bumpAuthVersion(su.getId()); // 남아있는 AT도 즉시 무효 (선택)
+        }
+        rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
+        return new RsData<>("200-2", "모든 기기에서 로그아웃 되었습니다.");
     }
 
     @PostMapping("/findPw")
@@ -131,9 +153,32 @@ public class ApiV1UserController {
                 reqBody.oldPassword(),
                 reqBody.newPassword()
         );
+        refreshTokenStore.revokeAllForUser(actor.getId());
+        refreshTokenStore.bumpAuthVersion(actor.getId());
+        rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
         return new RsData<>(
                 "200-1",
-                "비밀번호가 성공적으로 변경되었습니다."
+                "비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요."
         );
+    }
+
+    @DeleteMapping("/me")
+    public void deleteMe(@RequestBody UserDeleteReqBody body) {
+        SecurityUser su = (SecurityUser) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        long userId = su.getId();
+
+        userService.deleteMe(userId, body.password());
+
+        // 1) 이 사용자의 모든 리프레시 토큰 무효화
+        refreshTokenStore.revokeAllForUser(userId);
+
+        // 2) authVersion 증가 → 남은 AT 즉시 무효
+        refreshTokenStore.bumpAuthVersion(userId);
+
+        // 3) 쿠키 삭제
+        rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
     }
 }

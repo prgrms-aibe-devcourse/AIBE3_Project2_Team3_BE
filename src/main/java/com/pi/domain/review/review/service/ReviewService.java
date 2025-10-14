@@ -1,12 +1,15 @@
 package com.pi.domain.review.review.service;
 
-import com.pi.domain.contract.contract.entity.Contract;
-import com.pi.domain.contract.contract.repository.ContractRepository;
+import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.post.post.repository.PostRepository;
+import com.pi.domain.review.review.dto.ReviewDto;
 import com.pi.domain.review.review.entity.Review;
 import com.pi.domain.review.review.repository.ReviewRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,17 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ContractRepository contractRepository;
+    private final PostRepository postRepository;
 
     @Transactional
-    public Review create(User actor, Long contractId, int rating, String comment) {
-        Contract contract = contractRepository.findById(contractId).get();
+    public Review create(User actor, Long postId, int rating, String comment) {
+        Post post = postRepository.findById(postId).get();
 
-        if (reviewRepository.existsByContract(contract)) {
-            throw new ServiceException("409-1", "이미 이 계약에 대한 리뷰가 존재합니다.");
+        if (reviewRepository.existsByPost(post)) {
+            throw new ServiceException("409-1", "이미 이 게시글에 대한 리뷰가 존재합니다.");
         }
 
-        Review review = new Review(contract, actor, rating, comment);
+        Review review = new Review(post, actor, rating, comment);
         return reviewRepository.save(review);
     }
 
@@ -55,5 +58,15 @@ public class ReviewService {
 
     public Review findById(Long id) {
         return reviewRepository.findById(id).get();
+    }
+
+    public Page<ReviewDto> findReviewsByFreelancer(Long freelancerId, Pageable pageable) {
+        return reviewRepository.findByPost_Freelancer_Id(freelancerId, pageable)
+                .map(ReviewDto::new);
+    }
+
+    public Page<ReviewDto> findReviewsByProject(Long projectId, Pageable pageable) {
+        return reviewRepository.findByPost_Project_Id(projectId, pageable)
+                .map(ReviewDto::new);
     }
 }

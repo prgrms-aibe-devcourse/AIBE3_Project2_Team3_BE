@@ -15,20 +15,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class SkillService {
     private final SkillRepository skillRepository;
 
+    public long count() {
+        return skillRepository.count();
+    }
+
     @Transactional
-    public Skill createSkill(SkillCreateReqBody dto) {
+    public Skill create(SkillCreateReqBody dto) {
         Skill skill = new Skill(dto.name());
         return skillRepository.save(skill);
     }
 
     @Transactional(readOnly = true)
-    public Page<SkillDto> getSkills(Pageable pageable) {
-        return skillRepository.findAll(pageable)
-                .map(SkillDto::from);
+    public Page<SkillDto> getSkills(Pageable pageable, String searchKeyword) {
+        return skillRepository.findByNameContainingIgnoreCase(searchKeyword, pageable)
+                .map(SkillDto::new);
     }
 
     @Transactional
-    public void deleteSkill(Long id) {
+    public void delete(Long id) {
         skillRepository.deleteById(id);
     }
 }
