@@ -32,7 +32,7 @@ public record NotificationDto(
         if (n.getOffer() != null) return "OFFER";
         if (n.getChatMessage() != null) return "CHAT";
         if (n.getReview() != null) return "REVIEW";
-        if (n.getContract() != null) return "CONTRACT";
+//        if (n.getContract() != null) return "CONTRACT";
         return "GENERAL";
     }
 
@@ -41,7 +41,7 @@ public record NotificationDto(
         if (n.getOffer() != null) return n.getOffer().getId();
         if (n.getChatMessage() != null) return n.getChatMessage().getId();
         if (n.getReview() != null) return n.getReview().getId();
-        if (n.getContract() != null) return n.getContract().getId();
+//        if (n.getContract() != null) return n.getContract().getId();
 
         return null;
     }
