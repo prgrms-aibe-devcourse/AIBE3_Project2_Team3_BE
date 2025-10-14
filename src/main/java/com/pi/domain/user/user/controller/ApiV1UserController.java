@@ -15,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -184,11 +182,11 @@ public class ApiV1UserController {
         rq.deleteCookie("refreshToken");
     }
 
-    @PostMapping("/searchToInvite")
-    public RsData<UserInviteDto> invite(
-            @RequestBody UserInviteSearchReqBody reqBody
+    @GetMapping("/search")
+    public RsData<UserInviteDto> search(
+            @RequestParam(name = "username", defaultValue = " ") String username
     ) {
-        String q = Optional.ofNullable(reqBody.username()).orElse("").trim();
+        String q = username.trim();
         if (q.isEmpty()) {
             return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", null);
         }
