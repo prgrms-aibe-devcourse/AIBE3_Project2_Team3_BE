@@ -39,11 +39,6 @@ jobs:
 #      - name: Run unit tests (JUnit5)
 #        run: ./gradlew test --info
 
-      # JaCoCo 플러그인 사용 중일 때만 유지 (없으면 이 스텝 삭제)
-      - name: Generate JaCoCo report
-        if: success()
-        run: ./gradlew jacocoTestReport
-
       - name: Upload test results (JUnit XML)
         if: always()
         uses: actions/upload-artifact@v4
