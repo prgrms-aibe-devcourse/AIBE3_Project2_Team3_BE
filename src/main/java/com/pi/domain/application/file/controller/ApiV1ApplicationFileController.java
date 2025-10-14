@@ -36,7 +36,8 @@ public class ApiV1ApplicationFileController {
         String fileUrl = applicationFileService.findById(id).getUrl();
 
         AwsS3DownloadDto fileData = awsS3Service.getDownloadData(fileUrl);
-        String encodedFileName = URLEncoder.encode(fileData.fileName(), StandardCharsets.UTF_8);
+        String encodedFileName = URLEncoder.encode(fileData.fileName(), StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20");
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)

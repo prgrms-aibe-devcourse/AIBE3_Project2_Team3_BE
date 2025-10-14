@@ -9,7 +9,8 @@ public record OfferDto(
         int amount,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
-        long freelancerId,
+        long postId,
+        String postType, // "PROJECT" or "FREELANCER"
         long userId,
         String status
 ) {
@@ -20,6 +21,7 @@ public record OfferDto(
                 offer.getCreatedDate(),
                 offer.getModifiedDate(),
                 offer.getPost().getId(),
+                "FREELANCER",
                 offer.getUser().getId(),
                 offer.getStatus().name()
         );
