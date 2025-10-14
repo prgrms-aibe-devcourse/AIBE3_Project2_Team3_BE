@@ -6,7 +6,6 @@ import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.repository.FreelancerQueryRepository;
-import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
@@ -26,16 +25,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FreelancerService {
-    private final FreelancerRepository freelancerRepository;
     private final PostRepository postRepository;
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
     private final FreelancerQueryRepository freelancerQueryRepository;
-
-    public long count() {
-        return freelancerRepository.count();
-    }
 
     public Post findById(Long id) {
         return postRepository.findByFreelancerIsNotNullAndId(id).get();
@@ -105,17 +99,6 @@ public class FreelancerService {
         }
 
         return postRepository.save(post);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<Post> search(Pageable pageable,
-                             Long categoryId,
-                             Long regionId,
-                             List<Long> skillIds,
-                             String title,
-                             Long minSalary,
-                             Long maxSalary) {
-        return postRepository.searchFreelancers(pageable, categoryId, regionId, skillIds, title, minSalary, maxSalary);
     }
 
     @Transactional(readOnly = true)
