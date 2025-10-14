@@ -100,14 +100,6 @@ public class Application extends BaseEntity {
         this.status = status;
     }
 
-//    // TODO 빼기
-//    public void checkActorCanRead(User actor, User user) {
-//        if (isDifferentUser(actor, user)) {
-//            log.warn("구직({}) 읽기 권한 없음. 사용자: {}", getId(), actor.getUsername());
-//            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
-//        }
-//    }
-
     public void checkActorCanModify(User actor, User user) {
         if (isDifferentUser(actor, user)) {
             log.warn("구직({}) 수정 권한 없음. 사용자: {}", getId(), actor.getUsername());

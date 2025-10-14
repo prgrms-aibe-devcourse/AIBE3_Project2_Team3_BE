@@ -1,9 +1,6 @@
 package com.pi.domain.offer.offer.controller;
 
-import com.pi.domain.offer.offer.dto.OfferDto;
-import com.pi.domain.offer.offer.dto.OfferModifyReqBody;
-import com.pi.domain.offer.offer.dto.OfferWithPostDto;
-import com.pi.domain.offer.offer.dto.OfferWriteReqBody;
+import com.pi.domain.offer.offer.dto.*;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
@@ -107,6 +104,32 @@ public class ApiV1OfferController {
                 "200-1",
                 "%d번 구인이 수정되었습니다.".formatted(id),
                 new OfferDto(offer)
+        );
+    }
+
+    @PutMapping("/{id}/status")
+    @Transactional
+    @Operation(summary = "상태 수정")
+    public RsData<PostOwnerOfferModifyResBody> modifyStatus(
+            @PathVariable long id,
+            @Valid @RequestBody PostOwnerOfferModifyReqBody reqBody
+    ) {
+        Offer offer = offerService.findById(id);
+
+        User actor = rq.getActor();
+        User postUser = offer.getPost().getUser();
+        offer.checkActorCanModifyStatus(actor, postUser);
+
+        if (offer.getStatus() == OfferStatus.ACCEPTED) {
+            log.warn("수락된 구인({})은 수정 불가", offer.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        offerService.updateStatus(offer, reqBody.status());
+
+        return new RsData<>(
+                "200-1",
+                "%d번 구인 상태가 수정되었습니다.".formatted(id),
+                new PostOwnerOfferModifyResBody(offer)
         );
     }
 

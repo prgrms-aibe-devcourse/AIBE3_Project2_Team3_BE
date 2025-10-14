@@ -128,6 +128,33 @@ public class ApiV1ApplicationController {
         );
     }
 
+    @PutMapping("/{id}/status")
+    @Transactional
+    @Operation(summary = "상태 수정")
+    public RsData<PostOwnerApplicationModifyResBody> modifyStatus(
+            @PathVariable long id,
+            @Valid @RequestBody PostOwnerApplicationModifyReqBody reqBody
+    ) {
+        User actor = rq.getActor();
+
+        Application application = applicationService.findById(id);
+
+        User postUser = application.getPost().getUser();
+        application.checkActorCanModify(actor, postUser);
+
+        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
+            log.warn("수락된 구직({})은 수정 불가", application.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        applicationService.updateStatus(application, reqBody.status());
+
+        return new RsData<>(
+                "200-1",
+                "%d번 구직 상태가 수정되었습니다.".formatted(id),
+                new PostOwnerApplicationModifyResBody(application.getStatus().name())
+        );
+    }
+
     @Transactional
     @DeleteMapping("/{id}")
     @Operation(summary = "삭제")
