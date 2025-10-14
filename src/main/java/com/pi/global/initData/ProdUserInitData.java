@@ -24,7 +24,7 @@ public class ProdUserInitData {
 
     @Transactional
     public void initUsers() {
-        if (userService.count() > 5) {
+        if (userService.count() > 1) {
             return;
         }
 
