@@ -46,10 +46,11 @@ public class Post extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
 
-    public Post(User user, String title, String content) {
+    public Post(User user, String title, String content, boolean isViewed) {
         this.user = user;
         this.title = title;
         this.content = content;
+        this.isViewed = isViewed;
     }
 
     public void modify(String title, String content, Boolean isViewed) {

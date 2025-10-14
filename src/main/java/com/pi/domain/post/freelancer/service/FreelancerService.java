@@ -1,14 +1,18 @@
 package com.pi.domain.post.freelancer.service;
 
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.freelancer.repository.FreelancerQueryRepository;
 import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
+import com.pi.domain.post.project.dto.ProjectDto;
+import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
@@ -28,6 +32,7 @@ public class FreelancerService {
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
+    private final FreelancerQueryRepository freelancerQueryRepository;
 
     public long count() {
         return freelancerRepository.count();
@@ -45,7 +50,7 @@ public class FreelancerService {
     }
 
     public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
-        Post post = new Post(actor, p.title(), p.content());
+        Post post = new Post(actor, p.title(), p.content(), p.isViewed());
         post.setFreelancer(Freelancer.of(post));
         post.getFreelancer().modify(f.salary(), f.period());
         if (regionIds != null) {
@@ -106,5 +111,10 @@ public class FreelancerService {
                              Long minSalary,
                              Long maxSalary) {
         return postRepository.searchFreelancers(pageable, categoryId, regionId, skillIds, title, minSalary, maxSalary);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
+        return freelancerQueryRepository.searchFreelancers(condition, pageable);
     }
 }

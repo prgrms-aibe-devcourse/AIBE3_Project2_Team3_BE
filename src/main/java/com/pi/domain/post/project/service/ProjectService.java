@@ -8,7 +8,7 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
 import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyDto;
-import com.pi.domain.post.project.dto.ProjectSearchReqDto;
+import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.entity.ProjectStatus;
@@ -48,19 +48,12 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProjectDto> searchProjects(ProjectSearchReqDto condition, Pageable pageable) {
+    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
         return projectQueryRepository.searchProjects(condition, pageable);
     }
 
-    public Page<Post> getPage(Pageable pageable, String searchKeyword) {
-        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
-            return postRepository.findByProjectIsNotNull(pageable);
-        }
-        return postRepository.findByProjectIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
-    }
-
     public Post create(User actor, PostWriteDto po, ProjectWriteDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
-        Post post = new Post(actor, po.title(), po.content());
+        Post post = new Post(actor, po.title(), po.content(), po.isViewed());
         postRepository.save(post);  // ID 생성
 
         Project project = new Project();
