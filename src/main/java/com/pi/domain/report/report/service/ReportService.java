@@ -72,4 +72,8 @@ public class ReportService {
 
         return ReportDto.from(reportRepository.save(report));
     }
+
+    public long count() {
+        return reportRepository.count();
+    }
 }

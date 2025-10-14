@@ -5,7 +5,6 @@ import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.service.ApplicationService;
 import com.pi.domain.application.file.dto.ApplicationFileDto;
-import com.pi.domain.application.file.service.ApplicationFileService;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
@@ -38,16 +37,14 @@ import java.util.List;
 @Slf4j
 @Tag(name = "ApiV1ApplicationController", description = "API 구직 컨트롤러")
 public class ApiV1ApplicationController {
-    private static final String AWS_S3_DIRECTORY = "application";
     private final Rq rq;
     private final ApplicationService applicationService;
     private final ProjectService projectService;
-    private final ApplicationFileService applicationFileService;
     private final AwsS3Service awsS3Service;
 
-    @GetMapping
+    @GetMapping("/my")
     @Transactional(readOnly = true)
-    @Operation(summary = "다건 조회")
+    @Operation(summary = "내가 등록한 구직 다건 조회")
     public PagePayload<ApplicationWithPostDto> getMyItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) ApplicationStatus status
@@ -55,6 +52,20 @@ public class ApiV1ApplicationController {
         User actor = rq.getActor();
         Page<ApplicationWithPostDto> dtoPage = applicationService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
                 .map(application -> new ApplicationWithPostDto(application, application.getPost()));
+
+        return Ut.pageMapper.of(dtoPage);
+    }
+
+    @GetMapping("/received")
+    @Transactional(readOnly = true)
+    @Operation(summary = "내 게시글에 들어온 구직 다건 조회")
+    public PagePayload<PostApplicationWithUserDto> getItems(
+            @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) ApplicationStatus status
+    ) {
+        User actor = rq.getActor();
+        Page<PostApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
+                .map(application -> new PostApplicationWithUserDto(application, application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -67,7 +78,11 @@ public class ApiV1ApplicationController {
 
         Application application = applicationService.findById(id);
         User user = application.getUser();
-        application.checkActorCanRead(actor, user);
+        User postUser = application.getPost().getUser();
+        if (application.isDifferentUser(actor, user) && application.isDifferentUser(actor, postUser)) {
+            log.warn("본인 또는 게시글 작성자만 조회 가능");
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
 
         return new ApplicationDto(
                 application,
@@ -75,7 +90,7 @@ public class ApiV1ApplicationController {
                         .map(file -> new ApplicationFileDto(
                                 file.getId(),
                                 file.getUrl(),
-                                awsS3Service.getOriginalFileNameFromUrl(file.getUrl())
+                                awsS3Service.getDecodedFileName(file.getUrl())
                         ))
                         .toList()
         );
@@ -83,16 +98,16 @@ public class ApiV1ApplicationController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    @Operation(summary = "등록 (임시저장 또는 제출)")
+    @Operation(summary = "등록")
     public RsData<ApplicationWriteResBody> write(
             @Valid @RequestPart ApplicationWriteReqBody reqBody,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
         Post post = projectService.findById(reqBody.postId());
-        post.checkActorCanWriteApplication(actor);
+        post.checkActorIsNotOwner(actor);
 
-        Application application = applicationService.createOrUpdate(post, actor, reqBody, files);
+        Application application = applicationService.create(post, actor, reqBody, files);
 
         return new RsData<>(
                 "201-1",
@@ -101,12 +116,13 @@ public class ApiV1ApplicationController {
         );
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    @Operation(summary = "상태 수정")
-    public RsData<ApplicationModifyResBody> modifyStatus(
+    @Operation(summary = "수정")
+    public RsData<ApplicationModifyResBody> modify(
             @PathVariable long id,
-            @Valid @RequestBody ApplicationModifyReqBody reqBody
+            @Valid @RequestPart ApplicationModifyReqBody reqBody,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
         Application application = applicationService.findById(id);
@@ -114,11 +130,42 @@ public class ApiV1ApplicationController {
         User user = application.getUser();
         application.checkActorCanModify(actor, user);
 
-        applicationService.updateStatus(application, reqBody.status(), true);
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            log.warn("수락/거절된 구직({})은 수정 불가", application.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        applicationService.update(application, reqBody, files);
 
         return new RsData<>("200-1",
+                "%d번 구직이 수정되었습니다.".formatted(id),
+                new ApplicationModifyResBody(application)
+        );
+    }
+
+    @PutMapping("/{id}/status")
+    @Transactional
+    @Operation(summary = "상태 수정")
+    public RsData<ApplicationModifyStatusResBody> modifyStatus(
+            @PathVariable long id,
+            @Valid @RequestBody ApplicationModifyStatusReqBody reqBody
+    ) {
+        User actor = rq.getActor();
+
+        Application application = applicationService.findById(id);
+
+        User postUser = application.getPost().getUser();
+        application.checkActorCanModify(actor, postUser);
+
+        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
+            log.warn("수락된 구직({})은 수정 불가", application.getId());
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        applicationService.updateStatus(application, reqBody.status());
+
+        return new RsData<>(
+                "200-1",
                 "%d번 구직 상태가 수정되었습니다.".formatted(id),
-                new ApplicationModifyResBody(application.getStatus())
+                new ApplicationModifyStatusResBody(application.getStatus().name())
         );
     }
 
@@ -129,11 +176,6 @@ public class ApiV1ApplicationController {
         User actor = rq.getActor();
         Application application = applicationService.findById(id);
         application.checkActorCanDelete(actor);
-
-        if (application.getStatus() != ApplicationStatus.DRAFT) {
-            log.warn("제출된 구직({})은 삭제 불가", application.getId());
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
-        }
 
         applicationService.delete(application);
 

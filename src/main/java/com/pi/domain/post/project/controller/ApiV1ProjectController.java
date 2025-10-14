@@ -4,6 +4,7 @@ import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyReqBody;
+import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.post.project.dto.ProjectWriteReqBody;
 import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.post.project.service.ProjectService;
@@ -14,7 +15,6 @@ import com.pi.global.rsData.RsData;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -37,7 +37,6 @@ public class ApiV1ProjectController {
     private final Rq rq;
 
     @PostMapping
-    @Transactional
     @Operation(summary = "프로젝트 글 작성")
     public RsData<ProjectDto> write(
             @Valid @RequestBody ProjectWriteReqBody reqBody
@@ -49,19 +48,31 @@ public class ApiV1ProjectController {
     }
 
     @GetMapping
-    @Transactional
     @Operation(summary = "프로젝트 글 다건 조회")
     public PagePayload<ProjectDto> getItems(
             @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(defaultValue = "") String searchKeyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> regionIds,
+            @RequestParam(required = false) List<Long> skillIds,
+            @RequestParam(required = false) Long minSalary,
+            @RequestParam(required = false) Long maxSalary
     ) {
-        Page<ProjectDto> dtoPage = projectService.getPage(pageable, searchKeyword).map(ProjectDto::new);
+        Page<ProjectDto> dtoPage = projectService.searchProjects(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable);
         return Ut.pageMapper.of(dtoPage);
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "내가 쓴 프로젝트 글 다건 조회")
+    public PagePayload<ProjectDto> getMyItems(
+            @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        User actor = rq.getActor();
+        Page<ProjectDto> dtoPage = projectService.getMyProjects(actor, pageable);
+        return Ut.pageMapper.of(dtoPage);
+    }
 
     @GetMapping("/{id}")
-    @Transactional
     @Operation(summary = "프로젝트 글 단건 조회")
     public ProjectDto getItem(
             @PathVariable Long id
@@ -71,7 +82,6 @@ public class ApiV1ProjectController {
     }
 
     @PutMapping("/{id}")
-    @Transactional
     @Operation(summary = "프로젝트 글 수정")
     public RsData<ProjectDto> modify(
             @PathVariable Long id,
@@ -86,7 +96,6 @@ public class ApiV1ProjectController {
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
     @Operation(summary = "프로젝트 글 삭제")
     public RsData<Void> delete(
             @PathVariable Long id
@@ -99,32 +108,7 @@ public class ApiV1ProjectController {
         return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "프로젝트 글 검색 및 다건조회")
-    public List<ProjectDto> getProjects(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) List<Long> regionIds,
-            @RequestParam(required = false) List<Long> categoryIds,
-            @RequestParam(required = false) List<Long> skillIds,
-            @RequestParam(required = false) String keyword
-    ) {
-        ProjectStatus projectStatus = null;
-
-        if (status != null && !status.isEmpty()) {
-            projectStatus = ProjectStatus.fromDisplayValue(status);
-        }
-
-        return projectService.searchProjects(
-                projectStatus,
-                regionIds,
-                categoryIds,
-                skillIds,
-                keyword
-        );
-    }
-
     @PatchMapping("/{id}/status")
-    @Transactional
     @Operation(summary = "프로젝트 상태 변경")
     public RsData<Void> changeStatus(
             @PathVariable Long id,
@@ -133,4 +117,5 @@ public class ApiV1ProjectController {
         projectService.changeStatus(id, ProjectStatus.fromDisplayValue(status));
         return new RsData<>("200-1", "프로젝트 상태가 변경되었습니다.");
     }
+
 }

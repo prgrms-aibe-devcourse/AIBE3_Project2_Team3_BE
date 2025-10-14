@@ -1,10 +1,9 @@
 package com.pi.domain.offer.offer.dto;
 
-import com.pi.domain.offer.offer.entity.OfferStatus;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 public record OfferModifyReqBody(
-        @NotNull OfferStatus status,
-        int amount
+        @Min(1) @Max(100) Integer amount
 ) {
 }

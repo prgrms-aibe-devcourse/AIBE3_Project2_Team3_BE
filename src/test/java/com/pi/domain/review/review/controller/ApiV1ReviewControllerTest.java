@@ -11,9 +11,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -55,7 +58,6 @@ public class ApiV1ReviewControllerTest {
     @MockBean
     private com.pi.domain.user.user.service.RefreshTokenStore refreshTokenStore;
 
-
     private Long savedReviewId;
 
     @BeforeEach
@@ -66,7 +68,15 @@ public class ApiV1ReviewControllerTest {
         savedReviewId = review.getId();
 
         if (postRepository.findById(2L).isEmpty()) {
-            postRepository.save(new Post(user, "작성용 제목", "작성용 내용"));
+            postRepository.save(new Post(user, "작성용 제목", "작성용 내용", true));
+        }
+    }
+
+    @TestConfiguration
+    static class DisableInitDataConfig {
+        @Bean
+        public ApplicationRunner notProdInitDataApplicationRunner() {
+            return args -> { };
         }
     }
 
@@ -75,13 +85,13 @@ public class ApiV1ReviewControllerTest {
     @WithUserDetails("user1")
     void t1() throws Exception {
         mvc.perform(post("/api/v1/reviews/{postId}", 2)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "rating": 5,
-                        "comment": "좋은 경험이었습니다."
-                    }
-                """))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                    {
+                                        "rating": 5,
+                                        "comment": "좋은 경험이었습니다."
+                                    }
+                                """))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
@@ -111,11 +121,11 @@ public class ApiV1ReviewControllerTest {
         mvc.perform(put("/api/v1/reviews/{reviewId}", savedReviewId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                            {
-                                "rating": 4,
-                                "comment": "수정된 리뷰입니다."
-                            }
-                        """))
+                                    {
+                                        "rating": 4,
+                                        "comment": "수정된 리뷰입니다."
+                                    }
+                                """))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-2"))
@@ -154,8 +164,8 @@ public class ApiV1ReviewControllerTest {
     @WithUserDetails("user1")
     void t6() throws Exception {
         mvc.perform(get("/api/v1/reviews/project/{projectId}", 1)
-                .param("page", "0")
-                .param("size", "10"))
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-6"))

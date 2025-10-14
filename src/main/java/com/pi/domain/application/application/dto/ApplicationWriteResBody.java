@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record ApplicationWriteResBody(
         long id,
         long postId,
+        String postType, // "PROJECT" or "FREELANCER"
         long userId,
         String status,
         String content,
@@ -19,6 +20,7 @@ public record ApplicationWriteResBody(
         this(
                 application.getId(),
                 application.getPost().getId(),
+                "PROJECT",
                 application.getUser().getId(),
                 application.getStatus().name(),
                 application.getContent(),

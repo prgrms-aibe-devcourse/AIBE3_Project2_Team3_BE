@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
     Optional<Post> findByFreelancerIsNotNullAndId(Long id);
 
     Page<Post> findByFreelancerIsNotNull(Pageable pageable);
 
     Page<Post> findByFreelancerIsNotNullAndTitleContainingIgnoreCase(Pageable pageable, String title);
+
+    Page<Post> findByFreelancerIsNotNullAndUser_Id(Long userId, Pageable pageable);
 
     Optional<Post> findByProjectIsNotNullAndId(Long id);
 
@@ -26,4 +28,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findTopByOrderByIdDesc();
 
     List<Post> findByProjectIsNotNull();
+
+    Page<Post> findByUserAndProjectIsNotNull(Long userId, Pageable pageable);
 }

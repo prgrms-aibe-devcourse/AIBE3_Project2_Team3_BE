@@ -27,22 +27,37 @@ public class OfferService {
         return offerRepository.findFirstByOrderByIdDesc().get();
     }
 
-    public Page<Offer> findAllByUserIdAndStatus(long id, OfferStatus status, Pageable pageable) {
-        return offerRepository.findAllByUserIdAndStatus(id, status, pageable);
+    public Page<Offer> findAllByUserIdAndStatus(long userId, OfferStatus status, Pageable pageable) {
+        if (status == null) {
+            return offerRepository.findAllByUserId(userId, pageable);
+        }
+        return offerRepository.findAllByUserIdAndStatus(userId, status, pageable);
+    }
+
+    public Page<Offer> findAllByPostUserIdAndStatus(long postUserId, OfferStatus status, Pageable pageable) {
+        if (status == null) {
+            return offerRepository.findAllByPostUserId(postUserId, pageable);
+        }
+        return offerRepository.findAllByPostUserIdAndStatus(postUserId, status, pageable);
     }
 
     public Page<Offer> findAllByPostIdAndStatus(Long postId, OfferStatus status, Pageable pageable) {
+        if (status == null) return offerRepository.findAllByPostId(postId, pageable);
         return offerRepository.findAllByPostIdAndStatus(postId, status, pageable);
     }
 
     public Offer create(Post post, User user, int amount) {
-        Offer offer = new Offer(post, user, OfferStatus.REQUESTED, amount);
+        Offer offer = new Offer(post, user, amount);
 
         return offerRepository.save(offer);
     }
 
-    public void update(Offer offer, OfferStatus status) {
-        offer.setStatus(status);
+    public void update(Offer offer, int amount) {
+        offer.setAmount(amount);
+    }
+
+    public void updateStatus(Offer offer, String status) {
+        offer.setStatus(OfferStatus.valueOf(status));
     }
 
     public void delete(Offer offer) {

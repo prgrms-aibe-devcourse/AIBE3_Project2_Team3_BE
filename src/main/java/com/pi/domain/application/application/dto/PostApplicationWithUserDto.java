@@ -5,7 +5,7 @@ import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
-public record PostOwnerApplicationWithUserDto(
+public record PostApplicationWithUserDto(
         long id,
         String status,
         long salary,
@@ -14,7 +14,7 @@ public record PostOwnerApplicationWithUserDto(
         long userId,
         String userNickname
 ) {
-    public PostOwnerApplicationWithUserDto(Application application, User user) {
+    public PostApplicationWithUserDto(Application application, User user) {
         this(
                 application.getId(),
                 application.getStatus().name(),

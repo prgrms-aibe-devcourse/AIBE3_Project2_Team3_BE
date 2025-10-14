@@ -1,9 +1,10 @@
 package com.pi.domain.application.application.dto;
 
-import com.pi.domain.application.application.entity.ApplicationStatus;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
 
 public record ApplicationModifyReqBody(
-        @NotNull ApplicationStatus status
+        String content,
+        @Min(0) Long salary,
+        @Min(0) Integer period
 ) {
 }
