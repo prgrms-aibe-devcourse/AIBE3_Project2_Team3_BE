@@ -50,8 +50,8 @@ public class FreelancerService {
 
     @Transactional(readOnly = true)
     public Page<FreelancerDto> getMyFreelancers(User user, Pageable pageable) {
-        Page<Freelancer> freelancers = freelancerRepository.findAllByPost_User(user, pageable);
-        return freelancers.map(f -> new FreelancerDto(f.getPost()));
+        Page<Post> posts = postRepository.findByFreelancerIsNotNullAndUser_Id(user.getId(), pageable);
+        return posts.map(FreelancerDto::new);
     }
 
     public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
