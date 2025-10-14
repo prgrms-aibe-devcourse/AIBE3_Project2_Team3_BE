@@ -6,7 +6,7 @@ on:
       - "**"                         # 루트 변경도 감지
       - ".github/workflows/be-ci.yml"
   push:
-    branches: ["dev", "feature/**"]
+    branches: ["dev", "feat/**"]
 
 jobs:
   ci:
