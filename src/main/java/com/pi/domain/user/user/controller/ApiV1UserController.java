@@ -190,7 +190,7 @@ public class ApiV1UserController {
         if (q.isEmpty()) {
             return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", null);
         }
-        User searchedUsers = userService.getInvitedUsers(q);
+        User searchedUsers = userService.findByUsername(q).get();
         UserInviteDto dtoList = new UserInviteDto(searchedUsers);
         return new RsData<>(
                 "200-2",

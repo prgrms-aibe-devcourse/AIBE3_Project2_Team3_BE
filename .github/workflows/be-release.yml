@@ -1,0 +1,100 @@
+name: be-release
+
+on:
+  push:
+    tags:
+      - "be-v*.*.*"   # 예: be-v1.2.3 형태 태그로 릴리스 트리거
+
+permissions:
+  contents: read
+  packages: write   # GHCR 푸시 권한
+  security-events: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Gradle JVM은 24 (도구체인은 build.gradle에서 25로 선언 권장)
+      - name: Setup Java (Gradle JVM)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "24"
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+
+      # (옵션) 프로덕션 빌드용 프로필 등
+      - name: Build JAR
+        working-directory: backend
+        run: ./gradlew clean build -x test
+
+      # Docker 로그인 (GHCR 기준)
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Docker 메타 (태그/라벨 자동)
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/pi-backend
+          tags: |
+            type=ref,event=tag
+            type=sha
+
+      # 멀티스테이지 Dockerfile을 backend/Dockerfile로 가정
+      - name: Build and Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # 빌드 캐시(선택)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # SBOM 생성 (Syft)
+      - name: Generate SBOM (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.meta.outputs.tags }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+      # 컨테이너 취약점 스캔 (Trivy)
+      - name: Trivy scan (image)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ steps.meta.outputs.tags }}
+          format: table
+          exit-code: "0"   # 실패로 막고 싶으면 "1"로
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+
+  # (옵션) 배포 잡: 위 이미지 태그를 사용해 ECS/EKS/서버에 배포
+  # deploy:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy...
+  #       run: echo "여기에 ECS/EKS/SSH 배포 스크립트 연결"
