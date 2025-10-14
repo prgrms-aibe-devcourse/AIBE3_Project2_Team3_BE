@@ -1,0 +1,116 @@
+package com.pi.domain.offer.offer.controller;
+
+import com.pi.domain.offer.offer.dto.*;
+import com.pi.domain.offer.offer.entity.Offer;
+import com.pi.domain.offer.offer.entity.OfferStatus;
+import com.pi.domain.offer.offer.service.OfferService;
+import com.pi.domain.post.freelancer.service.FreelancerService;
+import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.user.user.entity.User;
+import com.pi.global.rq.Rq;
+import com.pi.global.rsData.PagePayload;
+import com.pi.global.rsData.RsData;
+import com.pi.global.util.Ut;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/offers")
+@RequiredArgsConstructor
+@Tag(name = "ApiV1OfferController", description = "API 구인(삽니다) 컨트롤러")
+public class ApiV1OfferController {
+    private final Rq rq;
+    private final OfferService offerService;
+    private final FreelancerService freelancerService;
+
+    @GetMapping("/my")
+    @Transactional(readOnly = true)
+    @Operation(summary = "본인이 등록한 구인 다건 조회")
+    public PagePayload<OfferWithPostDto> getMyOffers(
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) OfferStatus status
+    ) {
+        User actor = rq.getActor();
+        Page<OfferWithPostDto> dtoPage = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
+                .map(offer -> new OfferWithPostDto(offer, offer.getPost(), offer.getUser()));
+
+        return Ut.pageMapper.of(dtoPage);
+    }
+
+    @GetMapping("/freelancer/{freelancerId}")
+    @Transactional(readOnly = true)
+    @Operation(summary = "프리랜서의 구인 다건 조회")
+    public PagePayload<OfferWithUserDto> getOffersForFreelancer(
+            @PathVariable Long freelancerId,
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) OfferStatus status
+    ) {
+        User actor = rq.getActor();
+        Post post = freelancerService.findById(freelancerId);
+        post.checkActorCanReadOffer(actor);
+
+        Page<OfferWithUserDto> dtoPage = offerService.findAllByPostIdAndStatus(freelancerId, status, pageable)
+                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
+
+        return Ut.pageMapper.of(dtoPage);
+    }
+
+    @PostMapping
+    @Transactional
+    @Operation(summary = "등록")
+    public RsData<OfferDto> write(@Valid @RequestBody OfferWriteReqBody reqBody) {
+        User actor = rq.getActor();
+        Post post = freelancerService.findById(reqBody.freelancerId());
+
+        Offer offer = offerService.create(post, actor, reqBody.amount());
+
+        return new RsData<>(
+                "201-1",
+                "%d번 구인이 등록되었습니다.".formatted(offer.getId()),
+                new OfferDto(offer)
+        );
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    @Operation(summary = "수정")
+    public RsData<Void> modify(
+            @PathVariable long id,
+            @Valid @RequestBody OfferModifyReqBody reqBody
+    ) {
+        Offer offer = offerService.findById(id);
+
+        User actor = rq.getActor();
+        User freelancerUser = offer.getPost().getUser();
+        offer.checkActorCanModify(actor, freelancerUser);
+
+        offerService.update(offer, reqBody.status());
+
+        return new RsData<>(
+                "200-1",
+                "%d번 구인 상태가 수정되었습니다.".formatted(id)
+        );
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}")
+    @Operation(summary = "삭제")
+    public RsData<OfferDto> delete(@PathVariable Long id) {
+        Offer offer = offerService.findById(id);
+
+        User actor = rq.getActor();
+        offer.checkActorCanDelete(actor);
+
+        offerService.delete(offer);
+
+        return new RsData<>("200-1", "%d번 구인이 삭제되었습니다.".formatted(id), new OfferDto(offer));
+    }
+}

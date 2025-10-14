@@ -4,20 +4,24 @@ import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
-public record UserDto (
+public record UserDto(
         Long id,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         String nickname,
-        String role
-){
+        String email,
+        String role,
+        String profileImageUrl
+) {
     public UserDto(User user) {
         this(
                 user.getId(),
                 user.getCreatedDate(),
                 user.getModifiedDate(),
                 user.getNickname(),
-                user.getRole()
+                user.getEmail(),
+                user.getRole().getDescription(),
+                user.getProfileImageUrl()
         );
     }
 }
