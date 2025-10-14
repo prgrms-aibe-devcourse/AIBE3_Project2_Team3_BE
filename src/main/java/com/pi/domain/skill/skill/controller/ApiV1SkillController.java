@@ -1,8 +1,11 @@
 package com.pi.domain.skill.skill.controller;
 
+import com.pi.domain.skill.skill.dto.SkillCreateReqBody;
 import com.pi.domain.skill.skill.dto.SkillDto;
+import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.service.SkillService;
 import com.pi.global.rsData.PagePayload;
+import com.pi.global.rsData.RsData;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,10 +14,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,5 +29,12 @@ public class ApiV1SkillController {
             @RequestParam(defaultValue = "") String searchKeyword
     ) {
         return Ut.pageMapper.of(skillService.getSkills(pageable, searchKeyword));
+    }
+
+    @Operation(summary= "스킬 생성")
+    @PostMapping
+    public RsData<SkillDto> create(@RequestBody SkillCreateReqBody reqBody) {
+        Skill skill = skillService.create(reqBody);
+        return new RsData<>("200-1", "스킬이 삭제되었습니다.", new SkillDto(skill));
     }
 }
