@@ -6,7 +6,6 @@ import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectModifyReqBody;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.post.project.dto.ProjectWriteReqBody;
-import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
@@ -18,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -62,7 +60,7 @@ public class ApiV1ProjectController {
         return Ut.pageMapper.of(dtoPage);
     }
 
-    @GetMapping("/me")
+    @GetMapping("/my")
     @Operation(summary = "내가 쓴 프로젝트 글 다건 조회")
     public PagePayload<ProjectDto> getMyItems(
             @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
@@ -107,15 +105,4 @@ public class ApiV1ProjectController {
 
         return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
-
-    @PatchMapping("/{id}/status")
-    @Operation(summary = "프로젝트 상태 변경")
-    public RsData<Void> changeStatus(
-            @PathVariable Long id,
-            @RequestParam(required = false) String status
-    ) throws NotFoundException {
-        projectService.changeStatus(id, ProjectStatus.fromDisplayValue(status));
-        return new RsData<>("200-1", "프로젝트 상태가 변경되었습니다.");
-    }
-
 }
