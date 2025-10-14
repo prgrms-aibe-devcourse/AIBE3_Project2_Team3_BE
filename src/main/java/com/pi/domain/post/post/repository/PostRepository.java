@@ -26,4 +26,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     Optional<Post> findTopByOrderByIdDesc();
 
     List<Post> findByProjectIsNotNull();
+
+    Page<Post> findByUserAndProjectIsNotNull(Long userId, Pageable pageable);
 }

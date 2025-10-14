@@ -42,6 +42,7 @@ import static com.pi.domain.user.user.entity.QUser.user;
 public class ProjectQueryRepository {
     private final JPAQueryFactory queryFactory;
 
+
     /**
      * 1단계: 단일 엔티티 필드만 가진 내부 DTO (fetch join 금지용)
      */
