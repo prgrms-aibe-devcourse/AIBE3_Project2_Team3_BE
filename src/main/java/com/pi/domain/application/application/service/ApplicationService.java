@@ -44,6 +44,13 @@ public class ApplicationService {
         return applicationRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 
+    public Page<Application> findAllByPostUserIdAndStatus(long postUserId, ApplicationStatus status, Pageable pageable) {
+        if (status == null) {
+            return applicationRepository.findAllByPostUserId(postUserId, pageable);
+        }
+        return applicationRepository.findAllByPostUserIdAndStatus(postUserId, status, pageable);
+    }
+
     public Page<Application> findAllByPostIdAndStatus(long postId, ApplicationStatus status, Pageable pageable) {
         if (status == null) return applicationRepository.findAllByPostId(postId, pageable);
         return applicationRepository.findAllByPostIdAndStatus(postId, status, pageable);

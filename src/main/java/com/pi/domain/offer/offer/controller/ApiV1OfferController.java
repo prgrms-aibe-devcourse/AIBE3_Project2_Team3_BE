@@ -35,9 +35,9 @@ public class ApiV1OfferController {
     private final OfferService offerService;
     private final FreelancerService freelancerService;
 
-    @GetMapping
+    @GetMapping("/my")
     @Transactional(readOnly = true)
-    @Operation(summary = "다건 조회")
+    @Operation(summary = "내가 등록한 구인 다건 조회")
     public PagePayload<OfferWithPostDto> getMyItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
@@ -49,10 +49,24 @@ public class ApiV1OfferController {
         return Ut.pageMapper.of(dtoPage);
     }
 
+    @GetMapping("/received")
+    @Transactional(readOnly = true)
+    @Operation(summary = "내 게시글에 들어온 구인 다건 조회")
+    public PagePayload<OfferWithUserDto> getItems(
+            @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) OfferStatus status
+    ) {
+        User actor = rq.getActor();
+        Page<OfferWithUserDto> dtoPage = offerService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
+                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
+
+        return Ut.pageMapper.of(dtoPage);
+    }
+
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     @Operation(summary = "단건 조회")
-    public OfferDto getMyItem(@PathVariable Long id) {
+    public OfferDto getItem(@PathVariable Long id) {
         User actor = rq.getActor();
         Offer offer = offerService.findById(id);
         User user = offer.getUser();

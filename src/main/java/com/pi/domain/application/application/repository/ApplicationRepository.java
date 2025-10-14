@@ -22,4 +22,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Optional<Application> findByPostIdAndUserId(long postId, long userId);
 
     Page<Application> findAllByPostId(long postId, Pageable pageable);
+
+    Page<Application> findAllByPostUserId(Long postUserId, Pageable pageable);
+
+    Page<Application> findAllByPostUserIdAndStatus(Long postUserId, ApplicationStatus status, Pageable pageable);
 }

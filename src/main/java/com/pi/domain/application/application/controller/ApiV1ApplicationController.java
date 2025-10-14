@@ -42,9 +42,9 @@ public class ApiV1ApplicationController {
     private final ProjectService projectService;
     private final AwsS3Service awsS3Service;
 
-    @GetMapping
+    @GetMapping("/my")
     @Transactional(readOnly = true)
-    @Operation(summary = "다건 조회")
+    @Operation(summary = "내가 등록한 구직 다건 조회")
     public PagePayload<ApplicationWithPostDto> getMyItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) ApplicationStatus status
@@ -56,10 +56,24 @@ public class ApiV1ApplicationController {
         return Ut.pageMapper.of(dtoPage);
     }
 
+    @GetMapping("/received")
+    @Transactional(readOnly = true)
+    @Operation(summary = "내 게시글에 들어온 구직 다건 조회")
+    public PagePayload<PostOwnerApplicationWithUserDto> getItems(
+            @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) ApplicationStatus status
+    ) {
+        User actor = rq.getActor();
+        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
+                .map(application -> new PostOwnerApplicationWithUserDto(application, application.getUser()));
+
+        return Ut.pageMapper.of(dtoPage);
+    }
+
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     @Operation(summary = "단건 조회")
-    public ApplicationDto getMyItem(@PathVariable Long id) {
+    public ApplicationDto getItem(@PathVariable Long id) {
         User actor = rq.getActor();
 
         Application application = applicationService.findById(id);

@@ -34,6 +34,13 @@ public class OfferService {
         return offerRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 
+    public Page<Offer> findAllByPostUserIdAndStatus(long postUserId, OfferStatus status, Pageable pageable) {
+        if (status == null) {
+            return offerRepository.findAllByPostUserId(postUserId, pageable);
+        }
+        return offerRepository.findAllByPostUserIdAndStatus(postUserId, status, pageable);
+    }
+
     public Page<Offer> findAllByPostIdAndStatus(Long postId, OfferStatus status, Pageable pageable) {
         if (status == null) return offerRepository.findAllByPostId(postId, pageable);
         return offerRepository.findAllByPostIdAndStatus(postId, status, pageable);
