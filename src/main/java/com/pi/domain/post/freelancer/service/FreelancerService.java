@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -94,5 +95,16 @@ public class FreelancerService {
         }
 
         return postRepository.save(post);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Post> search(Pageable pageable,
+                             Long categoryId,
+                             Long regionId,
+                             List<Long> skillIds,
+                             String title,
+                             Long minSalary,
+                             Long maxSalary) {
+        return postRepository.searchFreelancers(pageable, categoryId, regionId, skillIds, title, minSalary, maxSalary);
     }
 }
