@@ -3,7 +3,7 @@ spring:
     url: ${SPRING__DATASOURCE__URL}
     username: ${SPRING__DATASOURCE__USERNAME}
     password: ${SPRING__DATASOURCE__PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: ${SPRING__REDIS__HOST}

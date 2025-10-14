@@ -6,27 +6,17 @@ import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Profile("prod")
 @RequiredArgsConstructor
 @Configuration
 public class ProdFreelancerInitData {
     private final FreelancerService freelancerService;
     private final UserRepository userRepository;
-
-    @Bean
-    ApplicationRunner prodFreelancerInitDataRunner() {
-        return args -> {
-            initFreelancers();
-        };
-    }
 
     @Transactional
     public void initFreelancers() {

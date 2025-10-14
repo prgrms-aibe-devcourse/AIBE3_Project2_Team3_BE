@@ -6,26 +6,16 @@ import com.pi.domain.post.post.repository.PostRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
-@Profile("prod")
 @RequiredArgsConstructor
 @Configuration
 public class ProdOfferInitData {
     private final OfferService offerService;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
-    @Bean
-    ApplicationRunner prodOfferInitDataRunner() {
-        return args -> {
-            initOffers();
-        };
-    }
 
     @Transactional
     public void initOffers() {

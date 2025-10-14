@@ -7,26 +7,16 @@ import com.pi.domain.question.question.repository.QuestionRepository;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
-@Profile("prod")
 @RequiredArgsConstructor
 @Configuration
 public class ProdAnswerInitData {
     private final AnswerRepository answerRepository;
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
-
-    @Bean
-    ApplicationRunner prodAnswerInitDataRunner() {
-        return args -> {
-            initAnswers();
-        };
-    }
 
     @Transactional
     public void initAnswers() {

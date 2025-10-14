@@ -4,8 +4,6 @@ import com.pi.domain.region.region.dto.RegionCreateReqBody;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.service.RegionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,18 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Profile("prod")
 @RequiredArgsConstructor
 @Configuration
 public class ProdRegionInitData {
     private final RegionService regionService;
-
-    @Bean
-    ApplicationRunner prodRegionInitDataRunner() {
-        return args -> {
-            initRegions();
-        };
-    }
 
     @Transactional
     public void initRegions() {

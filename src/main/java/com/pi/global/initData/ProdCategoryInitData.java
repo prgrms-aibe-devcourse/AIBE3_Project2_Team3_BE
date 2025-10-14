@@ -4,8 +4,6 @@ import com.pi.domain.category.category.dto.CategoryCreateReqBody;
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.service.CategoryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,18 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Profile("prod")
 @RequiredArgsConstructor
 @Configuration
 public class ProdCategoryInitData {
     private final CategoryService categoryService;
-
-    @Bean
-    ApplicationRunner prodCategoryInitDataRunner() {
-        return args -> {
-            initCategories();
-        };
-    }
 
     @Transactional
     public void initCategories() {
