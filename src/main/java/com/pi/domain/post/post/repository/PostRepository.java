@@ -29,5 +29,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     List<Post> findByProjectIsNotNull();
 
-    Page<Post> findByUserAndProjectIsNotNull(Long userId, Pageable pageable);
+    Page<Post> findByUser_IdAndProjectIsNotNull(Long id, Pageable pageable);
 }
