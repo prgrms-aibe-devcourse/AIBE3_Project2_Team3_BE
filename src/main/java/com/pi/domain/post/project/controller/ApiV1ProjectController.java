@@ -118,4 +118,19 @@ public class ApiV1ProjectController {
         Page<ProjectDto> dtoPage = projectService.getMyProjects(actor, pageable);
         return Ut.pageMapper.of(dtoPage);
     }
+
+
+//    @PostMapping("/{id}/like")
+//    @Operation(summary = "프로젝트 좋아요/취소")
+//    public RsData<Void> likeToggle(
+//            @PathVariable Long id
+//    ) {
+//        User actor = rq.getActor();
+//        Post post = projectService.findById(id);
+//        boolean isNowLiked = postService.toggleLike(post, actor);
+//        if (isNowLiked) {
+//            return new RsData<>("200", "프로젝트를 좋아요 하였습니다.");
+//        } else {
+//            return new RsData<>("200", "프로젝트 좋아요를 취소하였습니다.");
+//        }
 }
