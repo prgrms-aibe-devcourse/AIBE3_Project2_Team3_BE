@@ -17,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
@@ -103,5 +105,11 @@ public class ApiV1ChatRestController {
         User actor = rq.getActor();
         MemberStatus filter = MemberStatus.normalize(status);
         return Ut.pageMapper.of(chatService.listMembers(actor, roomId, filter,pageable));
+    }
+
+    @GetMapping("/invites")
+    public List<ChatInviteDto> getInvites() {
+        User actor = rq.getActor();
+        return chatService.listMyInvites(actor);
     }
 }

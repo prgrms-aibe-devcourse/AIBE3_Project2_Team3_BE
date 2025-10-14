@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -180,5 +183,23 @@ public class ApiV1UserController {
         // 3) 쿠키 삭제
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
+    }
+
+    @PostMapping("/searchToInvite")
+    public RsData<List<UserInviteDto>> invite(
+            @RequestBody UserInviteSearchReqBody reqBody
+    ) {
+        String q = Optional.ofNullable(reqBody.username()).orElse("").trim();
+        if (q.isEmpty()) {
+            return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", List.of());
+        }
+        List<User> searchedUsers = userService.getInvitedUsers(q);
+        List<UserInviteDto> dtoList = searchedUsers.stream()
+                .map(UserInviteDto::new)
+                .toList();
+        return new RsData<>(
+                "200-2",
+                "유저 목록을 성공적으로 가져왔습니다.",
+                dtoList);
     }
 }

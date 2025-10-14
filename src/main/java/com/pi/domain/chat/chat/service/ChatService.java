@@ -248,4 +248,15 @@ public class ChatService {
         chatMemberGuard.ensureMember(actor.getId(), roomId);
         return chatRoomQueryRepository.findMembers(roomId, status, pageable);
     }
+
+    public List<ChatInviteDto> listMyInvites(User actor) {
+        List<ChatMember> pendings = chatMemberRepository.findByUser_IdAndStartedDateIsNullAndEndedDateIsNull(actor.getId());
+        return pendings.stream()
+                .map(cm -> new ChatInviteDto(
+                        cm.getChatRoom().getId(),
+                        cm.getChatRoom().getName(),
+                        cm.getCreatedDate()
+                )).toList();
+
+    }
 }

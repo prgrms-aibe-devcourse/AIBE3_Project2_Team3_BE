@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -112,5 +113,9 @@ public class UserService {
         // - 강제 삭제 필요하면 cascade/on delete 세팅 먼저 확인
         user.deleteSoft();
         userRepository.save(user);
+    }
+
+    public List<User> getInvitedUsers(String username) {
+        return userRepository.findTop10ByUsernameContainsOrderByCreatedDate(username);
     }
 }
