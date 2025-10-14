@@ -62,7 +62,7 @@ public class ApiV1OfferControllerTest {
                 .andExpect(jsonPath("$.data.modifiedDate").value(Matchers.startsWith(offer.getModifiedDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.freelancerId").value(offer.getPost().getId()))
                 .andExpect(jsonPath("$.data.userId").value(offer.getUser().getId()))
-                .andExpect(jsonPath("$.data.status").value(OfferStatus.REQUESTED.name()));
+                .andExpect(jsonPath("$.data.status").value(OfferStatus.PENDING.name()));
     }
 
     @Test

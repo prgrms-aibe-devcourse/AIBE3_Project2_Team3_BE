@@ -12,6 +12,7 @@ public record OfferWithPostDto(
         String offerStatus,
         LocalDateTime offerCreatedDate,
         long postId,
+        String postType, // "PROJECT" or "FREELANCER"
         long postUserId,
         String postUserNickname,
         String postTitle
@@ -23,6 +24,7 @@ public record OfferWithPostDto(
                 offer.getStatus().name(),
                 offer.getCreatedDate(),
                 post.getId(),
+                "FREELANCER",
                 user.getId(),
                 user.getNickname(),
                 post.getTitle()

@@ -1,7 +1,7 @@
 package com.pi.domain.offer.offer.entity;
 
 public enum OfferStatus {
-    REQUESTED("요청"),
+    PENDING("대기"),
     ACCEPTED("수락"),
     REJECTED("거절");
 

@@ -51,6 +51,4 @@ public record ProjectDto(
                 post.getProject().getSkillLevel()
         );
     }
-
-
 }
