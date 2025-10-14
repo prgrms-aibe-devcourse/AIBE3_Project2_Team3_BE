@@ -1,6 +1,6 @@
 package com.pi.domain.application.application.controller;
 
-import com.pi.domain.application.application.dto.PostOwnerApplicationWithUserDto;
+import com.pi.domain.application.application.dto.PostApplicationWithUserDto;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.service.ApplicationService;
 import com.pi.domain.post.post.entity.Post;
@@ -34,7 +34,7 @@ public class ApiV1PostApplicationController {
     @GetMapping
     @Transactional(readOnly = true)
     @Operation(summary = "다건 조회")
-    public PagePayload<PostOwnerApplicationWithUserDto> getItems(
+    public PagePayload<PostApplicationWithUserDto> getItems(
             @PathVariable Long postId,
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) ApplicationStatus status
@@ -43,8 +43,8 @@ public class ApiV1PostApplicationController {
         Post post = projectService.findById(postId);
         post.checkActorCanReadApplication(actor);
 
-        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatus(postId, status, pageable)
-                .map(application -> new PostOwnerApplicationWithUserDto(application, application.getUser()));
+        Page<PostApplicationWithUserDto> dtoPage = applicationService.findAllByPostIdAndStatus(postId, status, pageable)
+                .map(application -> new PostApplicationWithUserDto(application, application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }

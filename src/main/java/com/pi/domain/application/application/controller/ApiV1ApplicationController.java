@@ -59,13 +59,13 @@ public class ApiV1ApplicationController {
     @GetMapping("/received")
     @Transactional(readOnly = true)
     @Operation(summary = "내 게시글에 들어온 구직 다건 조회")
-    public PagePayload<PostOwnerApplicationWithUserDto> getItems(
+    public PagePayload<PostApplicationWithUserDto> getItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) ApplicationStatus status
     ) {
         User actor = rq.getActor();
-        Page<PostOwnerApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
-                .map(application -> new PostOwnerApplicationWithUserDto(application, application.getUser()));
+        Page<PostApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
+                .map(application -> new PostApplicationWithUserDto(application, application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -145,9 +145,9 @@ public class ApiV1ApplicationController {
     @PutMapping("/{id}/status")
     @Transactional
     @Operation(summary = "상태 수정")
-    public RsData<PostOwnerApplicationModifyResBody> modifyStatus(
+    public RsData<ApplicationModifyStatusResBody> modifyStatus(
             @PathVariable long id,
-            @Valid @RequestBody PostOwnerApplicationModifyReqBody reqBody
+            @Valid @RequestBody ApplicationModifyStatusReqBody reqBody
     ) {
         User actor = rq.getActor();
 
@@ -165,7 +165,7 @@ public class ApiV1ApplicationController {
         return new RsData<>(
                 "200-1",
                 "%d번 구직 상태가 수정되었습니다.".formatted(id),
-                new PostOwnerApplicationModifyResBody(application.getStatus().name())
+                new ApplicationModifyStatusResBody(application.getStatus().name())
         );
     }
 

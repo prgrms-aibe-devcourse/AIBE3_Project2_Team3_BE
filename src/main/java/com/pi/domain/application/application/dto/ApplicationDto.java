@@ -9,6 +9,7 @@ import java.util.List;
 public record ApplicationDto(
         long id,
         long postId,
+        String postType, // "PROJECT" or "FREELANCER"
         long userId,
         String status,
         String content,
@@ -22,6 +23,7 @@ public record ApplicationDto(
         this(
                 application.getId(),
                 application.getPost().getId(),
+                "PROJECT",
                 application.getUser().getId(),
                 application.getStatus().name(),
                 application.getContent(),

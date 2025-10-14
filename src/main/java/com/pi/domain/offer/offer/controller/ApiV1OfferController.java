@@ -124,9 +124,9 @@ public class ApiV1OfferController {
     @PutMapping("/{id}/status")
     @Transactional
     @Operation(summary = "상태 수정")
-    public RsData<PostOwnerOfferModifyResBody> modifyStatus(
+    public RsData<OfferModifyStatusResBody> modifyStatus(
             @PathVariable long id,
-            @Valid @RequestBody PostOwnerOfferModifyReqBody reqBody
+            @Valid @RequestBody OfferModifyStatusReqBody reqBody
     ) {
         Offer offer = offerService.findById(id);
 
@@ -143,7 +143,7 @@ public class ApiV1OfferController {
         return new RsData<>(
                 "200-1",
                 "%d번 구인 상태가 수정되었습니다.".formatted(id),
-                new PostOwnerOfferModifyResBody(offer)
+                new OfferModifyStatusResBody(offer)
         );
     }
 

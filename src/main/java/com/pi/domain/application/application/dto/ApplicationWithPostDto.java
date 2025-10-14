@@ -12,6 +12,7 @@ public record ApplicationWithPostDto(
         int period,
         LocalDateTime createdDate,
         long postId,
+        String postType, // "PROJECT" or "FREELANCER"
         String postTitle,
         long postUserId,
         String postUserNickname
@@ -24,6 +25,7 @@ public record ApplicationWithPostDto(
                 application.getPeriod(),
                 application.getCreatedDate(),
                 post.getId(),
+                "PROJECT",
                 post.getTitle(),
                 post.getUser().getId(),
                 post.getUser().getNickname()
