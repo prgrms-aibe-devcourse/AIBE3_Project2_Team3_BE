@@ -74,7 +74,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public Page<ProjectDto> getMyProjects(User actor, Pageable pageable) {
-        Page<Post> posts = postRepository.findByUserAndProjectIsNotNull(actor.getId(), pageable);
+        Page<Post> posts = postRepository.findByUser_IdAndProjectIsNotNull(actor.getId(), pageable);
         return posts.map(ProjectDto::new);
     }
 
