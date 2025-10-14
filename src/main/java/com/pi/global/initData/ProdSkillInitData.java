@@ -1,7 +1,7 @@
 package com.pi.global.initData;
 
-import com.pi.domain.skill.skill.entity.Skill;
-import com.pi.domain.skill.skill.repository.SkillRepository;
+import com.pi.domain.skill.skill.dto.SkillCreateReqBody;
+import com.pi.domain.skill.skill.service.SkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Configuration
 public class ProdSkillInitData {
-    private final SkillRepository skillRepository;
+    private final SkillService skillService;
 
     @Bean
     ApplicationRunner prodSkillInitDataRunner() {
@@ -24,53 +24,53 @@ public class ProdSkillInitData {
 
     @Transactional
     public void initSkills() {
-        if (skillRepository.count() == 0) {
+        if (skillService.count() == 0) {
             // IT/개발
-            skillRepository.save(new Skill("Java"));
-            skillRepository.save(new Skill("Spring Boot"));
-            skillRepository.save(new Skill("Kotlin"));
-            skillRepository.save(new Skill("React"));
-            skillRepository.save(new Skill("Node.js"));
-            skillRepository.save(new Skill("Python"));
-            skillRepository.save(new Skill("Django"));
-            skillRepository.save(new Skill("AWS"));
-            skillRepository.save(new Skill("MySQL"));
-            skillRepository.save(new Skill("Git"));
+            skillService.create(new SkillCreateReqBody("Java"));
+            skillService.create(new SkillCreateReqBody("Spring Boot"));
+            skillService.create(new SkillCreateReqBody("Kotlin"));
+            skillService.create(new SkillCreateReqBody("React"));
+            skillService.create(new SkillCreateReqBody("Node.js"));
+            skillService.create(new SkillCreateReqBody("Python"));
+            skillService.create(new SkillCreateReqBody("Django"));
+            skillService.create(new SkillCreateReqBody("AWS"));
+            skillService.create(new SkillCreateReqBody("MySQL"));
+            skillService.create(new SkillCreateReqBody("Git"));
 
             // 디자인
-            skillRepository.save(new Skill("Photoshop"));
-            skillRepository.save(new Skill("Illustrator"));
-            skillRepository.save(new Skill("Figma"));
-            skillRepository.save(new Skill("Sketch"));
-            skillRepository.save(new Skill("XD"));
+            skillService.create(new SkillCreateReqBody("Photoshop"));
+            skillService.create(new SkillCreateReqBody("Illustrator"));
+            skillService.create(new SkillCreateReqBody("Figma"));
+            skillService.create(new SkillCreateReqBody("Sketch"));
+            skillService.create(new SkillCreateReqBody("XD"));
 
             // 마케팅
-            skillRepository.save(new Skill("Google Analytics"));
-            skillRepository.save(new Skill("SEO"));
-            skillRepository.save(new Skill("콘텐츠 기획"));
-            skillRepository.save(new Skill("SNS 마케팅"));
+            skillService.create(new SkillCreateReqBody("Google Analytics"));
+            skillService.create(new SkillCreateReqBody("SEO"));
+            skillService.create(new SkillCreateReqBody("콘텐츠 기획"));
+            skillService.create(new SkillCreateReqBody("SNS 마케팅"));
 
             // 번역/통역
-            skillRepository.save(new Skill("영어"));
-            skillRepository.save(new Skill("중국어"));
-            skillRepository.save(new Skill("일본어"));
+            skillService.create(new SkillCreateReqBody("영어"));
+            skillService.create(new SkillCreateReqBody("중국어"));
+            skillService.create(new SkillCreateReqBody("일본어"));
 
             // 영상/음향
-            skillRepository.save(new Skill("Premiere Pro"));
-            skillRepository.save(new Skill("After Effects"));
-            skillRepository.save(new Skill("Final Cut Pro"));
-            skillRepository.save(new Skill("Audition"));
+            skillService.create(new SkillCreateReqBody("Premiere Pro"));
+            skillService.create(new SkillCreateReqBody("After Effects"));
+            skillService.create(new SkillCreateReqBody("Final Cut Pro"));
+            skillService.create(new SkillCreateReqBody("Audition"));
 
             // 문서/글쓰기
-            skillRepository.save(new Skill("MS Word"));
-            skillRepository.save(new Skill("MS Excel"));
-            skillRepository.save(new Skill("블로그 작성"));
-            skillRepository.save(new Skill("기획서 작성"));
+            skillService.create(new SkillCreateReqBody("MS Word"));
+            skillService.create(new SkillCreateReqBody("MS Excel"));
+            skillService.create(new SkillCreateReqBody("블로그 작성"));
+            skillService.create(new SkillCreateReqBody("기획서 작성"));
 
             // 기타
-            skillRepository.save(new Skill("엑셀 자동화"));
-            skillRepository.save(new Skill("교육/과외"));
-            skillRepository.save(new Skill("상담/코칭"));
+            skillService.create(new SkillCreateReqBody("엑셀 자동화"));
+            skillService.create(new SkillCreateReqBody("교육/과외"));
+            skillService.create(new SkillCreateReqBody("상담/코칭"));
         }
     }
 }

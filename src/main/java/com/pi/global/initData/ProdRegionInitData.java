@@ -2,7 +2,6 @@ package com.pi.global.initData;
 
 import com.pi.domain.region.region.dto.RegionCreateReqBody;
 import com.pi.domain.region.region.entity.Region;
-import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.region.region.service.RegionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
@@ -73,4 +72,3 @@ public class ProdRegionInitData {
             }
         }
     }
-}

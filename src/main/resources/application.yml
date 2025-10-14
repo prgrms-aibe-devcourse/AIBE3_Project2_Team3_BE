@@ -4,7 +4,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   profiles:
-    active: dev
+    active: prod
     include: secret, s3
   output:
     ansi:

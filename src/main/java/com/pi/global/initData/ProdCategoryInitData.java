@@ -1,7 +1,8 @@
 package com.pi.global.initData;
 
+import com.pi.domain.category.category.dto.CategoryCreateReqBody;
 import com.pi.domain.category.category.entity.Category;
-import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.category.category.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Configuration
 public class ProdCategoryInitData {
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
     @Bean
     ApplicationRunner prodCategoryInitDataRunner() {
@@ -24,50 +25,42 @@ public class ProdCategoryInitData {
 
     @Transactional
     public void initCategories() {
-        if (categoryRepository.count() == 0) {
-            Category itDev = new Category("IT/개발");
-            itDev.addChild(new Category("웹 개발"));
-            itDev.addChild(new Category("앱 개발"));
-            itDev.addChild(new Category("서버/백엔드"));
-            itDev.addChild(new Category("데이터/AI"));
+        if (categoryService.count() == 0) {
+            Category itDev = categoryService.create(new CategoryCreateReqBody("IT/개발", null));
+            categoryService.create(new CategoryCreateReqBody("웹 개발", itDev.getId()));
+            categoryService.create(new CategoryCreateReqBody("앱 개발", itDev.getId()));
+            categoryService.create(new CategoryCreateReqBody("서버/백엔드", itDev.getId()));
+            categoryService.create(new CategoryCreateReqBody("데이터/AI", itDev.getId()));
 
-            Category design = new Category("디자인");
-            design.addChild(new Category("그래픽 디자인"));
-            design.addChild(new Category("UI/UX 디자인"));
-            design.addChild(new Category("제품/패키지 디자인"));
+            Category design = categoryService.create(new CategoryCreateReqBody("디자인", null));
+            categoryService.create(new CategoryCreateReqBody("그래픽 디자인", design.getId()));
+            categoryService.create(new CategoryCreateReqBody("UI/UX 디자인", design.getId()));
+            categoryService.create(new CategoryCreateReqBody("제품/패키지 디자인", design.getId()));
 
-            Category marketing = new Category("마케팅");
-            marketing.addChild(new Category("온라인 마케팅"));
-            marketing.addChild(new Category("콘텐츠 마케팅"));
-            marketing.addChild(new Category("브랜드 마케팅"));
+            Category marketing = categoryService.create(new CategoryCreateReqBody("마케팅", null));
+            categoryService.create(new CategoryCreateReqBody("온라인 마케팅", marketing.getId()));
+            categoryService.create(new CategoryCreateReqBody("콘텐츠 마케팅", marketing.getId()));
+            categoryService.create(new CategoryCreateReqBody("브랜드 마케팅", marketing.getId()));
 
-            Category translation = new Category("번역/통역");
-            translation.addChild(new Category("영어 번역"));
-            translation.addChild(new Category("중국어 번역"));
-            translation.addChild(new Category("일본어 번역"));
+            Category translation = categoryService.create(new CategoryCreateReqBody("번역/통역", null));
+            categoryService.create(new CategoryCreateReqBody("영어 번역", translation.getId()));
+            categoryService.create(new CategoryCreateReqBody("중국어 번역", translation.getId()));
+            categoryService.create(new CategoryCreateReqBody("일본어 번역", translation.getId()));
 
-            Category video = new Category("영상/음향");
-            video.addChild(new Category("영상 편집"));
-            video.addChild(new Category("촬영"));
-            video.addChild(new Category("음향/녹음"));
+            Category video = categoryService.create(new CategoryCreateReqBody("영상/음향", null));
+            categoryService.create(new CategoryCreateReqBody("영상 편집", video.getId()));
+            categoryService.create(new CategoryCreateReqBody("촬영", video.getId()));
+            categoryService.create(new CategoryCreateReqBody("음향/녹음", video.getId()));
 
-            Category writing = new Category("문서/글쓰기");
-            writing.addChild(new Category("블로그/콘텐츠 작성"));
-            writing.addChild(new Category("기획서 작성"));
-            writing.addChild(new Category("교정/교열"));
+            Category writing = categoryService.create(new CategoryCreateReqBody("문서/글쓰기", null));
+            categoryService.create(new CategoryCreateReqBody("블로그/콘텐츠 작성", writing.getId()));
+            categoryService.create(new CategoryCreateReqBody("기획서 작성", writing.getId()));
+            categoryService.create(new CategoryCreateReqBody("교정/교열", writing.getId()));
 
-            Category etc = new Category("기타");
-            etc.addChild(new Category("비즈니스 지원"));
-            etc.addChild(new Category("교육/과외"));
-            etc.addChild(new Category("상담/코칭"));
-
-            categoryRepository.save(itDev);
-            categoryRepository.save(design);
-            categoryRepository.save(marketing);
-            categoryRepository.save(translation);
-            categoryRepository.save(video);
-            categoryRepository.save(writing);
-            categoryRepository.save(etc);
+            Category etc = categoryService.create(new CategoryCreateReqBody("기타", null));
+            categoryService.create(new CategoryCreateReqBody("비즈니스 지원", etc.getId()));
+            categoryService.create(new CategoryCreateReqBody("교육/과외", etc.getId()));
+            categoryService.create(new CategoryCreateReqBody("상담/코칭", etc.getId()));
         }
     }
 }
