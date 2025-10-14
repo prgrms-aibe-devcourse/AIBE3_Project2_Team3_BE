@@ -39,10 +39,12 @@ public class ProjectService {
     private final SkillRepository skillRepository;
     private final ProjectQueryRepository projectQueryRepository;
 
+    @Transactional(readOnly = true)
     public long count() {
         return projectRepository.count();
     }
 
+    @Transactional(readOnly = true)
     public Post findById(Long id) {
         return postRepository.findByProjectIsNotNullAndId(id).get();
     }
@@ -52,6 +54,7 @@ public class ProjectService {
         return projectQueryRepository.searchProjects(condition, pageable);
     }
 
+    @Transactional
     public Post create(User actor, PostWriteDto po, ProjectWriteDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
         Post post = new Post(actor, po.title(), po.content(), po.isViewed());
         postRepository.save(post);  // ID 생성
@@ -68,6 +71,7 @@ public class ProjectService {
         return postRepository.save(post);
     }
 
+    @Transactional
     public Post modify(Post post, PostModifyDto po, ProjectModifyDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
         post.modify(po.title(), po.content(), po.isViewed());
         post.getProject().modify(pr.deadlineDate(), pr.startedDate(), pr.endedDate(), pr.hirerType(), pr.employmentType(), pr.salary(), pr.personnel(), pr.skillLevel());
@@ -82,6 +86,7 @@ public class ProjectService {
         return postRepository.save(post);
     }
 
+    @Transactional
     public void delete(Post post) {
         if (post.getProject() != null) {
             projectRepository.delete(post.getProject());
@@ -96,6 +101,7 @@ public class ProjectService {
     }
 
     // 테스트 용도
+    @Transactional(readOnly = true)
     public Post findLatestPost() {
         return postRepository.findTopByOrderByIdDesc()
                 .orElseThrow(() -> new RuntimeException());
