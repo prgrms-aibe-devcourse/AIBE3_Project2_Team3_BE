@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -186,17 +185,15 @@ public class ApiV1UserController {
     }
 
     @PostMapping("/searchToInvite")
-    public RsData<List<UserInviteDto>> invite(
+    public RsData<UserInviteDto> invite(
             @RequestBody UserInviteSearchReqBody reqBody
     ) {
         String q = Optional.ofNullable(reqBody.username()).orElse("").trim();
         if (q.isEmpty()) {
-            return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", List.of());
+            return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", null);
         }
-        List<User> searchedUsers = userService.getInvitedUsers(q);
-        List<UserInviteDto> dtoList = searchedUsers.stream()
-                .map(UserInviteDto::new)
-                .toList();
+        User searchedUsers = userService.getInvitedUsers(q);
+        UserInviteDto dtoList = new UserInviteDto(searchedUsers);
         return new RsData<>(
                 "200-2",
                 "유저 목록을 성공적으로 가져왔습니다.",
