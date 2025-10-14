@@ -48,12 +48,32 @@ public class ApiV1FreelancerController {
 
     @GetMapping
     @Transactional
-    @Operation(summary = "프리랜서 글 다건 조회")
+    @Operation(summary = "프리랜서 글 다건 조회 (필터 + 검색 자동 분기)")
     public PagePayload<FreelancerDto> getItems(
             @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(defaultValue = "") String searchKeyword
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long regionId,
+            @RequestParam(required = false) List<Long> skillIds,
+            @RequestParam(required = false) Long minSalary,
+            @RequestParam(required = false) Long maxSalary
     ) {
-        Page<FreelancerDto> dtoPage = freelancerService.getPage(pageable, searchKeyword).map(FreelancerDto::new);
+        Page<Post> postPage;
+
+        boolean hasFilter =
+                (categoryId != null) ||
+                        (regionId != null) ||
+                        (skillIds != null && !skillIds.isEmpty()) ||
+                        (minSalary != null) ||
+                        (maxSalary != null);
+
+        if (hasFilter) {
+            postPage = freelancerService.search(pageable, categoryId, regionId, skillIds, searchKeyword, minSalary, maxSalary);
+        } else {
+            postPage = freelancerService.getPage(pageable, searchKeyword);
+        }
+
+        Page<FreelancerDto> dtoPage = postPage.map(FreelancerDto::new);
         return Ut.pageMapper.of(dtoPage);
     }
 
@@ -95,23 +115,5 @@ public class ApiV1FreelancerController {
 
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
     }
-
-    @GetMapping("")
-    public RsData<Page<FreelancerDto>> getFreelancers(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String region,
-            @RequestParam(required = false) String skill,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) Integer minSalary,
-            @RequestParam(required = false) Integer maxSalary,
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        Page<FreelancerDto> freelancers = freelancerService.searchFreelancers(
-                category, region, skill, title, minSalary, maxSalary, pageable
-        );
-        return new RsData<>("200-1", "프리랜서 검색 결과입니다.", freelancers);
-    }
-
-
 }
 

@@ -1,7 +1,6 @@
 package com.pi.domain.post.freelancer.service;
 
 import com.pi.domain.category.category.repository.CategoryRepository;
-import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
@@ -99,20 +98,13 @@ public class FreelancerService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FreelancerDto> searchFreelancers(
-            String category,
-            String region,
-            String skill,
-            String title,
-            Integer minSalary,
-            Integer maxSalary,
-            Pageable pageable
-    ) {
-        Page<Freelancer> result = freelancerRepository.searchFreelancers(
-                category, region, skill, title, minSalary, maxSalary, pageable
-        );
-
-        return result.map(FreelancerDto::new);
+    public Page<Post> search(Pageable pageable,
+                             Long categoryId,
+                             Long regionId,
+                             List<Long> skillIds,
+                             String title,
+                             Long minSalary,
+                             Long maxSalary) {
+        return postRepository.searchFreelancers(pageable, categoryId, regionId, skillIds, title, minSalary, maxSalary);
     }
-
 }
