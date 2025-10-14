@@ -5,6 +5,7 @@ import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,19 +14,23 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class Category extends BaseEntity {
-    @OneToMany(mappedBy = "parent",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private final List<Category> children = new ArrayList<>();
-    @OneToMany(mappedBy = "category")
-    private final List<PostCategory> postCategories = new ArrayList<>();
+    @Setter
     private String name;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parent;
 
-    public Category(String name) {
+    @OneToMany(mappedBy = "parent",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private final List<Category> children = new ArrayList<>();
+
+    @OneToMany(mappedBy = "category")
+    private final List<PostCategory> postCategories = new ArrayList<>();
+
+    public Category(String name, Category parent) {
         this.name = name;
+        this.parent = parent;
     }
 
     public void addChild(Category child) {
@@ -52,9 +57,4 @@ public class Category extends BaseEntity {
         }
         return false;
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
 }

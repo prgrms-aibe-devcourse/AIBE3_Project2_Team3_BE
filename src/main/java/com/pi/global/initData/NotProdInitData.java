@@ -2,8 +2,8 @@ package com.pi.global.initData;
 
 import com.pi.domain.answer.answer.dto.AnswerCreateReqBody;
 import com.pi.domain.answer.answer.service.AnswerService;
-import com.pi.domain.category.category.entity.Category;
-import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.category.category.dto.CategoryCreateReqBody;
+import com.pi.domain.category.category.service.CategoryService;
 import com.pi.domain.notification.notification.entity.Notification;
 import com.pi.domain.notification.notification.repository.NotificationRepository;
 import com.pi.domain.notification.notification.service.NotificationService;
@@ -20,11 +20,10 @@ import com.pi.domain.post.project.service.ProjectService;
 import com.pi.domain.question.question.dto.QuestionCreateReqBody;
 import com.pi.domain.question.question.entity.Question;
 import com.pi.domain.question.question.service.QuestionService;
-import com.pi.domain.region.region.entity.Region;
-import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.region.region.dto.RegionCreateReqBody;
 import com.pi.domain.region.region.service.RegionService;
-import com.pi.domain.skill.skill.entity.Skill;
-import com.pi.domain.skill.skill.repository.SkillRepository;
+import com.pi.domain.skill.skill.dto.SkillCreateReqBody;
+import com.pi.domain.skill.skill.service.SkillService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.entity.UserRole;
 import com.pi.domain.user.user.repository.UserRepository;
@@ -50,13 +49,14 @@ public class NotProdInitData {
     private final PostService postService;
     private final FreelancerService freelancerService;
     private final ProjectService projectService;
-    private final RegionRepository regionRepository;
-    private final CategoryRepository categoryRepository;
-    private final SkillRepository skillRepository;
+    private final CategoryService categoryService;
+    private final RegionService regionService;
+    private final SkillService skillService;
     private final UserRepository userRepository;
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final NotificationRepository notificationRepository;
+    private final NotificationService notficationService;
     @Autowired
     @Lazy
     private NotProdInitData self;
@@ -103,8 +103,8 @@ public class NotProdInitData {
     }
 
     @Transactional
-    public boolean work4() {
-        if (answerService.count() > 0) return false;
+    public void work4() {
+        if (answerService.count() > 0) return;
 
         Question question = questionService.create(
                 new QuestionCreateReqBody("테스트 질문", "일반 사용자 테스트 작성 내용."),
@@ -115,23 +115,25 @@ public class NotProdInitData {
                 new AnswerCreateReqBody("관리자 테스트 답변.", question.getId()),
                 userRepository.findByUsername("admin").get()
         );
-
-        return true;
     }
 
 
     public void work5() {
-        if (categoryRepository.count() == 0) {
-            categoryRepository.save(new Category("웹 개발"));
-            categoryRepository.save(new Category("디자인"));
+        if (categoryService.count() == 0) {
+            categoryService.create(new CategoryCreateReqBody("웹 개발", null));
+            categoryService.create(new CategoryCreateReqBody("디자인", null));
+            categoryService.create(new CategoryCreateReqBody("프론트엔드", 1L));
+            categoryService.create(new CategoryCreateReqBody("백엔드", 1L));
         }
-        if (regionRepository.count() == 0) {
-            regionRepository.save(new Region("서울"));
-            regionRepository.save(new Region("경기"));
+        if (regionService.count() == 0) {
+            regionService.create(new RegionCreateReqBody("서울", null));
+            regionService.create(new RegionCreateReqBody("경기", null));
+            regionService.create(new RegionCreateReqBody("강남구", 1L));
+            regionService.create(new RegionCreateReqBody("동대문구", 1L));
         }
-        if (skillRepository.count() == 0) {
-            skillRepository.save(new Skill("Java"));
-            skillRepository.save(new Skill("React"));
+        if (skillService.count() == 0) {
+            skillService.create(new SkillCreateReqBody("Java"));
+            skillService.create(new SkillCreateReqBody("React"));
         }
     }
 

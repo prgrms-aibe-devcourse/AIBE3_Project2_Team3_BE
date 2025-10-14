@@ -9,10 +9,4 @@ public record SkillDto(
     public SkillDto(Skill skill) {
         this(skill.getId(), skill.getName());
     }
-
-    public static SkillDto from(Skill skill) {
-        return new SkillDto(skill.getId(), skill.getName());
-    }
-
-    
 }

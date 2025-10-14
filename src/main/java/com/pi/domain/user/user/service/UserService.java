@@ -31,8 +31,9 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void modify(User user, String nickname) {
-        user.modify(nickname);
+    @Transactional
+    public void modify(User user, String nickname, String email) {
+        user.modify(nickname, email);
     }
 
     public void checkPassword(User user, String password) {
@@ -89,5 +90,27 @@ public class UserService {
 
     public User getById(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
+    }
+
+    @Transactional
+    public void deleteMe(long userId, String password) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ServiceException("404-1", "회원이 존재하지 않습니다."));
+
+        // 이미 탈퇴 처리된 계정 방지
+        if (user.isDeleted()) {
+            throw new ServiceException("400-9", "이미 탈퇴 처리된 계정입니다.");
+        }
+
+        // 비밀번호 재확인
+        if (password == null || password.isBlank() || !passwordEncoder.matches(password, user.getPassword())) {
+            throw new ServiceException("401-1", "비밀번호가 일치하지 않습니다.");
+        }
+
+        // 도메인 참조 검토:
+        // - 작성글/댓글 등은 유지(작성자 표시만 “탈퇴회원”)
+        // - 강제 삭제 필요하면 cascade/on delete 세팅 먼저 확인
+        user.deleteSoft();
+        userRepository.save(user);
     }
 }
