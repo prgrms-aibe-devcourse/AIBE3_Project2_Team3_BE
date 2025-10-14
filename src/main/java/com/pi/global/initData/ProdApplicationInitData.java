@@ -41,19 +41,19 @@ public class ProdApplicationInitData {
         User user2 = userRepository.findById(4L).orElseThrow();
         User user3 = userRepository.findById(5L).orElseThrow();
 
-        applicationService.createOrUpdate(post1, user1,
+        applicationService.create(post1, user1,
                 new com.pi.domain.application.application.dto.ApplicationWriteReqBody(
-                        post1.getId(), "APPLIED", "웹 개발 지원합니다.", 5000000L, 30
+                        post1.getId(), "웹 개발 지원합니다.", 5000000L, 30
                 ), null);
 
-        applicationService.createOrUpdate(post2, user2,
+        applicationService.create(post2, user2,
                 new com.pi.domain.application.application.dto.ApplicationWriteReqBody(
-                        post2.getId(), "APPLIED", "디자인 리뉴얼 경험 있습니다.", 3000000L, 20
+                        post2.getId(), "디자인 리뉴얼 경험 있습니다.", 3000000L, 20
                 ), null);
 
-        applicationService.createOrUpdate(post3, user3,
+        applicationService.create(post3, user3,
                 new com.pi.domain.application.application.dto.ApplicationWriteReqBody(
-                        post3.getId(), "APPLIED", "마케팅 캠페인 참여 희망합니다.", 2000000L, 15
+                        post3.getId(), "마케팅 캠페인 참여 희망합니다.", 2000000L, 15
                 ), null);
     }
 }

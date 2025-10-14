@@ -34,9 +34,9 @@ public class ProdProjectInitData {
         if (projectService.count() > 0) {
             return;
         }
-        User user1 = userRepository.findById(2L).orElseThrow();
-        User user2 = userRepository.findById(3L).orElseThrow();
-        User user3 = userRepository.findById(4L).orElseThrow();
+        User user1 = userRepository.findById(3L).orElseThrow();
+        User user2 = userRepository.findById(4L).orElseThrow();
+        User user3 = userRepository.findById(5L).orElseThrow();
 
         projectService.create(
                 user1,
