@@ -57,8 +57,6 @@ public class NotProdInitData {
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final NotificationRepository notificationRepository;
-    private final NotificationService notficationService;
-    private final RegionService regionService;
     @Autowired
     @Lazy
     private NotProdInitData self;
