@@ -1,5 +1,6 @@
 package com.pi.domain.post.freelancer.service;
 
+import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
@@ -11,9 +12,12 @@ import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,53 +56,53 @@ public class FreelancerService {
         Post post = new Post(actor, p.title(), p.content(), p.isViewed());
         post.setFreelancer(Freelancer.of(post));
         post.getFreelancer().modify(f.salary(), f.period());
-        if (regionIds != null) {
-            for (Long regionId : regionIds) {
-                post.addRegion(regionRepository.findById(regionId).get());
-            }
-        }
-
-        if (categoryIds != null) {
-            for (Long categoryId : categoryIds) {
-                post.addCategory(categoryRepository.findById(categoryId).get());
-            }
-        }
-
-        if (skillIds != null) {
-            for (Long skillId : skillIds) {
-                post.addSkill(skillRepository.findById(skillId).get());
-            }
-        }
+        addRelations(post, regionIds, categoryIds, skillIds);
 
         return postRepository.save(post);
     }
 
+    @Transactional
     public Post modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
         post.modify(p.title(), p.content(), p.isViewed());
         post.getFreelancer().modify(f.salary(), f.period());
 
         post.getPostRegions().clear();
+        post.getPostCategories().clear();
+        post.getPostSkills().clear();
+        postRepository.flush();
+        addRelations(post, regionIds, categoryIds, skillIds);
+
+        return postRepository.save(post);
+    }
+
+    private void addRelations(Post post, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+
+        post.getPostRegions().clear();
         if (regionIds != null) {
             for (Long regionId : regionIds) {
-                post.addRegion(regionRepository.findById(regionId).get());
+                Region region = regionRepository.findById(regionId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 지역 ID: " + regionId));
+                post.addRegion(region);
             }
         }
 
         post.getPostCategories().clear();
         if (categoryIds != null) {
             for (Long categoryId : categoryIds) {
-                post.addCategory(categoryRepository.findById(categoryId).get());
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 카테고리 ID: " + categoryId));
+                post.addCategory(category);
             }
         }
 
         post.getPostSkills().clear();
         if (skillIds != null) {
             for (Long skillId : skillIds) {
-                post.addSkill(skillRepository.findById(skillId).get());
+                Skill skill = skillRepository.findById(skillId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 스킬 ID: " + skillId));
+                post.addSkill(skill);
             }
         }
-
-        return postRepository.save(post);
     }
 
     @Transactional(readOnly = true)
