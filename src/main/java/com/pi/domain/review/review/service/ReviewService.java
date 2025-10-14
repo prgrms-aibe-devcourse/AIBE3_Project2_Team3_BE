@@ -69,4 +69,8 @@ public class ReviewService {
         return reviewRepository.findByPost_Project_Id(projectId, pageable)
                 .map(ReviewDto::new);
     }
+
+    public long count() {
+        return reviewRepository.count();
+    }
 }

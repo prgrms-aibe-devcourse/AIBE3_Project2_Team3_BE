@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${SPRING__DATASOURCE__URL}
+    username: ${SPRING__DATASOURCE__USERNAME}
+    password: ${SPRING__DATASOURCE__PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${SPRING__REDIS__HOST}
+      port: ${SPRING__REDIS__PORT}
+      password: ${SPRING__REDIS__PASSWORD}
+  mail:
+    host: ${SPRING__MAIL__HOST}
+    port: ${SPRING__MAIL__PORT}
+    username: ${SPRING__MAIL__USERNAME}
+    password: ${SPRING__MAIL__PASSWORD}

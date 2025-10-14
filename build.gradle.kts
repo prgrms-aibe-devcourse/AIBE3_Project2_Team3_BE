@@ -45,6 +45,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt:0.12.6")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     runtimeOnly ("org.postgresql:postgresql")
+    runtimeOnly("mysql:mysql-connector-java:8.0.33")
     // QueryDSL
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")

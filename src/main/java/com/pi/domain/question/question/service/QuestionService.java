@@ -56,5 +56,9 @@ public class QuestionService {
         long total = questions.size();
         return new PageImpl<>(questions, pageable, total);
     }
+
+    public long count() {
+        return questionRepository.count();
+    }
 }
 
