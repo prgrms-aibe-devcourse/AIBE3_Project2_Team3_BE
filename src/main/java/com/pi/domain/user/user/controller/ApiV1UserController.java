@@ -184,13 +184,13 @@ public class ApiV1UserController {
 
     @GetMapping("/search")
     public RsData<UserInviteDto> search(
-            @RequestParam(name = "username", defaultValue = " ") String username
+            @RequestParam(name = "username", defaultValue = " ") String nickname
     ) {
-        String q = username.trim();
+        String q = nickname.trim();
         if (q.isEmpty()) {
             return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", null);
         }
-        User searchedUsers = userService.findByUsername(q).get();
+        User searchedUsers = userService.findByNickname(q).get();
         UserInviteDto dtoList = new UserInviteDto(searchedUsers);
         return new RsData<>(
                 "200-2",
