@@ -89,6 +89,12 @@ public class ProjectService {
         postRepository.delete(post);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProjectDto> getMyProjects(User actor, Pageable pageable) {
+        return projectRepository.findByPost_User(actor, pageable)
+                .map(project -> new ProjectDto(project.getPost()));
+    }
+
     // 테스트 용도
     public Post findLatestPost() {
         return postRepository.findTopByOrderByIdDesc()

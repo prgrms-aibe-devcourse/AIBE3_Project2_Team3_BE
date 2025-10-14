@@ -2,6 +2,9 @@ package com.pi.domain.post.project.repository;
 
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.entity.Project;
+import com.pi.domain.user.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +45,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             @Param("keyword") String keyword,
             @Param("now") LocalDateTime now
     );
+
+
+    Page<Project> findByPost_User(User actor, Pageable pageable);
 }

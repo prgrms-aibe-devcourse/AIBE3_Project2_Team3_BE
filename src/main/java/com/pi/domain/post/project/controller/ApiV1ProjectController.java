@@ -115,4 +115,15 @@ public class ApiV1ProjectController {
         projectService.changeStatus(id, ProjectStatus.fromDisplayValue(status));
         return new RsData<>("200-1", "프로젝트 상태가 변경되었습니다.");
     }
+
+    @GetMapping("/me")
+    @Transactional
+    @Operation(summary = "내가 쓴 프로젝트 글 다건 조회")
+    public PagePayload<ProjectDto> getMyItems(
+            @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        User actor = rq.getActor();
+        Page<ProjectDto> dtoPage = projectService.getMyProjects(actor, pageable);
+        return Ut.pageMapper.of(dtoPage);
+    }
 }
