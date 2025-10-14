@@ -59,7 +59,11 @@ public class ApiV1OfferController {
         User actor = rq.getActor();
         Offer offer = offerService.findById(id);
         User user = offer.getUser();
-        offer.checkActorCanRead(actor, user);
+        User postUser = offer.getPost().getUser();
+        if (offer.isDifferentUser(actor, user) && offer.isDifferentUser(actor, postUser)) {
+            log.warn("본인 또는 게시글 작성자만 조회 가능");
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
 
         return new OfferDto(offer);
     }

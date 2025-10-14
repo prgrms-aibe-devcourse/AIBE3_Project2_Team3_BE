@@ -26,16 +26,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/post-owner/offers")
+@RequestMapping("/api/v1/posts/{postId}/offers")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "ApiV1PostOwnerOfferController", description = "게시글 작성자용 API 구인 컨트롤러")
-public class ApiV1PostOwnerOfferController {
+@Tag(name = "ApiV1PostOfferController", description = "게시글 작성자용 API 구인 컨트롤러")
+public class ApiV1PostOfferController {
     private final Rq rq;
     private final OfferService offerService;
     private final FreelancerService freelancerService;
 
-    @GetMapping("/post/{postId}")
+    @GetMapping
     @Transactional(readOnly = true)
     @Operation(summary = "다건 조회")
     public PagePayload<OfferWithUserDto> getItems(
@@ -51,18 +51,6 @@ public class ApiV1PostOwnerOfferController {
                 .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
-    }
-
-    @GetMapping("/{id}")
-    @Transactional(readOnly = true)
-    @Operation(summary = "단건 조회")
-    public OfferDto getItem(@PathVariable Long id) {
-        User actor = rq.getActor();
-        Offer offer = offerService.findById(id);
-        User postUser = offer.getPost().getUser();
-        offer.checkActorCanRead(actor, postUser);
-
-        return new OfferDto(offer);
     }
 
     @PutMapping("/{id}")

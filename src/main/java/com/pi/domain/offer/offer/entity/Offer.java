@@ -44,13 +44,6 @@ public class Offer extends BaseEntity {
         this.amount = amount;
     }
 
-    public void checkActorCanRead(User actor, User user) {
-        if (isDifferentUser(actor, user)) {
-            log.warn("구인({}) 조회 권한 없음. 사용자: {}", getId(), actor.getUsername());
-            throw new ServiceException("403-1", "권한이 없습니다.".formatted(getId()));
-        }
-    }
-
     public void checkActorCanModify(User actor) {
         if (isNotOwner(actor)) {
             log.warn("구인({}) 수정 권한 없음. 사용자: {}", getId(), actor.getUsername());
@@ -76,7 +69,7 @@ public class Offer extends BaseEntity {
         return !actor.getUsername().equals(this.user.getUsername());
     }
 
-    private boolean isDifferentUser(User actor, User user) {
+    public boolean isDifferentUser(User actor, User user) {
         return !actor.getUsername().equals(user.getUsername());
     }
 }
