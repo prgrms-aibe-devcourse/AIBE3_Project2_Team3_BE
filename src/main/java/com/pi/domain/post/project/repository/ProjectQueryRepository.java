@@ -108,6 +108,7 @@ public class ProjectQueryRepository {
                 .join(post.project, project)
                 .join(post.user, user)
                 .where(
+                        post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
                         salaryBetween(condition.minSalary(), condition.maxSalary()),
                         anyRegion(condition.regionIds()),
@@ -169,6 +170,7 @@ public class ProjectQueryRepository {
                 .from(post)
                 .join(post.project, project)
                 .where(
+                        post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
                         salaryBetween(condition.minSalary(), condition.maxSalary()),
                         anyRegion(condition.regionIds()),

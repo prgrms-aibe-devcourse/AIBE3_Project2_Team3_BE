@@ -94,6 +94,7 @@ public class FreelancerQueryRepository {
                 .join(post.freelancer, freelancer) // 프리랜서 글만 대상
                 .join(post.user, user)
                 .where(
+                        post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
                         salaryBetween(condition.minSalary(), condition.maxSalary()), // freelancer.salary 기준
                         anyRegion(condition.regionIds()),
@@ -148,6 +149,7 @@ public class FreelancerQueryRepository {
                 .from(post)
                 .join(post.freelancer, freelancer)
                 .where(
+                        post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
                         salaryBetween(condition.minSalary(), condition.maxSalary()),
                         anyRegion(condition.regionIds()),
