@@ -37,8 +37,13 @@ jobs:
         run: echo "SPRING_PROFILES_ACTIVE=test" >> $GITHUB_ENV
 
       # Spotless 플러그인 사용 중일 때만 유지 (없으면 이 스텝 삭제)
-      - name: Spotless check (format)
-        run: ./gradlew spotlessCheck
+      - name: Spotless check (skip if not configured)
+        run: |
+          if ./gradlew -q tasks --all | grep -q "^spotlessCheck"; then
+            ./gradlew spotlessCheck
+          else
+            echo "Spotless not configured; skipping."
+          fi
 
       - name: Run unit tests (JUnit5)
         run: ./gradlew test --info
