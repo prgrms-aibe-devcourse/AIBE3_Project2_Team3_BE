@@ -25,7 +25,7 @@ public class DevInitData {
                     "--package", "typescript",
                     "--package", "openapi-typescript",
                     "openapi-typescript", "http://localhost:8080/v3/api-docs/apiV1",
-                    "-o", frontendSrc+"/global/backend/apiV1/schema.d.ts",
+                    "-o", frontendSrc + "/global/backend/apiV1/schema.d.ts",
                     "--properties-required-by-default"
             );
         };
