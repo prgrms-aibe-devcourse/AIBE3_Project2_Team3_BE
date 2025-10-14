@@ -23,4 +23,6 @@ public interface ChatMemberRepository extends JpaRepository<ChatMember, Long> {
     Optional<ChatMember> findByChatRoom_IdAndUser_IdAndStartedDateIsNullAndEndedDateIsNull(Long roomId, Long id);
 
     List<ChatMember> findByChatRoom_IdAndUser_IdInAndEndedDateIsNull(Long roomId, Set<Long> foundIds);
+
+    List<ChatMember> findByUser_IdAndStartedDateIsNullAndEndedDateIsNull(Long userId);
 }

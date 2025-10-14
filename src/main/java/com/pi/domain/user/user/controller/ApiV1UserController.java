@@ -181,4 +181,20 @@ public class ApiV1UserController {
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
     }
+
+    @GetMapping("/search")
+    public RsData<UserInviteDto> search(
+            @RequestParam(name = "username", defaultValue = " ") String username
+    ) {
+        String q = username.trim();
+        if (q.isEmpty()) {
+            return new RsData<>("200-1", "검색어는 1글자 이상으로 검색해주세요.", null);
+        }
+        User searchedUsers = userService.getInvitedUsers(q);
+        UserInviteDto dtoList = new UserInviteDto(searchedUsers);
+        return new RsData<>(
+                "200-2",
+                "유저 목록을 성공적으로 가져왔습니다.",
+                dtoList);
+    }
 }

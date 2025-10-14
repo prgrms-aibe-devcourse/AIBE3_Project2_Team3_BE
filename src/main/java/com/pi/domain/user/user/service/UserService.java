@@ -113,4 +113,8 @@ public class UserService {
         user.deleteSoft();
         userRepository.save(user);
     }
+
+    public User getInvitedUsers(String username) {
+        return userRepository.findByUsername(username).orElseThrow();
+    }
 }

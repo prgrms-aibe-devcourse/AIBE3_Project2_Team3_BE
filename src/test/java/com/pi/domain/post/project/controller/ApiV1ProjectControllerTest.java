@@ -52,7 +52,6 @@ public class ApiV1ProjectControllerTest {
     @Autowired
     private UserService userService;
 
-
     @Test
     @DisplayName("프로젝트 등록")
     @WithUserDetails("user1")
@@ -363,5 +362,22 @@ public class ApiV1ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.message").value("프로젝트 상태가 변경되었습니다."));
+    }
+
+    @Test
+    @DisplayName("내가 작성한 게시물 조회")
+    @WithUserDetails("user1")
+    void t7() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                        get("/api/v1/projects/me")
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProjectController.class))
+                .andExpect(handler().methodName("getMyItems"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].title").value("프로젝트"))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 }
