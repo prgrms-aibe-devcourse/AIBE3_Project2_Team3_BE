@@ -151,4 +151,53 @@ public class ApiV1FreelancerControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.message").value("프리랜서 게시글이 삭제되었습니다."));
     }
+
+    @Test
+    @DisplayName("프리랜서 글 필터 검색")
+    @WithUserDetails("user1")
+    void t5() throws Exception {
+        // given: 필터 조건 (카테고리, 지역, 스킬, 급여범위, 키워드)
+        String url = "/api/v1/freelancers?categoryIds=1&regionIds=1&skillIds=1&minSalary=50&maxSalary=200&keyword=프리랜서";
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get(url))
+                .andDo(print());
+
+        // then
+        resultActions
+                .andExpect(handler().handlerType(com.pi.domain.post.freelancer.controller.ApiV1FreelancerController.class))
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("SUCCESS"))
+                .andExpect(jsonPath("$.data.items").isArray())
+                .andExpect(jsonPath("$.data.items[0].title").value("프리랜서"))
+                .andExpect(jsonPath("$.data.items[0].salary").value(100));
+    }
+
+    @Test
+    @DisplayName("내가 작성한 프리랜서 글 조회 (Page 형식)")
+    @WithUserDetails("user1")
+    void t6() throws Exception {
+        // given
+        String url = "/api/v1/freelancers/my?page=0&size=5";
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get(url))
+                .andDo(print());
+
+        // then
+        resultActions
+                .andExpect(handler().handlerType(com.pi.domain.post.freelancer.controller.ApiV1FreelancerController.class))
+                .andExpect(handler().methodName("getMyFreelancers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("SUCCESS"))
+                .andExpect(jsonPath("$.data.items").isArray())
+                .andExpect(jsonPath("$.data.items[0].title").value("프리랜서"))
+                .andExpect(jsonPath("$.data.items[0].salary").value(100));
+    }
+
 }
