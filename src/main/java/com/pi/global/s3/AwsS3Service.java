@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,13 +51,16 @@ public class AwsS3Service {
 
     public AwsS3DownloadDto getDownloadData(String fileUrl) {
         String fileKey = getFileKey(fileUrl);
-        S3Object s3Object = amazonS3.getObject(bucket, fileKey);
+        String decodedFileKey = URLDecoder.decode(fileKey, StandardCharsets.UTF_8);
+        S3Object s3Object = amazonS3.getObject(bucket, decodedFileKey);
 
         String fileName = getOriginalFileName(fileKey);
+        String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+
         String contentType = s3Object.getObjectMetadata().getContentType();
         InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
 
-        return new AwsS3DownloadDto(fileName, contentType, resource);
+        return new AwsS3DownloadDto(decodedFileName, contentType, resource);
     }
 
     public void deleteFile(String fileKey) {
@@ -81,7 +86,7 @@ public class AwsS3Service {
         return UUID.randomUUID() + "_" + originalFileName;
     }
 
-    public String getFileKey(String fileUrl) {
+    private String getFileKey(String fileUrl) {
         String delimiter = ".com/";
         int index = fileUrl.indexOf(delimiter);
         if (index == -1) {
@@ -94,8 +99,15 @@ public class AwsS3Service {
         return fileKey.substring(fileKey.indexOf("_") + 1);
     }
 
-    public String getOriginalFileNameFromUrl(String fileUrl) {
+    public String getDecodedFileKey(String fileUrl) {
         String fileKey = getFileKey(fileUrl);
-        return getOriginalFileName(fileKey);
+        return URLDecoder.decode(fileKey, StandardCharsets.UTF_8);
+    }
+
+    public String getDecodedFileName(String fileUrl) {
+        String fileKey = getFileKey(fileUrl);
+        String originalFileName = getOriginalFileName(fileKey);
+
+        return URLDecoder.decode(originalFileName, StandardCharsets.UTF_8);
     }
 }

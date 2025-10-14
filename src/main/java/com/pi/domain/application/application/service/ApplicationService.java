@@ -71,7 +71,7 @@ public class ApplicationService {
 
     public void delete(Application application) {
         List<String> fileKeys = application.getFiles().stream()
-                .map(file -> awsS3Service.getFileKey(file.getUrl()))
+                .map(file -> awsS3Service.getDecodedFileKey(file.getUrl()))
                 .toList();
 
         applicationRepository.delete(application);
@@ -93,7 +93,7 @@ public class ApplicationService {
 
     private void deleteFiles(Application application) {
         List<String> fileKeys = application.getFiles().stream()
-                .map(file -> awsS3Service.getFileKey(file.getUrl()))
+                .map(file -> awsS3Service.getDecodedFileKey(file.getUrl()))
                 .toList();
 
         application.getFiles().clear();

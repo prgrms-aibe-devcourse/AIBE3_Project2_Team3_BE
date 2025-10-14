@@ -72,7 +72,7 @@ public class ApiV1ApplicationController {
                         .map(file -> new ApplicationFileDto(
                                 file.getId(),
                                 file.getUrl(),
-                                awsS3Service.getOriginalFileNameFromUrl(file.getUrl())
+                                awsS3Service.getDecodedFileName(file.getUrl())
                         ))
                         .toList()
         );
