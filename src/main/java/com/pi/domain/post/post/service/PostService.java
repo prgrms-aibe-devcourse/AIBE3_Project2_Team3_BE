@@ -22,7 +22,7 @@ public class PostService {
     @Transactional
     public Post increaseViewCount(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException(""));
         post.increaseViewCount();
         return post;
     }
