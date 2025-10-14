@@ -52,7 +52,6 @@ public class ApiV1ProjectControllerTest {
     @Autowired
     private UserService userService;
 
-
     @Test
     @DisplayName("프로젝트 등록")
     @WithUserDetails("user1")
@@ -366,7 +365,7 @@ public class ApiV1ProjectControllerTest {
     }
 
     @Test
-    @DisplayName("내 게시물 조회")
+    @DisplayName("내가 작성한 게시물 조회")
     @WithUserDetails("user1")
     void t7() throws Exception {
         ResultActions resultActions = mvc.perform(

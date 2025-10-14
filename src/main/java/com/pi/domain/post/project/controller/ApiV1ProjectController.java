@@ -62,6 +62,15 @@ public class ApiV1ProjectController {
         return Ut.pageMapper.of(dtoPage);
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "내가 쓴 프로젝트 글 다건 조회")
+    public PagePayload<ProjectDto> getMyItems(
+            @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        User actor = rq.getActor();
+        Page<ProjectDto> dtoPage = projectService.getMyProjects(actor, pageable);
+        return Ut.pageMapper.of(dtoPage);
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "프로젝트 글 단건 조회")
@@ -109,28 +118,4 @@ public class ApiV1ProjectController {
         return new RsData<>("200-1", "프로젝트 상태가 변경되었습니다.");
     }
 
-    @GetMapping("/me")
-    @Operation(summary = "내가 쓴 프로젝트 글 다건 조회")
-    public PagePayload<ProjectDto> getMyItems(
-            @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        User actor = rq.getActor();
-        Page<ProjectDto> dtoPage = projectService.getMyProjects(actor, pageable);
-        return Ut.pageMapper.of(dtoPage);
-    }
-
-
-//    @PostMapping("/{id}/like")
-//    @Operation(summary = "프로젝트 좋아요/취소")
-//    public RsData<Void> likeToggle(
-//            @PathVariable Long id
-//    ) {
-//        User actor = rq.getActor();
-//        Post post = projectService.findById(id);
-//        boolean isNowLiked = postService.toggleLike(post, actor);
-//        if (isNowLiked) {
-//            return new RsData<>("200", "프로젝트를 좋아요 하였습니다.");
-//        } else {
-//            return new RsData<>("200", "프로젝트 좋아요를 취소하였습니다.");
-//        }
 }

@@ -96,8 +96,8 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public Page<ProjectDto> getMyProjects(User actor, Pageable pageable) {
-        return projectRepository.findByPost_User(actor, pageable)
-                .map(project -> new ProjectDto(project.getPost()));
+        Page<Post> posts = postRepository.findByUserAndProjectIsNotNull(actor.getId(), pageable);
+        return posts.map(ProjectDto::new);
     }
 
     // 테스트 용도
