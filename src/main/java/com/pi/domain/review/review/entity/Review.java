@@ -1,6 +1,6 @@
 package com.pi.domain.review.review.entity;
 
-import com.pi.domain.contract.contract.entity.Contract;
+import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -10,8 +10,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 
 @Entity
 @Getter
@@ -19,7 +17,7 @@ import java.time.LocalDateTime;
 public class Review extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Contract contract;
+    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -30,10 +28,8 @@ public class Review extends BaseEntity {
     @Column(columnDefinition ="TEXT", nullable = false)
     private String comment;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    public Review(Contract contract, User user, int rating, String comment) {
-        this.contract = contract;
+    public Review(Post post, User user, int rating, String comment) {
+        this.post = post;
         this.user = user;
         this.rating = rating;
         this.comment = comment;
@@ -45,6 +41,6 @@ public class Review extends BaseEntity {
     }
 
     public boolean isOwnedBy(User actor) {
-        return this.user.equals(actor);
+        return this.user.getId().equals(actor.getId());
     }
 }
