@@ -51,7 +51,7 @@ public class ApiV1ApplicationController {
     ) {
         User actor = rq.getActor();
         Page<ApplicationWithPostDto> dtoPage = applicationService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
-                .map(application -> new ApplicationWithPostDto(application, application.getPost()));
+                .map(application -> new ApplicationWithPostDto(application, application.getPost(), application.getPost().getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -59,13 +59,13 @@ public class ApiV1ApplicationController {
     @GetMapping("/received")
     @Transactional(readOnly = true)
     @Operation(summary = "내 게시글에 들어온 구직 다건 조회")
-    public PagePayload<PostApplicationWithUserDto> getItems(
+    public PagePayload<ApplicationWithUserDto> getItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) ApplicationStatus status
     ) {
         User actor = rq.getActor();
-        Page<PostApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
-                .map(application -> new PostApplicationWithUserDto(application, application.getUser()));
+        Page<ApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
+                .map(application -> new ApplicationWithUserDto(application, application.getPost(), application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -81,7 +81,7 @@ public class ApiV1ApplicationController {
         User postUser = application.getPost().getUser();
         if (application.isDifferentUser(actor, user) && application.isDifferentUser(actor, postUser)) {
             log.warn("본인 또는 게시글 작성자만 조회 가능");
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
 
         return new ApplicationDto(
@@ -131,7 +131,7 @@ public class ApiV1ApplicationController {
         application.checkActorCanModify(actor, user);
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            log.warn("수락/거절된 구직({})은 수정 불가", application.getId());
+            log.warn("수락/거절/완료된 구직({})은 수정 불가", application.getId());
             throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
         applicationService.update(application, reqBody, files);
@@ -156,10 +156,6 @@ public class ApiV1ApplicationController {
         User postUser = application.getPost().getUser();
         application.checkActorCanModify(actor, postUser);
 
-        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
-            log.warn("수락된 구직({})은 수정 불가", application.getId());
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
-        }
         applicationService.updateStatus(application, reqBody.status());
 
         return new RsData<>(

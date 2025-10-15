@@ -7,6 +7,7 @@ import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.repository.ApplicationRepository;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
+import com.pi.global.exception.ServiceException;
 import com.pi.global.s3.AwsS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,11 @@ public class ApplicationService {
     }
 
     public Application create(Post post, User actor, ApplicationWriteReqBody reqBody, List<MultipartFile> files) {
+        if (applicationRepository.existsByPostAndUser(post, actor)) {
+            log.warn("중복 지원 불가. 게시글: {}, 사용자: {}", post.getId(), actor.getId());
+            throw new ServiceException("409-1", "이미 존재하는 데이터입니다.");
+        }
+
         Application application = new Application(post, actor, reqBody.content(), reqBody.salary(), reqBody.period());
         applicationRepository.save(application);
 

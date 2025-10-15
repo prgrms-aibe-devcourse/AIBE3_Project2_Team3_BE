@@ -6,26 +6,30 @@ import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
-public record ApplicationWithPostDto(
+public record ApplicationWithUserDto(
         long id,
         String status,
+        long salary,
+        int period,
         LocalDateTime createdDate,
         long postId,
         String postType, // "PROJECT" or "FREELANCER"
         String postTitle,
-        long postUserId,
-        String postUserNickname
+        long userId,
+        String userNickname
 ) {
-    public ApplicationWithPostDto(Application application, Post post, User postUser) {
+    public ApplicationWithUserDto(Application application, Post post, User user) {
         this(
                 application.getId(),
                 application.getStatus().name(),
+                application.getSalary(),
+                application.getPeriod(),
                 application.getCreatedDate(),
                 post.getId(),
                 "PROJECT",
                 post.getTitle(),
-                postUser.getId(),
-                postUser.getNickname()
+                user.getId(),
+                user.getNickname()
         );
     }
 }

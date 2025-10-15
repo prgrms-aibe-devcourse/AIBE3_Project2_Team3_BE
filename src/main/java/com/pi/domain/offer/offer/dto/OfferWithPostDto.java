@@ -7,27 +7,25 @@ import com.pi.domain.user.user.entity.User;
 import java.time.LocalDateTime;
 
 public record OfferWithPostDto(
-        long offerId,
-        int amount,
-        String offerStatus,
-        LocalDateTime offerCreatedDate,
+        long id,
+        String status,
+        LocalDateTime createdDate,
         long postId,
         String postType, // "PROJECT" or "FREELANCER"
+        String postTitle,
         long postUserId,
-        String postUserNickname,
-        String postTitle
+        String postUserNickname
 ) {
-    public OfferWithPostDto(Offer offer, Post post, User user) {
+    public OfferWithPostDto(Offer offer, Post post, User postUser) {
         this(
                 offer.getId(),
-                offer.getAmount(),
                 offer.getStatus().name(),
                 offer.getCreatedDate(),
                 post.getId(),
                 "FREELANCER",
-                user.getId(),
-                user.getNickname(),
-                post.getTitle()
+                post.getTitle(),
+                postUser.getId(),
+                postUser.getNickname()
         );
     }
 }

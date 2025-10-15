@@ -44,7 +44,7 @@ public class ApiV1OfferController {
     ) {
         User actor = rq.getActor();
         Page<OfferWithPostDto> dtoPage = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
-                .map(offer -> new OfferWithPostDto(offer, offer.getPost(), offer.getUser()));
+                .map(offer -> new OfferWithPostDto(offer, offer.getPost(), offer.getPost().getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -58,7 +58,7 @@ public class ApiV1OfferController {
     ) {
         User actor = rq.getActor();
         Page<OfferWithUserDto> dtoPage = offerService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
-                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
+                .map(offer -> new OfferWithUserDto(offer, offer.getPost(), offer.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
@@ -73,7 +73,7 @@ public class ApiV1OfferController {
         User postUser = offer.getPost().getUser();
         if (offer.isDifferentUser(actor, user) && offer.isDifferentUser(actor, postUser)) {
             log.warn("본인 또는 게시글 작성자만 조회 가능");
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
 
         return new OfferDto(offer);
@@ -108,8 +108,8 @@ public class ApiV1OfferController {
         User actor = rq.getActor();
         offer.checkActorCanModify(actor);
 
-        if (offer.getStatus() != OfferStatus.PENDING) {
-            log.warn("수락/거절된 구인({})은 수정 불가", offer.getId());
+        if (offer.getStatus() == OfferStatus.REJECTED || offer.getStatus() == OfferStatus.COMPLETED) {
+            log.warn("거절 또는 구매 확정된 구인({})은 수정 불가", offer.getId());
             throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
         offerService.update(offer, reqBody.amount());
@@ -131,14 +131,17 @@ public class ApiV1OfferController {
         Offer offer = offerService.findById(id);
 
         User actor = rq.getActor();
+        User offerUser = offer.getUser();
         User postUser = offer.getPost().getUser();
-        offer.checkActorCanModifyStatus(actor, postUser);
 
-        if (offer.getStatus() == OfferStatus.ACCEPTED) {
-            log.warn("수락된 구인({})은 수정 불가", offer.getId());
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        boolean isOfferUser = offer.isSameUser(actor, offerUser);
+        boolean isPostUser = offer.isSameUser(actor, postUser);
+        if (!isOfferUser && !isPostUser) {
+            log.warn("본인 또는 게시글 작성자만 상태 수정 가능");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
-        offerService.updateStatus(offer, reqBody.status());
+
+        offerService.updateStatus(offer, reqBody.status(), isOfferUser);
 
         return new RsData<>(
                 "200-1",
