@@ -3,6 +3,7 @@ package com.pi.domain.post.freelancer.controller;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyReqBody;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteReqBody;
+import com.pi.domain.post.freelancer.entity.FreelancerFile;
 import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
@@ -36,16 +37,19 @@ public class ApiV1FreelancerController {
     private final PostService postService;
     private final Rq rq;
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     @Transactional
     @Operation(summary = "프리랜서 글 작성")
     public RsData<FreelancerDto> write(
-            @Valid @RequestBody FreelancerWriteReqBody reqBody
+            @Valid @RequestPart("data") FreelancerWriteReqBody reqBody,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
-        Post post = freelancerService.create(actor, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
+        Post post = freelancerService.create(actor, reqBody.post(), reqBody.freelancer(),
+                reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), files);
 
-        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post));
+        List<FreelancerFile> fileList = freelancerService.getFilesByPost(post);
+        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post, fileList));
     }
 
     @GetMapping
@@ -86,19 +90,24 @@ public class ApiV1FreelancerController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     @Transactional
     @Operation(summary = "프리랜서 글 수정")
     public RsData<FreelancerDto> modify(
             @PathVariable Long id,
-            @Valid @RequestBody FreelancerModifyReqBody reqBody
+            @Valid @RequestPart("data") FreelancerModifyReqBody reqBody,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
         Post post = freelancerService.findById(id);
         post.checkActorCanModify(actor);
-        freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("200-1", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(post));
+        Post modified = freelancerService.modify(post,
+                reqBody.post(), reqBody.freelancer(),
+                reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), files);
+
+        List<FreelancerFile> fileList = freelancerService.getFilesByPost(modified);
+        return new RsData<>("200-2", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(modified, fileList));
     }
 
     @DeleteMapping("/{id}")
@@ -113,30 +122,6 @@ public class ApiV1FreelancerController {
         postService.delete(post);
 
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
-    }
-
-    @PostMapping("/{postId}/files")
-    public RsData<FreelancerDto> uploadFiles(
-            @PathVariable Long postId,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
-    ) {
-        FreelancerDto dto = freelancerService.uploadFiles(postId, files);
-        return new RsData<>("200-1", "파일 업로드 완료", dto);
-    }
-
-    @GetMapping("/files")
-    public RsData<Page<FreelancerDto>> getFiles(
-            Pageable pageable,
-            @RequestParam(required = false) String searchKeyword
-    ) {
-        Page<FreelancerDto> result = freelancerService.getFiles(pageable, searchKeyword);
-        return new RsData<>("200-2", "파일 조회 성공", result);
-    }
-
-    @DeleteMapping("/files/{fileId}")
-    public RsData<FreelancerDto> deleteFile(@PathVariable Long fileId) {
-        FreelancerDto dto = freelancerService.deleteFile(fileId);
-        return new RsData<>("200-3", "파일 삭제 완료", dto);
     }
 }
 

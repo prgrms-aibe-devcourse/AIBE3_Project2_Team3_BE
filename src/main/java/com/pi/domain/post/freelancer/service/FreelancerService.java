@@ -59,17 +59,34 @@ public class FreelancerService {
         return posts.map(FreelancerDto::new);
     }
 
-    public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    public Post create(User actor,
+                       PostWriteDto p,
+                       FreelancerWriteDto f,
+                       List<Long> regionIds,
+                       List<Long> categoryIds,
+                       List<Long> skillIds,
+                       List<MultipartFile> files) {
         Post post = new Post(actor, p.title(), p.content(), p.isViewed());
         post.setFreelancer(Freelancer.of(post));
         post.getFreelancer().modify(f.salary(), f.period());
         addRelations(post, regionIds, categoryIds, skillIds);
 
+
+        if (files != null && !files.isEmpty()) {
+            uploadFiles(post, files);
+        }
+
         return postRepository.save(post);
     }
 
     @Transactional
-    public Post modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    public Post modify(Post post,
+                       PostModifyDto p,
+                       FreelancerModifyDto f,
+                       List<Long> regionIds,
+                       List<Long> categoryIds,
+                       List<Long> skillIds,
+                       List<MultipartFile> files) {
         post.modify(p.title(), p.content(), p.isViewed());
         post.getFreelancer().modify(f.salary(), f.period());
 
@@ -78,6 +95,10 @@ public class FreelancerService {
         post.getPostSkills().clear();
         postRepository.flush();
         addRelations(post, regionIds, categoryIds, skillIds);
+
+        if (files != null && !files.isEmpty()) {
+            uploadFiles(post, files);
+        }
 
         return postRepository.save(post);
     }
@@ -117,19 +138,12 @@ public class FreelancerService {
         return freelancerQueryRepository.searchFreelancers(condition, pageable);
     }
 
-    @Transactional
-    public FreelancerDto uploadFiles(Long postId, List<MultipartFile> files) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
-
-        if (files == null || files.isEmpty()) {
-            return new FreelancerDto(post);
-        }
-
+    private void uploadFiles(Post post, List<MultipartFile> files) {
         for (MultipartFile file : files) {
             try {
                 String savedName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 File dest = new File(fileDir + savedName);
+                dest.getParentFile().mkdirs();
                 file.transferTo(dest);
 
                 String url = "/uploads/freelancer/" + savedName;
@@ -138,49 +152,6 @@ public class FreelancerService {
                 throw new RuntimeException("파일 업로드 실패: " + e.getMessage());
             }
         }
-
-        List<FreelancerFile> fileList = freelancerFileRepository.findByPost(post);
-        return new FreelancerDto(post, fileList);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<FreelancerDto> getFiles(Pageable pageable, String searchKeyword) {
-        Page<Post> posts;
-        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
-            posts = postRepository.findByFreelancerIsNotNull(pageable);
-        } else {
-            posts = postRepository.findByFreelancerIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
-        }
-
-        return posts.map(post -> {
-            List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
-            return new FreelancerDto(post, files);
-        });
-    }
-
-    @Transactional(readOnly = true)
-    public FreelancerDto getPostFiles(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-
-        List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
-        return new FreelancerDto(post, files);
-    }
-
-    @Transactional
-    public FreelancerDto deleteFile(Long fileId) {
-        FreelancerFile file = freelancerFileRepository.findById(fileId)
-                .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다."));
-
-        Post post = file.getPost();
-
-        String filePath = fileDir + file.getUrl().substring(file.getUrl().lastIndexOf("/") + 1);
-        new File(filePath).delete();
-
-        freelancerFileRepository.delete(file);
-
-        List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
-        return new FreelancerDto(post, files);
     }
 
     @Transactional
@@ -190,5 +161,10 @@ public class FreelancerService {
             new File(fileDir + file.getUrl().substring(file.getUrl().lastIndexOf("/") + 1)).delete();
         }
         freelancerFileRepository.deleteByPost(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FreelancerFile> getFilesByPost(Post post) {
+        return freelancerFileRepository.findByPost(post);
     }
 }
