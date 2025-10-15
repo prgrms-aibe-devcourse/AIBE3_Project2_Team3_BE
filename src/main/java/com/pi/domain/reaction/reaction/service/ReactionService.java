@@ -34,5 +34,11 @@ public class ReactionService {
             reactionRepository.save(reaction);
             post.increaseLikeCount();
         }
+        postRepository.saveAndFlush(post);
+    }
+
+    @Transactional
+    public boolean isLikedByUser(Long postId, Long userId) {
+        return reactionRepository.existsByPostIdAndUserId(postId, userId);
     }
 }

@@ -12,6 +12,7 @@ import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.repository.ProjectQueryRepository;
+import com.pi.domain.reaction.reaction.service.ReactionService;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.entity.Skill;
@@ -34,6 +35,7 @@ public class ProjectService {
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
     private final ProjectQueryRepository projectQueryRepository;
+    private final ReactionService reactionService;
 
     @Transactional(readOnly = true)
     public Post findById(Long id) {
@@ -76,6 +78,15 @@ public class ProjectService {
     public Page<ProjectDto> getMyProjects(User actor, Pageable pageable) {
         Page<Post> posts = postRepository.findByUser_IdAndProjectIsNotNull(actor.getId(), pageable);
         return posts.map(ProjectDto::new);
+    }
+
+    public ProjectDto getProjectDto(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException());
+
+        boolean isLiked = reactionService.isLikedByUser(postId, userId);
+
+        return new ProjectDto(post, isLiked);
     }
 
     // 테스트 용도

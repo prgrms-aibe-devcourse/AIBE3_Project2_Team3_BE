@@ -29,7 +29,8 @@ public record ProjectDto(
         Integer personnel,
         Integer skillLevel,
         Integer viewCount,
-        Integer likeCount
+        Integer likeCount,
+        boolean isLiked
 ) {
     public ProjectDto(Post post) {
         this(
@@ -52,7 +53,34 @@ public record ProjectDto(
                 post.getProject().getPersonnel(),
                 post.getProject().getSkillLevel(),
                 post.getViewCount(),
-                post.getLikeCount()
+                post.getLikeCount(),
+                false
+        );
+    }
+
+    public ProjectDto(Post post, boolean isLiked) {
+        this(
+                post.getId(),
+                post.getCreatedDate(),
+                post.getModifiedDate(),
+                post.getTitle(),
+                post.getContent(),
+                post.isViewed(),
+                new UserDto(post.getUser()),
+                post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
+                post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
+                post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
+                post.getProject().getDeadlineDate(),
+                post.getProject().getStartedDate(),
+                post.getProject().getEndedDate(),
+                post.getProject().getHirerType(),
+                post.getProject().getEmploymentType(),
+                post.getProject().getSalary(),
+                post.getProject().getPersonnel(),
+                post.getProject().getSkillLevel(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                isLiked
         );
     }
 }

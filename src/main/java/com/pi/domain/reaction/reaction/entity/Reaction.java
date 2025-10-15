@@ -23,4 +23,5 @@ public class Reaction extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    boolean isLiked;
 }
