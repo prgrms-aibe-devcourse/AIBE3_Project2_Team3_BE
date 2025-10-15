@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 public record ApplicationWriteReqBody(
         @NotNull Long postId,
-        String content,
-        @Min(0) Long salary,
-        @Min(0) Integer period
+        @NotNull @Min(50) String content,
+        @NotNull @Min(0) Long salary,
+        @NotNull @Min(0) Integer period
 ) {
 }
