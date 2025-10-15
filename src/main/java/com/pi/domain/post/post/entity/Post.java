@@ -45,6 +45,12 @@ public class Post extends BaseEntity {
 
     private int viewCount = 0;
     private int likeCount = 0;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reaction> reactions = new ArrayList<>();
+
+    @Setter
+    @Transient
+    private boolean isLiked = false;
 
     public Post(User user, String title, String content, boolean isViewed) {
         this.user = user;
@@ -158,4 +164,22 @@ public class Post extends BaseEntity {
         this.likeCount--;
     }
 
+    public Post withIsLiked(boolean isLiked) {
+        this.isLiked = isLiked;
+        return this;
+    }
+
+    public boolean isLikedBy(User user) {
+        if (user == null) return false;
+        return reactions.stream()
+                .anyMatch(r -> Objects.equals(r.getUser().getId(), user.getId()) &&
+                        r.getType() == ReactionType.LIKE);
+    }
+
+    public int getLikeCount() {
+        // ReactionType 필드를 추가했으므로, LIKE 타입만 세도록 수정
+        return (int) reactions.stream()
+                .filter(r -> r.getType().equals(ReactionType.LIKE))
+                .count();
+    }
 }

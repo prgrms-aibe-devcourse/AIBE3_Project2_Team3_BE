@@ -49,6 +49,23 @@ public class FreelancerService {
     }
 
     @Transactional(readOnly = true)
+    public FreelancerDto findById(Long id, User actor) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException());
+
+        boolean isLiked = post.isLikedBy(actor);
+
+        return new FreelancerDto(post.withIsLiked(isLiked));
+    }
+
+    public Page<Post> getPage(Pageable pageable, String searchKeyword) {
+        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+            return postRepository.findByFreelancerIsNotNull(pageable);
+        }
+        return postRepository.findByFreelancerIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
+    }
+
+    @Transactional(readOnly = true)
     public Page<FreelancerDto> getMyFreelancers(User user, Pageable pageable) {
         Page<Post> posts = postRepository.findByFreelancerIsNotNullAndUser_Id(user.getId(), pageable);
         return posts.map(FreelancerDto::new);
@@ -128,6 +145,7 @@ public class FreelancerService {
     }
 
     private void addRelations(Post post, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+
         post.getPostRegions().clear();
         if (regionIds != null) {
             for (Long regionId : regionIds) {
