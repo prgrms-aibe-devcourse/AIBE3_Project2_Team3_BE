@@ -57,8 +57,6 @@ public class ApiV1FreelancerController {
                 files
         );
 
-        if (reqBody.viewCount() != null) post.setViewCount(reqBody.viewCount());
-        if (reqBody.likeCount() != null) post.setLikeCount(reqBody.likeCount());
 
         return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post));
     }
