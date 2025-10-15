@@ -1,5 +1,6 @@
 package com.pi.domain.post.freelancer.entity;
 
+import com.pi.domain.post.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,11 +18,11 @@ public class FreelancerFile {
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Freelancer freelancer;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    public FreelancerFile(String url, Freelancer freelancer) {
+    public FreelancerFile(String url, Post post) {
         this.url = url;
-        this.freelancer = freelancer;
+        this.post = post;
     }
 }

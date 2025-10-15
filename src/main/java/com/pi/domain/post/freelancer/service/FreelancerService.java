@@ -6,6 +6,8 @@ import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
+import com.pi.domain.post.freelancer.entity.FreelancerFile;
+import com.pi.domain.post.freelancer.repository.FreelancerFileRepository;
 import com.pi.domain.post.freelancer.repository.FreelancerQueryRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
@@ -23,8 +25,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +39,8 @@ public class FreelancerService {
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
     private final FreelancerQueryRepository freelancerQueryRepository;
+    private final FreelancerFileRepository freelancerFileRepository;
+    private final String fileDir = "./uploads/freelancer/";
 
     public Post findById(Long id) {
         return postRepository.findByFreelancerIsNotNullAndId(id).get();
@@ -108,5 +115,80 @@ public class FreelancerService {
     @Transactional(readOnly = true)
     public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
         return freelancerQueryRepository.searchFreelancers(condition, pageable);
+    }
+
+    @Transactional
+    public FreelancerDto uploadFiles(Long postId, List<MultipartFile> files) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        if (files == null || files.isEmpty()) {
+            return new FreelancerDto(post);
+        }
+
+        for (MultipartFile file : files) {
+            try {
+                String savedName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                File dest = new File(fileDir + savedName);
+                file.transferTo(dest);
+
+                String url = "/uploads/freelancer/" + savedName;
+                freelancerFileRepository.save(new FreelancerFile(url, post));
+            } catch (Exception e) {
+                throw new RuntimeException("파일 업로드 실패: " + e.getMessage());
+            }
+        }
+
+        List<FreelancerFile> fileList = freelancerFileRepository.findByPost(post);
+        return new FreelancerDto(post, fileList);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FreelancerDto> getFiles(Pageable pageable, String searchKeyword) {
+        Page<Post> posts;
+        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+            posts = postRepository.findByFreelancerIsNotNull(pageable);
+        } else {
+            posts = postRepository.findByFreelancerIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
+        }
+
+        return posts.map(post -> {
+            List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
+            return new FreelancerDto(post, files);
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public FreelancerDto getPostFiles(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
+        return new FreelancerDto(post, files);
+    }
+
+    @Transactional
+    public FreelancerDto deleteFile(Long fileId) {
+        FreelancerFile file = freelancerFileRepository.findById(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다."));
+
+        Post post = file.getPost();
+
+        String filePath = fileDir + file.getUrl().substring(file.getUrl().lastIndexOf("/") + 1);
+        new File(filePath).delete();
+
+        freelancerFileRepository.delete(file);
+
+        List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
+        return new FreelancerDto(post, files);
+    }
+
+    @Transactional
+    public void deleteAllFiles(Post post) {
+        List<FreelancerFile> files = freelancerFileRepository.findByPost(post);
+        for (FreelancerFile file : files) {
+            new File(fileDir + file.getUrl().substring(file.getUrl().lastIndexOf("/") + 1)).delete();
+        }
+        freelancerFileRepository.deleteByPost(post);
     }
 }

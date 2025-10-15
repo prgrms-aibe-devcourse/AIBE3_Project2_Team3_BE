@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -112,6 +113,30 @@ public class ApiV1FreelancerController {
         postService.delete(post);
 
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
+    }
+
+    @PostMapping("/{postId}/files")
+    public RsData<FreelancerDto> uploadFiles(
+            @PathVariable Long postId,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        FreelancerDto dto = freelancerService.uploadFiles(postId, files);
+        return new RsData<>("200-1", "파일 업로드 완료", dto);
+    }
+
+    @GetMapping("/files")
+    public RsData<Page<FreelancerDto>> getFiles(
+            Pageable pageable,
+            @RequestParam(required = false) String searchKeyword
+    ) {
+        Page<FreelancerDto> result = freelancerService.getFiles(pageable, searchKeyword);
+        return new RsData<>("200-2", "파일 조회 성공", result);
+    }
+
+    @DeleteMapping("/files/{fileId}")
+    public RsData<FreelancerDto> deleteFile(@PathVariable Long fileId) {
+        FreelancerDto dto = freelancerService.deleteFile(fileId);
+        return new RsData<>("200-3", "파일 삭제 완료", dto);
     }
 }
 
