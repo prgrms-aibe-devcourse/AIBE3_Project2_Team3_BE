@@ -42,6 +42,9 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostSkill> postSkills = new ArrayList<>();
 
+    private int viewCount = 0;
+    private int likeCount = 0;
+
     public Post(User user, String title, String content, boolean isViewed) {
         this.user = user;
         this.title = title;
@@ -140,6 +143,18 @@ public class Post extends BaseEntity {
         if (isNotOwner(actor)) {
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
+    }
+
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
     }
 
 }

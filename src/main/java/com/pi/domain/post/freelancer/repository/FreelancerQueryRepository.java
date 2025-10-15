@@ -55,6 +55,8 @@ public class FreelancerQueryRepository {
 
         private Long salary;
         private Long period;
+        private Integer viewCount;
+        private Integer likeCount;
 
         // author (user)
         private Long authorId;
@@ -81,6 +83,8 @@ public class FreelancerQueryRepository {
 
                         freelancer.salary,
                         freelancer.period,
+                        post.viewCount,
+                        post.likeCount,
 
                         user.id,
                         user.createdDate,
@@ -139,7 +143,9 @@ public class FreelancerQueryRepository {
                         categoriesMap.getOrDefault(p.getId(), List.of()),
                         skillsMap.getOrDefault(p.getId(), List.of()),
                         p.getSalary(),
-                        p.getPeriod()
+                        p.getPeriod(),
+                        p.getViewCount(),
+                        p.getLikeCount()
                 ))
                 .toList();
 

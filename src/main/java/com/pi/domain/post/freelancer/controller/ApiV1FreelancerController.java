@@ -7,6 +7,7 @@ import com.pi.domain.post.freelancer.service.FreelancerService;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.reaction.reaction.service.ReactionService;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
@@ -33,6 +34,7 @@ import java.util.List;
 public class ApiV1FreelancerController {
     private final FreelancerService freelancerService;
     private final PostService postService;
+    private final ReactionService reactionService;
     private final Rq rq;
 
     @PostMapping
@@ -113,5 +115,23 @@ public class ApiV1FreelancerController {
 
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
     }
+
+    @PostMapping("/{id}/like")
+    @Operation(summary = "프리랜서 글 좋아요/취소")
+    public RsData<Void> toggleLike(
+            @PathVariable Long id) {
+        User actor = rq.getActor();
+        Long userId = actor.getId();
+        reactionService.toggleLike(id, userId);
+        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.");
+    }
+
+    @PostMapping("/{id}/view")
+    @Operation(summary = "프리랜서 글 조회수 증가")
+    public RsData<Void> increaseViewCount(@PathVariable Long id) {
+        postService.increaseViewCount(id);
+        return new RsData<>("200-1", "프리랜서 게시글 조회수가 증가되었습니다.");
+    }
+
 }
 
