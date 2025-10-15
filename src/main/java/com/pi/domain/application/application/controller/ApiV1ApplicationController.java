@@ -51,7 +51,7 @@ public class ApiV1ApplicationController {
     ) {
         User actor = rq.getActor();
         Page<ApplicationWithPostDto> dtoPage = applicationService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
-                .map(application -> new ApplicationWithPostDto(application, application.getPost()));
+                .map(application -> new ApplicationWithPostDto(application, application.getPost(), application.getPost().getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
