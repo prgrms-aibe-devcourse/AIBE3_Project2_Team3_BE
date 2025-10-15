@@ -44,7 +44,7 @@ public class ApiV1ProjectController {
         User actor = rq.getActor();
         Post post = projectService.create(actor, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("201-1", "프로젝트 게시글이 등록되었습니다.".formatted(post.getId()), new ProjectDto(post));
+        return new RsData<>("201-1", "프로젝트 게시글이 등록되었습니다.", new ProjectDto(post));
     }
 
     @GetMapping
@@ -78,7 +78,10 @@ public class ApiV1ProjectController {
             @PathVariable Long id
     ) {
         Post post = projectService.findById(id);
-        return new ProjectDto(post);
+        User actor = rq.getActor();
+        Long userId = actor.getId();
+        boolean isLiked = reactionService.isLikedByUser(id, userId);
+        return new ProjectDto(post.withIsLiked(isLiked));
     }
 
     @PutMapping("/{id}")
@@ -92,7 +95,7 @@ public class ApiV1ProjectController {
         post.checkActorCanModify(actor);
         projectService.modify(post, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.".formatted(post.getId()), new ProjectDto(post));
+        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.", new ProjectDto(post));
     }
 
     @DeleteMapping("/{id}")
@@ -110,7 +113,7 @@ public class ApiV1ProjectController {
 
     @PostMapping("/{id}/like")
     @Operation(summary = "프로젝트 글 좋아요/취소")
-    public RsData<Void> toggleLike(
+    public RsData<ProjectDto> toggleLike(
             @PathVariable Long id) {
         User actor = rq.getActor();
         Long userId = actor.getId();
@@ -120,7 +123,7 @@ public class ApiV1ProjectController {
         boolean isLiked = reactionService.isLikedByUser(id, userId);
 
         ProjectDto projectDto = new ProjectDto(post.withIsLiked(isLiked));
-        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.");
+        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.", projectDto);
     }
 
     @PostMapping("/{id}/view")

@@ -84,7 +84,10 @@ public class ApiV1FreelancerController {
             @PathVariable Long id
     ) {
         Post post = freelancerService.findById(id);
-        return new FreelancerDto(post);
+        User actor = rq.getActor();
+        Long userId = actor.getId();
+        boolean isLiked = reactionService.isLikedByUser(id, userId);
+        return new FreelancerDto(post.withIsLiked(isLiked));
     }
 
     @GetMapping("/my")
