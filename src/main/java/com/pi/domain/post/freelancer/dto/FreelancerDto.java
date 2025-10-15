@@ -25,6 +25,37 @@ public record FreelancerDto(
         Long period,
         List<String> fileUrls
 ) {
+    public FreelancerDto(
+            Long id,
+            LocalDateTime createdDate,
+            LocalDateTime modifiedDate,
+            String title,
+            String content,
+            boolean isViewed,
+            UserDto author,
+            List<RegionDto> regions,
+            List<CategoryDto> categories,
+            List<SkillDto> skills,
+            Long salary,
+            Long period
+    ) {
+        this(
+                id,
+                createdDate,
+                modifiedDate,
+                title,
+                content,
+                isViewed,
+                author,
+                regions,
+                categories,
+                skills,
+                salary,
+                period,
+                List.of()
+        );
+    }
+
     public FreelancerDto(Post post) {
         this(
                 post.getId(),
