@@ -119,6 +119,7 @@ public class ApiV1FreelancerController {
         User actor = rq.getActor();
         Post post = freelancerService.findById(id);
         post.checkActorCanDelete(actor);
+        freelancerService.deleteAllFiles(post);
         postService.delete(post);
 
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
