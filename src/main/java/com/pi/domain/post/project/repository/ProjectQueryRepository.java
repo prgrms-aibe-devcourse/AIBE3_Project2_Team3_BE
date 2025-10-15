@@ -167,7 +167,8 @@ public class ProjectQueryRepository {
                         p.getPersonnel(),
                         p.getSkillLevel(),
                         p.getViewCount(),
-                        p.getLikeCount()
+                        p.getLikeCount(),
+                        false
                 ))
                 .toList();
 
