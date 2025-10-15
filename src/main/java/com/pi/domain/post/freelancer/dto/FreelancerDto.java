@@ -36,6 +36,26 @@ public record FreelancerDto(
                 post.getContent(),
                 post.isViewed(),
                 new UserDto(post.getUser()),
+                safeList(post.getPostRegions()).stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
+                safeList(post.getPostCategories()).stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
+                safeList(post.getPostSkills()).stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
+                post.getFreelancer() != null ? post.getFreelancer().getSalary() : null,   // ✅ null 방어
+                post.getFreelancer() != null ? post.getFreelancer().getPeriod() : null,   // ✅ null 방어
+                post.getViewCount(),
+                post.getLikeCount(),
+                List.of() // ✅ 파일은 Service에서 주입
+        );
+    }
+
+    public FreelancerDto(Post post, List<FreelancerFileDto> files) {
+        this(
+                post.getId(),
+                post.getCreatedDate(),
+                post.getModifiedDate(),
+                post.getTitle(),
+                post.getContent(),
+                post.isViewed(),
+                new UserDto(post.getUser()),
                 post.getPostRegions().stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
                 post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
                 post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
@@ -43,7 +63,11 @@ public record FreelancerDto(
                 post.getFreelancer().getPeriod(),
                 post.getViewCount(),
                 post.getLikeCount(),
-                List.of()
+                safeList(files)
         );
+    }
+
+    private static <T> List<T> safeList(List<T> src) {
+        return src == null ? List.of() : src;
     }
 }

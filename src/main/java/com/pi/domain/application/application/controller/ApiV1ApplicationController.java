@@ -12,7 +12,7 @@ import com.pi.global.exception.ServiceException;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
-import com.pi.global.s3.AwsS3Service;
+import com.pi.global.s3.S3KeyParser;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,7 +40,7 @@ public class ApiV1ApplicationController {
     private final Rq rq;
     private final ApplicationService applicationService;
     private final ProjectService projectService;
-    private final AwsS3Service awsS3Service;
+    private final S3KeyParser s3KeyParser;
 
     @GetMapping("/my")
     @Transactional(readOnly = true)
@@ -90,7 +90,7 @@ public class ApiV1ApplicationController {
                         .map(file -> new ApplicationFileDto(
                                 file.getId(),
                                 file.getUrl(),
-                                awsS3Service.getDecodedFileName(file.getUrl())
+                                s3KeyParser.getDecodedFileName(file.getUrl())
                         ))
                         .toList()
         );
