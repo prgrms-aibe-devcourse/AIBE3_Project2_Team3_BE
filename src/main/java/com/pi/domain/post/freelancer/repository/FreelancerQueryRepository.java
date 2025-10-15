@@ -127,7 +127,7 @@ public class FreelancerQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
-        Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
+        Map<Long, List<FreelancerFileDto>> filesMap = fetchFiles(postIds);
 
         // 3) 최종 DTO 조립
         List<FreelancerDto> result = basicList.stream()
@@ -154,6 +154,7 @@ public class FreelancerQueryRepository {
                         p.getPeriod(),
                         p.getViewCount(),
                         p.getLikeCount(),
+                        p.isLiked(),
                         filesMap.getOrDefault(p.getId(), List.of())
                 ))
                 .toList();
@@ -274,8 +275,6 @@ public class FreelancerQueryRepository {
                 ), Collectors.toList())
         ));
     }
-
-
 
     // ---------- 조건 메서드 ----------
 

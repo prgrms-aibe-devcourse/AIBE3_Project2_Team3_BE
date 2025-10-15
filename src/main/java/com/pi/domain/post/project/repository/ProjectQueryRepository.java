@@ -4,6 +4,7 @@ import com.pi.domain.category.category.dto.CategoryDto;
 import com.pi.domain.category.category.entity.QCategory;
 import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.region.region.entity.QRegion;
 import com.pi.domain.skill.skill.dto.SkillDto;
@@ -11,6 +12,7 @@ import com.pi.domain.user.user.dto.UserDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -33,6 +35,7 @@ import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
 import static com.pi.domain.post.project.entity.QProject.project;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
@@ -75,9 +78,10 @@ public class ProjectQueryRepository {
         private String authorProfileImageUrl;
         private Integer viewCount;
         private Integer likeCount;
+        private boolean isLiked;
     }
 
-    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
+    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable, Long loginUserId) {
 
         // [1] Step 1 — 단순 필드만 SELECT
         List<ProjectSimpleDto> basicList = queryFactory
@@ -107,11 +111,18 @@ public class ProjectQueryRepository {
                         user.role.stringValue(),
                         user.profileImageUrl,
                         post.viewCount,
-                        post.likeCount
+                        post.likeCount,
+                        new CaseBuilder()
+                                .when(reaction.id.isNotNull())
+                                .then(true)
+                                .otherwise(false)
                 ))
                 .from(post)
                 .join(post.project, project)
                 .join(post.user, user)
+                .leftJoin(post.reactions, reaction)
+                .on(reaction.user.id.eq(loginUserId)
+                        .and(reaction.type.eq(ReactionType.LIKE)))
                 .where(
                         post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
@@ -168,7 +179,7 @@ public class ProjectQueryRepository {
                         p.getSkillLevel(),
                         p.getViewCount(),
                         p.getLikeCount(),
-                        false
+                        p.isLiked()
                 ))
                 .toList();
 

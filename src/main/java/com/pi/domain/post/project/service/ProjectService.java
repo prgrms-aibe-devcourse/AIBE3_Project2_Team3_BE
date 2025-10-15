@@ -54,8 +54,8 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
-        return projectQueryRepository.searchProjects(condition, pageable);
+    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable, Long userId) {
+        return projectQueryRepository.searchProjects(condition, pageable, userId);
     }
 
     @Transactional

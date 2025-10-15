@@ -25,6 +25,7 @@ public record FreelancerDto(
         Long period,
         Integer viewCount,
         Integer likeCount,
+        boolean isLiked,
         List<FreelancerFileDto> files
 ) {
     public FreelancerDto(Post post) {
@@ -43,6 +44,7 @@ public record FreelancerDto(
                 post.getFreelancer() != null ? post.getFreelancer().getPeriod() : null,   // ✅ null 방어
                 post.getViewCount(),
                 post.getLikeCount(),
+                post.isLiked(),
                 List.of() // ✅ 파일은 Service에서 주입
         );
     }
@@ -63,6 +65,7 @@ public record FreelancerDto(
                 post.getFreelancer().getPeriod(),
                 post.getViewCount(),
                 post.getLikeCount(),
+                post.isLiked(),
                 safeList(files)
         );
     }

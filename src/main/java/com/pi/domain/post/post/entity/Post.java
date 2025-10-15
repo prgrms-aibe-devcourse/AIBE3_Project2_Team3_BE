@@ -180,7 +180,6 @@ public class Post extends BaseEntity {
     }
 
     public int getLikeCount() {
-        // ReactionType 필드를 추가했으므로, LIKE 타입만 세도록 수정
         return (int) reactions.stream()
                 .filter(r -> r.getType().equals(ReactionType.LIKE))
                 .count();

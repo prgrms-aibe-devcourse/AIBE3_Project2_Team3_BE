@@ -58,7 +58,8 @@ public class ApiV1ProjectController {
             @RequestParam(required = false) Long minSalary,
             @RequestParam(required = false) Long maxSalary
     ) {
-        Page<ProjectDto> dtoPage = projectService.searchProjects(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable);
+        long userId = rq.getActor().getId();
+        Page<ProjectDto> dtoPage = projectService.searchProjects(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable, userId);
         return Ut.pageMapper.of(dtoPage);
     }
 
