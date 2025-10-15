@@ -30,6 +30,11 @@ public class AwsS3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    public String uploadFile(MultipartFile file, String directoryName) {
+        String fileKey = directoryName + "/" + generateUniqueFileName(file.getOriginalFilename());
+        return upload(file, fileKey);
+    }
+
     public List<String> uploadFiles(List<MultipartFile> files) {
         List<String> fileUrls = new ArrayList<>();
         for (MultipartFile file : files) {
@@ -66,6 +71,11 @@ public class AwsS3Service {
 
     public void deleteFile(String fileKey) {
         amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileKey));
+    }
+
+    public void deleteFileByUrl(String fileUrl) {
+        String key = s3KeyParser.extractKey(fileUrl); // URI 기반으로 path만 추출하는 유틸 권장
+        deleteFile(key);
     }
 
     private String upload(MultipartFile file, String fileKey) {

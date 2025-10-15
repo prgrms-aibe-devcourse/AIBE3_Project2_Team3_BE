@@ -4,20 +4,26 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.entity.UserRole;
 import com.pi.domain.user.user.repository.UserRepository;
 import com.pi.global.exception.ServiceException;
+import com.pi.global.s3.AwsS3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
+    private static final String AWS_S3_DIRECTORY = "user";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final AwsS3Service awsS3Service;
 
     public long count() {
         return userRepository.count();
@@ -36,8 +42,22 @@ public class UserService {
     }
 
     @Transactional
-    public void modify(User user, String nickname, String email) {
+    public void modify(User user, String nickname, String email, MultipartFile file) {
         user.modify(nickname, email);
+        if (file != null && !file.isEmpty()) {
+            String oldUrl = user.getProfileImageUrl();
+            String newUrl = awsS3Service.uploadFile(file, AWS_S3_DIRECTORY);
+            user.setProfileImageUrl(newUrl);
+
+            if (oldUrl != null && !oldUrl.isBlank()) {
+                try {
+                    awsS3Service.deleteFileByUrl(oldUrl); // 아래 유틸 메서드 참고
+                } catch (Exception e) {
+                    // 삭제 실패는 치명적이지 않으니 로그만 남기고 무시
+                    log.warn("Failed to delete old profile image: {}", oldUrl, e);
+                }
+            }
+        }
     }
 
     public void checkPassword(User user, String password) {
