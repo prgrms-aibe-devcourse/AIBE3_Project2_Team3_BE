@@ -13,4 +13,6 @@ public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     void deleteByPostAndUser(Post post, User user);
 
     long countByPost(Post post);
+
+    boolean existsByPostIdAndUserId(Long postId, Long userId);
 }

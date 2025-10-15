@@ -33,9 +33,9 @@ public class SecurityConfig {
                                 .requestMatchers("/ws/**").permitAll()
                                 // 게시글 다건 단건, 댓글 다건 단건 요청 권한을 전체 허용하겠다.
                                 // \\d+ -> 숫자가 한 자리 이상 연속된 것 (ex. 1, 23, 123)
-                                .requestMatchers(HttpMethod.GET, "/api/*/posts/{id:\\d+}",
-                                        "/api/*/posts", "/api/*/posts/{postId:\\d+}/comments",
-                                        "/api/*/posts/{postId:\\d+}/comments/{id:\\d+}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/projects", "api/v1/projects/{id}",
+                                        "api/v1/reviews/freelancers/{id}", "api/v1/freelancers").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/projects/*/view").permitAll()
                                 .requestMatchers("/api/*/users/login", "/api/*/users/logout").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/join").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/findPw").permitAll()
