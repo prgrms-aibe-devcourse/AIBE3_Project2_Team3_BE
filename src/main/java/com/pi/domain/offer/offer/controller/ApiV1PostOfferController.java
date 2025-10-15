@@ -1,6 +1,6 @@
 package com.pi.domain.offer.offer.controller;
 
-import com.pi.domain.offer.offer.dto.OfferWithUserDto;
+import com.pi.domain.offer.offer.dto.PostOfferWithUserDto;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.service.OfferService;
 import com.pi.domain.post.freelancer.service.FreelancerService;
@@ -34,7 +34,7 @@ public class ApiV1PostOfferController {
     @GetMapping
     @Transactional(readOnly = true)
     @Operation(summary = "다건 조회")
-    public PagePayload<OfferWithUserDto> getItems(
+    public PagePayload<PostOfferWithUserDto> getItems(
             @PathVariable Long postId,
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
@@ -43,8 +43,8 @@ public class ApiV1PostOfferController {
         Post post = freelancerService.findById(postId);
         post.checkActorCanReadOffer(actor);
 
-        Page<OfferWithUserDto> dtoPage = offerService.findAllByPostIdAndStatus(postId, status, pageable)
-                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
+        Page<PostOfferWithUserDto> dtoPage = offerService.findAllByPostIdAndStatus(postId, status, pageable)
+                .map(offer -> new PostOfferWithUserDto(offer, offer.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }

@@ -58,7 +58,7 @@ public class ApiV1OfferController {
     ) {
         User actor = rq.getActor();
         Page<OfferWithUserDto> dtoPage = offerService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
-                .map(offer -> new OfferWithUserDto(offer, offer.getUser()));
+                .map(offer -> new OfferWithUserDto(offer, offer.getPost(), offer.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
