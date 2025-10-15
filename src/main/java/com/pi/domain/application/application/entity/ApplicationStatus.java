@@ -6,7 +6,8 @@ import java.util.Set;
 public enum ApplicationStatus {
     PENDING("대기"),
     ACCEPTED("수락"),
-    REJECTED("거절");
+    REJECTED("거절"),
+    COMPLETED("프로젝트 완료");
 
     private final String description;
 
@@ -20,8 +21,9 @@ public enum ApplicationStatus {
 
     public static final Map<ApplicationStatus, Set<ApplicationStatus>> POST_OWNER_TRANSITIONS = Map.of(
             PENDING, Set.of(PENDING, ACCEPTED, REJECTED),
-            ACCEPTED, Set.of(REJECTED),
-            REJECTED, Set.of(ACCEPTED)
+            ACCEPTED, Set.of(REJECTED, COMPLETED),
+            REJECTED, Set.of(ACCEPTED),
+            COMPLETED, Set.of()
     );
 
     public boolean canTransitionTo(ApplicationStatus next) {

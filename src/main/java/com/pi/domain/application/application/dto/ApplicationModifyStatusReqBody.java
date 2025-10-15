@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 
 public record ApplicationModifyStatusReqBody(
         @NotNull
-        @Pattern(regexp = "PENDING|ACCEPTED|REJECTED")
+        @Pattern(regexp = "PENDING|ACCEPTED|REJECTED|COMPLETED")
         String status
 ) {
 }
