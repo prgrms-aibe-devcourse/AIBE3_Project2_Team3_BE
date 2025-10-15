@@ -30,7 +30,6 @@ public class Offer extends BaseEntity {
 
     @Column(columnDefinition = "VARCHAR(255) DEFAULT 'ACCEPTED'")
     @Enumerated(EnumType.STRING)
-    @Setter
     private OfferStatus status;
 
     @Column(columnDefinition = "INT UNSIGNED DEFAULT 1")
@@ -42,6 +41,14 @@ public class Offer extends BaseEntity {
         this.user = user;
         this.status = OfferStatus.ACCEPTED;
         this.amount = amount;
+    }
+
+    public void modifyStatus(OfferStatus status, boolean isOfferUser) {
+        if (!this.status.canTransitionTo(status, isOfferUser)) {
+            log.warn("{} 상태에서 {}(으)로 변경 불가", this.status, status);
+            throw new ServiceException("400-1", "잘못된 요청입니다.");
+        }
+        this.status = status;
     }
 
     public void checkActorCanModify(User actor) {
@@ -71,5 +78,9 @@ public class Offer extends BaseEntity {
 
     public boolean isDifferentUser(User actor, User user) {
         return !actor.getUsername().equals(user.getUsername());
+    }
+
+    public boolean isSameUser(User actor, User user) {
+        return actor.getUsername().equals(user.getUsername());
     }
 }

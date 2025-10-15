@@ -81,7 +81,7 @@ public class ApiV1ApplicationController {
         User postUser = application.getPost().getUser();
         if (application.isDifferentUser(actor, user) && application.isDifferentUser(actor, postUser)) {
             log.warn("본인 또는 게시글 작성자만 조회 가능");
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
+            throw new ServiceException("403-1", "권한이 없습니다.");
         }
 
         return new ApplicationDto(

@@ -56,8 +56,8 @@ public class OfferService {
         offer.setAmount(amount);
     }
 
-    public void updateStatus(Offer offer, String status) {
-        offer.setStatus(OfferStatus.valueOf(status));
+    public void updateStatus(Offer offer, String status, boolean isOfferUser) {
+        offer.modifyStatus(OfferStatus.valueOf(status), isOfferUser);
     }
 
     public void delete(Offer offer) {
