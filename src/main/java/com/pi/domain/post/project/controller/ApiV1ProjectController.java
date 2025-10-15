@@ -44,7 +44,7 @@ public class ApiV1ProjectController {
         User actor = rq.getActor();
         Post post = projectService.create(actor, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("201-1", "프로젝트 게시글이 등록되었습니다.".formatted(post.getId()), new ProjectDto(post));
+        return new RsData<>("201-1", "프로젝트 게시글이 등록되었습니다.", new ProjectDto(post));
     }
 
     @GetMapping
@@ -77,8 +77,11 @@ public class ApiV1ProjectController {
     public ProjectDto getItem(
             @PathVariable Long id
     ) {
+        Post post = projectService.findById(id);
         User actor = rq.getActor();
-        return projectService.getProjectDtoWithIsLiked(id, actor.getId());
+        Long userId = actor.getId();
+        boolean isLiked = reactionService.isLikedByUser(id, userId);
+        return new ProjectDto(post.withIsLiked(isLiked));
     }
 
     @PutMapping("/{id}")
@@ -92,7 +95,7 @@ public class ApiV1ProjectController {
         post.checkActorCanModify(actor);
         projectService.modify(post, reqBody.post(), reqBody.project(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds());
 
-        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.".formatted(post.getId()), new ProjectDto(post));
+        return new RsData<>("200-1", "프로젝트 게시글이 수정되었습니다.", new ProjectDto(post));
     }
 
     @DeleteMapping("/{id}")

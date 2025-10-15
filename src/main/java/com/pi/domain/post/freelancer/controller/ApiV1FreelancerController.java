@@ -49,7 +49,7 @@ public class ApiV1FreelancerController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
-        FreelancerDto dto = freelancerService.create(
+        Post post = freelancerService.create(
                 actor,
                 reqBody.post(),
                 reqBody.freelancer(),
@@ -59,9 +59,9 @@ public class ApiV1FreelancerController {
                 files
         );
 
-        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", dto);
 
-       }
+        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post));
+    }
 
     @GetMapping
     @Transactional
@@ -86,8 +86,10 @@ public class ApiV1FreelancerController {
             @PathVariable Long id
     ) {
         Post post = freelancerService.findById(id);
-        return new FreelancerDto(post);
-        // return freelancerService.getItem(id);
+        User actor = rq.getActor();
+        Long userId = actor.getId();
+        boolean isLiked = reactionService.isLikedByUser(id, userId);
+        return new FreelancerDto(post.withIsLiked(isLiked));
     }
 
     @GetMapping("/my")
