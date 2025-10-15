@@ -2,6 +2,7 @@ package com.pi.domain.post.freelancer.repository;
 
 import com.pi.domain.category.category.dto.CategoryDto;
 import com.pi.domain.category.category.entity.QCategory;
+import com.pi.domain.post.file.dto.FreelancerFileDto;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.region.region.dto.RegionDto;
@@ -36,6 +37,7 @@ import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
+import static com.pi.domain.post.file.entity.QFreelancerFile.freelancerFile;
 
 @Repository
 @RequiredArgsConstructor
@@ -120,6 +122,7 @@ public class FreelancerQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, List<FreelancerFileDto>> filesMap = fetchFiles(postIds);
 
         // 3) 최종 DTO 조립
         List<FreelancerDto> result = basicList.stream()
@@ -145,7 +148,8 @@ public class FreelancerQueryRepository {
                         p.getSalary(),
                         p.getPeriod(),
                         p.getViewCount(),
-                        p.getLikeCount()
+                        p.getLikeCount(),
+                        filesMap.getOrDefault(p.getId(), List.of())
                 ))
                 .toList();
 
@@ -221,6 +225,27 @@ public class FreelancerQueryRepository {
                         t -> t.get(postSkill.post.id),
                         Collectors.mapping(
                                 t -> new SkillDto(t.get(skill.id), t.get(skill.name)),
+                                Collectors.toList()
+                        )
+                ));
+    }
+
+    private Map<Long, List<FreelancerFileDto>> fetchFiles(List<Long> postIds) {
+        List<Tuple> tuples = queryFactory
+                .select(freelancerFile.post.id, freelancerFile.id, freelancerFile.url, freelancerFile.originalName, freelancerFile.createdDate)
+                .from(freelancerFile)
+                .where(freelancerFile.post.id.in(postIds))
+                .fetch();
+
+        return tuples.stream()
+                .collect(Collectors.groupingBy(
+                        t -> t.get(freelancerFile.post.id),
+                        Collectors.mapping(
+                                t -> new FreelancerFileDto(
+                                        t.get(freelancerFile.id),
+                                        t.get(freelancerFile.url),
+                                        t.get(freelancerFile.originalName)
+                                ),
                                 Collectors.toList()
                         )
                 ));

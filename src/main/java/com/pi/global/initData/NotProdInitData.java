@@ -89,7 +89,7 @@ public class NotProdInitData {
         if (postService.count() > 0) return;
         User user1 = userService.findByUsername("user1").get();
         List<Long> singleIdList = List.of(1L);
-        Post post1 = freelancerService.create(user1, new PostWriteDto("프리랜서", "만들어드립니다.", true), new FreelancerWriteDto(100L, 12L), null, null, null);
+        Post post1 = freelancerService.create(user1, new PostWriteDto("프리랜서", "만들어드립니다.", true), new FreelancerWriteDto(100L, 12L), null, null, null, null);
         Post post2 = projectService.create(user1, new PostWriteDto("프로젝트", "만들어드립니다.", true), new ProjectWriteDto(LocalDateTime.now().plusDays(7), LocalDateTime.now(), LocalDateTime.now().plusMonths(1), "individual", "onsite", 100L, 10, 1), singleIdList, singleIdList, singleIdList);
     }
 

@@ -2,6 +2,7 @@ package com.pi.domain.post.freelancer.service;
 
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.post.file.repository.FreelancerFileRepository;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -52,7 +54,8 @@ public class FreelancerService {
         return posts.map(FreelancerDto::new);
     }
 
-    public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds, List<MultipartFile> files) {
+
         Post post = new Post(actor, p.title(), p.content(), p.isViewed());
         post.setFreelancer(Freelancer.of(post));
         post.getFreelancer().modify(f.salary(), f.period());
@@ -62,7 +65,7 @@ public class FreelancerService {
     }
 
     @Transactional
-    public Post modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    public Post modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds, List<Long> deleteFileIds) {
         post.modify(p.title(), p.content(), p.isViewed());
         post.getFreelancer().modify(f.salary(), f.period());
 
@@ -71,6 +74,10 @@ public class FreelancerService {
         post.getPostSkills().clear();
         postRepository.flush();
         addRelations(post, regionIds, categoryIds, skillIds);
+
+        if (deleteFileIds != null && !deleteFileIds.isEmpty()) {
+            freelancerFileRepository.deleteAllByIdInBatch(deleteFileIds);
+        }
 
         return postRepository.save(post);
     }
@@ -109,4 +116,6 @@ public class FreelancerService {
     public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
         return freelancerQueryRepository.searchFreelancers(condition, pageable);
     }
+
+    private final FreelancerFileRepository freelancerFileRepository;
 }
