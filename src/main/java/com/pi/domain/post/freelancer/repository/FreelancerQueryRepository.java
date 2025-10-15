@@ -139,7 +139,8 @@ public class FreelancerQueryRepository {
                         categoriesMap.getOrDefault(p.getId(), List.of()),
                         skillsMap.getOrDefault(p.getId(), List.of()),
                         p.getSalary(),
-                        p.getPeriod()
+                        p.getPeriod(),
+                        List.of()
                 ))
                 .toList();
 
