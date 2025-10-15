@@ -72,7 +72,6 @@ public class ApiV1FreelancerController {
             @PathVariable Long id
     ) {
         Post post = freelancerService.findById(id);
-        postService.increaseViewCount(id);
         return new FreelancerDto(post);
     }
 
@@ -126,5 +125,13 @@ public class ApiV1FreelancerController {
         reactionService.toggleLike(id, userId);
         return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.");
     }
+
+    @PostMapping("/{id}/view")
+    @Operation(summary = "프리랜서 글 조회수 증가")
+    public RsData<Void> increaseViewCount(@PathVariable Long id) {
+        postService.increaseViewCount(id);
+        return new RsData<>("200-1", "프리랜서 게시글 조회수가 증가되었습니다.");
+    }
+
 }
 
