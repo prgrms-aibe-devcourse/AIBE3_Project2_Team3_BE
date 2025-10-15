@@ -133,12 +133,17 @@ public class ApiV1FreelancerController {
 
     @PostMapping("/{id}/like")
     @Operation(summary = "프리랜서 글 좋아요/취소")
-    public RsData<Void> toggleLike(
+    public RsData<FreelancerDto> toggleLike(
             @PathVariable Long id) {
         User actor = rq.getActor();
         Long userId = actor.getId();
         reactionService.toggleLike(id, userId);
-        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.");
+
+        Post post = freelancerService.findById(id);
+        boolean isLiked = reactionService.isLikedByUser(id, userId);
+
+        FreelancerDto freelancerDto = new FreelancerDto(post.withIsLiked(isLiked));
+        return new RsData<>("200-1", "프리랜서 게시글 좋아요 상태가 변경되었습니다.", freelancerDto);
     }
 
     @PostMapping("/{id}/view")

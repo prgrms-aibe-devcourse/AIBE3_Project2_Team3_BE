@@ -44,6 +44,16 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    public ProjectDto findById(Long id, User actor) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException());
+
+        boolean isLiked = post.isLikedBy(actor);
+
+        return new ProjectDto(post.withIsLiked(isLiked));
+    }
+
+    @Transactional(readOnly = true)
     public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
         return projectQueryRepository.searchProjects(condition, pageable);
     }
@@ -87,7 +97,7 @@ public class ProjectService {
 
         boolean isLiked = reactionService.isLikedByUser(postId, userId);
 
-        return new ProjectDto(post, isLiked);
+        return new ProjectDto(post.withIsLiked(isLiked));
     }
 
     // 테스트 용도

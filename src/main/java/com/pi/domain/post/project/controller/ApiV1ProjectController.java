@@ -105,7 +105,7 @@ public class ApiV1ProjectController {
         post.checkActorCanDelete(actor);
         postService.delete(post);
 
-        return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
+        return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.");
     }
 
     @PostMapping("/{id}/like")
@@ -119,7 +119,7 @@ public class ApiV1ProjectController {
         Post post = projectService.findById(id);
         boolean isLiked = reactionService.isLikedByUser(id, userId);
 
-        ProjectDto projectDto = new ProjectDto(post, isLiked);
+        ProjectDto projectDto = new ProjectDto(post.withIsLiked(isLiked));
         return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.", projectDto);
     }
 

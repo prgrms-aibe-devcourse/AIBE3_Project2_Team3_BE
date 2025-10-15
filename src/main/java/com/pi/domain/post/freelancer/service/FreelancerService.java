@@ -46,6 +46,16 @@ public class FreelancerService {
         return postRepository.findByFreelancerIsNotNullAndId(id).get();
     }
 
+    @Transactional(readOnly = true)
+    public FreelancerDto findById(Long id, User actor) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException());
+
+        boolean isLiked = post.isLikedBy(actor);
+
+        return new FreelancerDto(post.withIsLiked(isLiked));
+    }
+
     public Page<Post> getPage(Pageable pageable, String searchKeyword) {
         if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
             return postRepository.findByFreelancerIsNotNull(pageable);
