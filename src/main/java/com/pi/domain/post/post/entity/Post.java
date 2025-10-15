@@ -42,9 +42,6 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostSkill> postSkills = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    private ProjectStatus status;
-
     private int viewCount = 0;
     private int likeCount = 0;
 

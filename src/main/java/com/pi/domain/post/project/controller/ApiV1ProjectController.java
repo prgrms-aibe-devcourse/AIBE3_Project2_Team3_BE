@@ -77,8 +77,8 @@ public class ApiV1ProjectController {
     public ProjectDto getItem(
             @PathVariable Long id
     ) {
-        postService.increaseViewCount(id);
         Post post = projectService.findById(id);
+        postService.increaseViewCount(id);
         return new ProjectDto(post);
     }
 
@@ -108,6 +108,7 @@ public class ApiV1ProjectController {
 
         return new RsData<>("200-1", "프로젝트 게시글이 삭제되었습니다.".formatted(post.getId()));
     }
+
     @PostMapping("/{id}/like")
     @Operation(summary = "프로젝트 글 좋아요/취소")
     public RsData<Void> toggleLike(

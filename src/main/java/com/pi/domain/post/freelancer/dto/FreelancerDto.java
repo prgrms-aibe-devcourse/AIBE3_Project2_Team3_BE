@@ -21,7 +21,9 @@ public record FreelancerDto(
         List<CategoryDto> categories,
         List<SkillDto> skills,
         Long salary,
-        Long period
+        Long period,
+        Integer viewCount,
+        Integer likeCount
 ) {
     public FreelancerDto(Post post) {
         this(
@@ -36,7 +38,9 @@ public record FreelancerDto(
                 post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
                 post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
                 post.getFreelancer().getSalary(),
-                post.getFreelancer().getPeriod()
+                post.getFreelancer().getPeriod(),
+                post.getViewCount(),
+                post.getLikeCount()
         );
     }
 }

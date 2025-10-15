@@ -20,9 +20,9 @@ public class ReactionService {
     @Transactional
     public void toggleLike(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException());
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException());
 
         if (reactionRepository.existsByPostAndUser(post, user)) {
             reactionRepository.deleteByPostAndUser(post, user);

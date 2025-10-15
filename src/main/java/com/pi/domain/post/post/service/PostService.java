@@ -22,7 +22,7 @@ public class PostService {
     @Transactional
     public Post increaseViewCount(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException(""));
+                .orElseThrow(() -> new RuntimeException());
         post.increaseViewCount();
         return post;
     }
