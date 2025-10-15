@@ -12,8 +12,6 @@ public record FreelancerWriteReqBody(
         FreelancerWriteDto freelancer,
         List<Long> regionIds,
         List<Long> categoryIds,
-        List<Long> skillIds,
-        Integer viewCount,
-        Integer likeCount
+        List<Long> skillIds
 ) {
 }

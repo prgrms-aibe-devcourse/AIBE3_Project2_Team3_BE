@@ -12,6 +12,7 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
+import com.pi.global.s3.S3KeyParser;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +39,7 @@ public class ApiV1FreelancerController {
     private final PostService postService;
     private final ReactionService reactionService;
     private final Rq rq;
+    private final S3KeyParser s3KeyParser;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
@@ -47,7 +49,7 @@ public class ApiV1FreelancerController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
-        Post post = freelancerService.create(
+        FreelancerDto dto = freelancerService.create(
                 actor,
                 reqBody.post(),
                 reqBody.freelancer(),
@@ -57,10 +59,7 @@ public class ApiV1FreelancerController {
                 files
         );
 
-        if (reqBody.viewCount() != null) post.setViewCount(reqBody.viewCount());
-        if (reqBody.likeCount() != null) post.setLikeCount(reqBody.likeCount());
-
-        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post));
+        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", dto);
     }
 
     @GetMapping
@@ -85,8 +84,7 @@ public class ApiV1FreelancerController {
     public FreelancerDto getItem(
             @PathVariable Long id
     ) {
-        Post post = freelancerService.findById(id);
-        return new FreelancerDto(post);
+        return freelancerService.getItem(id);
     }
 
     @GetMapping("/my")
@@ -107,14 +105,15 @@ public class ApiV1FreelancerController {
     public RsData<FreelancerDto> modify(
             @PathVariable Long id,
             @Valid @RequestPart FreelancerModifyReqBody reqBody,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "removeIds", required = false) List<Long> removeIds
     ) {
         User actor = rq.getActor();
         Post post = freelancerService.findById(id);
         post.checkActorCanModify(actor);
-        freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), reqBody.files());
+        FreelancerDto dto = freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), files, removeIds);
 
-        return new RsData<>("200-1", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(post));
+        return new RsData<>("200-1", "프리랜서 게시글이 수정되었습니다.", dto);
     }
 
     @DeleteMapping("/{id}")

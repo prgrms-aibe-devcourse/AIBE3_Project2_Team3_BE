@@ -27,7 +27,7 @@ public class Freelancer {
     @JoinColumn(name = "id", nullable = false)
     private Post post;
 
-    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FreelancerFile> files = new ArrayList<>();
 
     private Freelancer(Post post) {
@@ -41,5 +41,10 @@ public class Freelancer {
     public void modify(Long salary, Long period) {
         this.salary = salary;
         this.period = period;
+    }
+
+    public void addFreelancerFile(String fileUrl) {
+        FreelancerFile freelancerFile = new FreelancerFile(this, fileUrl);
+        files.add(freelancerFile);
     }
 }
