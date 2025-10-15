@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 public record ApplicationWithUserDto(
         long id,
+        String content,
         String status,
         long salary,
         int period,
@@ -21,6 +22,7 @@ public record ApplicationWithUserDto(
     public ApplicationWithUserDto(Application application, Post post, User user) {
         this(
                 application.getId(),
+                application.getContent(),
                 application.getStatus().name(),
                 application.getSalary(),
                 application.getPeriod(),

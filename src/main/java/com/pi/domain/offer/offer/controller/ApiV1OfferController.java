@@ -38,13 +38,13 @@ public class ApiV1OfferController {
     @GetMapping("/my")
     @Transactional(readOnly = true)
     @Operation(summary = "내가 등록한 구인 다건 조회")
-    public PagePayload<OfferWithPostDto> getMyItems(
+    public PagePayload<OfferWithUserDto> getMyItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) OfferStatus status
     ) {
         User actor = rq.getActor();
-        Page<OfferWithPostDto> dtoPage = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
-                .map(offer -> new OfferWithPostDto(offer, offer.getPost(), offer.getPost().getUser()));
+        Page<OfferWithUserDto> dtoPage = offerService.findAllByUserIdAndStatus(actor.getId(), status, pageable)
+                .map(offer -> new OfferWithUserDto(offer, offer.getPost(), offer.getPost().getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
