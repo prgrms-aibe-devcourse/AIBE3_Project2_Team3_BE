@@ -4,7 +4,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   profiles:
-    active: prod
+    active: dev
     include: secret, s3
   output:
     ansi:
@@ -18,7 +18,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
