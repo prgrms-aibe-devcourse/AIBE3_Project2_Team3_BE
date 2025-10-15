@@ -21,6 +21,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Slf4j
+@Table(name = "posts")
 public class Post extends BaseEntity {
     @ManyToOne
     private User user;

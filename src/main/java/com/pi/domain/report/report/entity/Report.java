@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "reports")
 public class Report extends BaseEntity {
 
     @ManyToOne

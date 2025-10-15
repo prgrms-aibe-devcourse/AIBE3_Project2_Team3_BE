@@ -9,6 +9,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "freelancers")
 public class Freelancer {
     @Id
     private Long id;
