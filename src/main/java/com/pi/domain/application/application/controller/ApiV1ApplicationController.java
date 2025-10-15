@@ -131,7 +131,7 @@ public class ApiV1ApplicationController {
         application.checkActorCanModify(actor, user);
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            log.warn("수락/거절된 구직({})은 수정 불가", application.getId());
+            log.warn("수락/거절/완료된 구직({})은 수정 불가", application.getId());
             throw new ServiceException("400-1", "잘못된 요청입니다.");
         }
         applicationService.update(application, reqBody, files);
@@ -156,10 +156,6 @@ public class ApiV1ApplicationController {
         User postUser = application.getPost().getUser();
         application.checkActorCanModify(actor, postUser);
 
-        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
-            log.warn("수락된 구직({})은 수정 불가", application.getId());
-            throw new ServiceException("400-1", "잘못된 요청입니다.");
-        }
         applicationService.updateStatus(application, reqBody.status());
 
         return new RsData<>(
