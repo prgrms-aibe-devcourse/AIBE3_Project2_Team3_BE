@@ -19,7 +19,7 @@ CREATE TABLE users
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Post 테이블
-CREATE TABLE post
+CREATE TABLE posts
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id      BIGINT  NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE post
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Project 테이블 (Post와 1:1, PK 공유)
-CREATE TABLE project
+CREATE TABLE projects
 (
     id             BIGINT PRIMARY KEY,
     deadlineDate   DATETIME,
@@ -66,7 +66,7 @@ CREATE TABLE applications
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Freelancer 테이블 (Post와 1:1, PK 공유)
-CREATE TABLE freelancer
+CREATE TABLE freelancers
 (
     id     BIGINT PRIMARY KEY,
     salary BIGINT,
@@ -114,7 +114,7 @@ CREATE TABLE answers
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Review 테이블
-CREATE TABLE review
+CREATE TABLE reviews
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     post_id      BIGINT,
@@ -128,7 +128,7 @@ CREATE TABLE review
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Report 테이블
-CREATE TABLE report
+CREATE TABLE reports
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     reporter_id  BIGINT,
@@ -146,7 +146,7 @@ CREATE TABLE report
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Category 테이블
-CREATE TABLE category
+CREATE TABLE categories
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(255),
@@ -157,7 +157,7 @@ CREATE TABLE category
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Region 테이블
-CREATE TABLE region
+CREATE TABLE regions
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(255),
@@ -168,7 +168,7 @@ CREATE TABLE region
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Skill 테이블
-CREATE TABLE skill
+CREATE TABLE skills
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(255),
@@ -270,7 +270,7 @@ CREATE TABLE chat_messages
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Notification 테이블
-CREATE TABLE notification
+CREATE TABLE notifications
 (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id         BIGINT,
@@ -311,7 +311,7 @@ VALUES ('구인/구직 게시글은 상단 메뉴에서 등록 가능합니다. 
        ('회원 탈퇴는 마이페이지에서 직접 신청하실 수 있습니다. 탈퇴 후 데이터는 복구되지 않습니다.', 1, 5, NOW(), NOW());
 
 -- Region 테이블 초기 데이터
-INSERT INTO region (name, parent_id, createdDate, modifiedDate)
+INSERT INTO regions (name, parent_id, createdDate, modifiedDate)
 VALUES ('서울특별시', NULL, NOW(), NOW()),
        ('강남구', 1, NOW(), NOW()),
        ('서초구', 1, NOW(), NOW()),
@@ -348,7 +348,7 @@ VALUES ('서울특별시', NULL, NOW(), NOW()),
        ('서귀포시', 32, NOW(), NOW());
 
 -- Category 테이블 초기 데이터
-INSERT INTO category (name, parent_id, createdDate, modifiedDate)
+INSERT INTO categories (name, parent_id, createdDate, modifiedDate)
 VALUES ('IT/개발', NULL, NOW(), NOW()),
        ('웹 개발', 1, NOW(), NOW()),
        ('앱 개발', 1, NOW(), NOW()),
@@ -380,7 +380,7 @@ VALUES ('IT/개발', NULL, NOW(), NOW()),
        ('상담/코칭', 26, NOW(), NOW());
 
 -- Skill 테이블 초기 데이터
-INSERT INTO skill (name, createdDate, modifiedDate)
+INSERT INTO skills (name, createdDate, modifiedDate)
 VALUES ('Java', NOW(), NOW()),
        ('Spring Boot', NOW(), NOW()),
        ('Kotlin', NOW(), NOW()),
@@ -416,12 +416,12 @@ VALUES ('Java', NOW(), NOW()),
        ('상담/코칭', NOW(), NOW());
 
 -- Post & Project 테이블 초기 데이터 (post_id 1,2,3)
-INSERT INTO post (user_id, is_viewed, title, content, status, createdDate, modifiedDate)
+INSERT INTO posts (user_id, is_viewed, title, content, status, createdDate, modifiedDate)
 VALUES (3, TRUE, '웹 개발 프로젝트', 'React 기반 웹 개발', NULL, NOW(), NOW()),
        (4, TRUE, '디자인 리뉴얼', 'Figma로 UI/UX 개선', NULL, NOW(), NOW()),
        (5, TRUE, '마케팅 캠페인', 'SNS 마케팅 및 콘텐츠 제작', NULL, NOW(), NOW());
 
-INSERT INTO project (id, deadlineDate, startedDate, endedDate, hirerType, employmentType, salary, personnel, skillLevel,
+INSERT INTO projects (id, deadlineDate, startedDate, endedDate, hirerType, employmentType, salary, personnel, skillLevel,
                      status)
 VALUES (1, DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), '개인', '정규직', 5000000, 3, 2, NULL),
        (2, DATE_ADD(NOW(), INTERVAL 15 DAY), NOW(), DATE_ADD(NOW(), INTERVAL 45 DAY), '기업', '계약직', 3000000, 2, 1, NULL),
@@ -429,11 +429,11 @@ VALUES (1, DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), DATE_ADD(NOW(), INTERVAL 60 
         NULL);
 
 -- Post & Freelancer 테이블 초기 데이터 (post_id 4,5)
-INSERT INTO post (user_id, is_viewed, title, content, status, createdDate, modifiedDate)
+INSERT INTO posts (user_id, is_viewed, title, content, status, createdDate, modifiedDate)
 VALUES (3, TRUE, '백엔드 개발 프리랜서 모집', 'Spring Boot 경험자 우대', NULL, NOW(), NOW()),
        (4, TRUE, '디자인 프리랜서 모집', 'UI/UX 디자인 경험자', NULL, NOW(), NOW());
 
-INSERT INTO freelancer (id, salary, period)
+INSERT INTO freelancers (id, salary, period)
 VALUES (4, 4000000, 30),
        (5, 3500000, 20);
 
@@ -444,7 +444,7 @@ VALUES (1, 3, '웹 개발 지원합니다.', 5000000, 30, NOW(), NOW()),
        (3, 5, '마케팅 캠페인 참여 희망합니다.', 2000000, 15, NOW(), NOW());
 
 -- Offers 테이블 초기 데이터 (post_id 6,7)
-INSERT INTO post (user_id, is_viewed, title, content, status, createdDate, modifiedDate)
+INSERT INTO posts (user_id, is_viewed, title, content, status, createdDate, modifiedDate)
 VALUES (4, TRUE, '오퍼용 게시글1', '오퍼 테스트1', NULL, NOW(), NOW()),
        (5, TRUE, '오퍼용 게시글2', '오퍼 테스트2', NULL, NOW(), NOW());
 
