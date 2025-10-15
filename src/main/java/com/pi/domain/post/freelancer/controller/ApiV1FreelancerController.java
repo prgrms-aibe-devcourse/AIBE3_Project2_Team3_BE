@@ -101,18 +101,18 @@ public class ApiV1FreelancerController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     @Operation(summary = "프리랜서 글 수정")
     public RsData<FreelancerDto> modify(
             @PathVariable Long id,
-            @Valid @RequestBody FreelancerModifyReqBody reqBody,
-            @RequestPart(value = "deleteFileIds", required = false) List<Long> deleteFileIds
+            @Valid @RequestPart FreelancerModifyReqBody reqBody,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
         Post post = freelancerService.findById(id);
         post.checkActorCanModify(actor);
-        freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), deleteFileIds);
+        freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), reqBody.files());
 
         return new RsData<>("200-1", "프리랜서 게시글이 수정되었습니다.", new FreelancerDto(post));
     }
