@@ -4,6 +4,7 @@ import com.pi.domain.post.post.entity.PostSkill;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "skills")
 public class Skill extends BaseEntity {
     private String name;
 

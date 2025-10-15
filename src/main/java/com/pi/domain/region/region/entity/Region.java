@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "regions")
 public class Region extends BaseEntity {
     private String name;
 
