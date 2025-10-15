@@ -60,7 +60,8 @@ public class ApiV1FreelancerController {
         );
 
         return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", dto);
-    }
+
+       }
 
     @GetMapping
     @Transactional
@@ -84,7 +85,9 @@ public class ApiV1FreelancerController {
     public FreelancerDto getItem(
             @PathVariable Long id
     ) {
-        return freelancerService.getItem(id);
+        Post post = freelancerService.findById(id);
+        return new FreelancerDto(post);
+        // return freelancerService.getItem(id);
     }
 
     @GetMapping("/my")
