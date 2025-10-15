@@ -1,10 +1,14 @@
 package com.pi.domain.post.freelancer.entity;
 
+import com.pi.domain.post.file.entity.FreelancerFile;
 import com.pi.domain.post.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,6 +26,9 @@ public class Freelancer {
     @MapsId
     @JoinColumn(name = "id", nullable = false)
     private Post post;
+
+    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<FreelancerFile> files = new ArrayList<>();
 
     private Freelancer(Post post) {
         setPost(post);

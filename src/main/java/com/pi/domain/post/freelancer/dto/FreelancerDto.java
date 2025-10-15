@@ -1,6 +1,7 @@
 package com.pi.domain.post.freelancer.dto;
 
 import com.pi.domain.category.category.dto.CategoryDto;
+import com.pi.domain.post.file.dto.FreelancerFileDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.skill.skill.dto.SkillDto;
@@ -23,7 +24,8 @@ public record FreelancerDto(
         Long salary,
         Long period,
         Integer viewCount,
-        Integer likeCount
+        Integer likeCount,
+        List<FreelancerFileDto> files
 ) {
     public FreelancerDto(Post post) {
         this(
@@ -40,7 +42,8 @@ public record FreelancerDto(
                 post.getFreelancer().getSalary(),
                 post.getFreelancer().getPeriod(),
                 post.getViewCount(),
-                post.getLikeCount()
+                post.getLikeCount(),
+                List.of()
         );
     }
 }
