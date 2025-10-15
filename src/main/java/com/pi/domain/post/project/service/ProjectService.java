@@ -36,6 +36,7 @@ public class ProjectService {
     private final SkillRepository skillRepository;
     private final ProjectQueryRepository projectQueryRepository;
     private final ReactionService reactionService;
+    private final ReactionService reactionRepository;
 
     @Transactional(readOnly = true)
     public Post findById(Long id) {
@@ -80,7 +81,7 @@ public class ProjectService {
         return posts.map(ProjectDto::new);
     }
 
-    public ProjectDto getProjectDto(Long postId, Long userId) {
+    public ProjectDto getProjectDtoWithIsLiked(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException());
 
