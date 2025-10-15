@@ -57,5 +57,4 @@ public record ProjectDto(
                 post.isLiked()
         );
     }
-    
 }

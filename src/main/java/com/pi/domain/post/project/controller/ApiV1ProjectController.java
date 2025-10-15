@@ -77,8 +77,8 @@ public class ApiV1ProjectController {
     public ProjectDto getItem(
             @PathVariable Long id
     ) {
-        User actor = rq.getActor();
-        return projectService.getProjectDtoWithIsLiked(id, actor.getId());
+        Post post = projectService.findById(id);
+        return new ProjectDto(post);
     }
 
     @PutMapping("/{id}")
@@ -110,7 +110,7 @@ public class ApiV1ProjectController {
 
     @PostMapping("/{id}/like")
     @Operation(summary = "프로젝트 글 좋아요/취소")
-    public RsData<ProjectDto> toggleLike(
+    public RsData<Void> toggleLike(
             @PathVariable Long id) {
         User actor = rq.getActor();
         Long userId = actor.getId();
@@ -120,7 +120,7 @@ public class ApiV1ProjectController {
         boolean isLiked = reactionService.isLikedByUser(id, userId);
 
         ProjectDto projectDto = new ProjectDto(post.withIsLiked(isLiked));
-        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.", projectDto);
+        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.");
     }
 
     @PostMapping("/{id}/view")
