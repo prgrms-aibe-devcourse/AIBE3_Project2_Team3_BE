@@ -135,8 +135,8 @@ public class ApiV1OfferController {
         User postUser = offer.getPost().getUser();
 
         boolean isOfferUser = offer.isSameUser(actor, offerUser);
-        boolean isOPostUser = !offer.isSameUser(actor, postUser);
-        if (!isOfferUser && !isOPostUser) {
+        boolean isPostUser = offer.isSameUser(actor, postUser);
+        if (!isOfferUser && !isPostUser) {
             log.warn("본인 또는 게시글 작성자만 상태 수정 가능");
             throw new ServiceException("403-1", "권한이 없습니다.");
         }
