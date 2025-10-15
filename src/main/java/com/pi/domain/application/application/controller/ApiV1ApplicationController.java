@@ -59,13 +59,13 @@ public class ApiV1ApplicationController {
     @GetMapping("/received")
     @Transactional(readOnly = true)
     @Operation(summary = "내 게시글에 들어온 구직 다건 조회")
-    public PagePayload<PostApplicationWithUserDto> getItems(
+    public PagePayload<ApplicationWithUserDto> getItems(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) ApplicationStatus status
     ) {
         User actor = rq.getActor();
-        Page<PostApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
-                .map(application -> new PostApplicationWithUserDto(application, application.getUser()));
+        Page<ApplicationWithUserDto> dtoPage = applicationService.findAllByPostUserIdAndStatus(actor.getId(), status, pageable)
+                .map(application -> new ApplicationWithUserDto(application, application.getPost(), application.getUser()));
 
         return Ut.pageMapper.of(dtoPage);
     }
