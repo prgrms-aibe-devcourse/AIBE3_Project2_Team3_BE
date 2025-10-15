@@ -30,4 +30,18 @@ public class PostService {
         post.increaseViewCount();
         return post;
     }
+//
+//    public ProjectDto findByIdWithLikeStatus(Long postId, Long currentUserId) {
+//        Post post = postRepository.findById(postId)
+//                .orElseThrow(() -> new RuntimeException());
+//
+//        boolean isLiked = false;
+//        if (currentUserId != null) {
+//            User user = userRepository.findById(currentUserId)
+//                    .orElseThrow(() -> new RuntimeException());
+//            isLiked = reactionRepository.existsByPostAndUser(post, user);
+//        }
+//
+//        return new ProjectDto(post, isLiked);
+//    }
 }

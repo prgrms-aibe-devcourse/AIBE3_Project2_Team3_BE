@@ -12,7 +12,6 @@ import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.post.project.repository.ProjectQueryRepository;
-import com.pi.domain.reaction.reaction.service.ReactionService;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.entity.Skill;
