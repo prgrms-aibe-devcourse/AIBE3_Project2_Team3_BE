@@ -75,7 +75,8 @@ public class ApiV1FreelancerController {
             @RequestParam(required = false) Long minSalary,
             @RequestParam(required = false) Long maxSalary
     ) {
-        Page<FreelancerDto> dtoPage = freelancerService.searchFreelancers(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable);
+        Long userId = rq.getActor().getId();
+        Page<FreelancerDto> dtoPage = freelancerService.searchFreelancers(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable, userId);
         return Ut.pageMapper.of(dtoPage);
     }
 

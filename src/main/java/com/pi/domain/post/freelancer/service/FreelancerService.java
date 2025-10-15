@@ -175,8 +175,8 @@ public class FreelancerService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
-        return freelancerQueryRepository.searchFreelancers(condition, pageable);
+    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long userId) {
+        return freelancerQueryRepository.searchFreelancers(condition, pageable, userId);
     }
 
     @Transactional(readOnly = true)

@@ -6,6 +6,7 @@ import com.pi.domain.post.file.dto.FreelancerFileDto;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.region.region.entity.QRegion;
 import com.pi.domain.skill.skill.dto.SkillDto;
@@ -14,6 +15,7 @@ import com.pi.global.s3.S3KeyParser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -38,6 +40,7 @@ import static com.pi.domain.post.post.entity.QPost.post;
 import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
@@ -75,7 +78,7 @@ public class FreelancerQueryRepository {
         private String authorProfileImageUrl;
     }
 
-    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
+    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long loginUserId) {
 
         // 1) 평평한 DTO로 1차 조회 (post + freelancer + user)
         List<FreelancerSimpleDto> basicList = queryFactory
@@ -92,6 +95,10 @@ public class FreelancerQueryRepository {
                         freelancer.period,
                         post.viewCount,
                         post.likeCount,
+                        new CaseBuilder()
+                                .when(reaction.id.isNotNull())
+                                .then(true)
+                                .otherwise(false),
 
                         user.id,
                         user.createdDate,
@@ -104,6 +111,9 @@ public class FreelancerQueryRepository {
                 .from(post)
                 .join(post.freelancer, freelancer) // 프리랜서 글만 대상
                 .join(post.user, user)
+                .leftJoin(reaction)
+                .on(reaction.user.id.eq(loginUserId)
+                        .and(reaction.type.eq(ReactionType.LIKE)))
                 .where(
                         post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
