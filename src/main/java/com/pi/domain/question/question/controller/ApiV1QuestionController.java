@@ -39,6 +39,14 @@ public class ApiV1QuestionController {
         return Ut.pageMapper.of(dtoPage);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "질문 상세 조회")
+    public RsData<QuestionDto> getQuestion(@PathVariable Long id) {
+        Question question = questionService.findById(id);
+        QuestionDto questionDto = new QuestionDto(question);
+        return new RsData<>("200-1", "질문을 조회했습니다.", questionDto);
+    }
+
     @GetMapping("/my")
     @Operation(summary = "본인이 등록한 문의 및 답변 조회")
     public PagePayload<QuestionDto> getMyQuestionsWithAnswers(

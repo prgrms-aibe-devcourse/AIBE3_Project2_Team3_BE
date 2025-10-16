@@ -92,8 +92,8 @@ CREATE TABLE offers
 CREATE TABLE questions
 (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title         VARCHAR(200) NOT NULL,
-    content       TEXT         NOT NULL,
+    title         VARCHAR(50) NOT NULL,
+    content       VARCHAR(1000)         NOT NULL,
     user_id       BIGINT,
     created_date  DATETIME,
     modified_date DATETIME,
@@ -104,7 +104,7 @@ CREATE TABLE questions
 CREATE TABLE answers
 (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    comment       VARCHAR(1000) NOT NULL,
+    comment       VARCHAR(2000) NOT NULL,
     user_id       BIGINT,
     question_id   BIGINT,
     created_date  DATETIME,
@@ -277,6 +277,19 @@ CREATE TABLE freelancer_files
     created_date  DATETIME,
     modified_date DATETIME,
     CONSTRAINT fk_freelancer_file_freelancer FOREIGN KEY (freelancer_id) REFERENCES freelancers (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+CREATE TABLE reactions
+(
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id       BIGINT NOT NULL,
+    user_id       BIGINT NOT NULL,
+    reaction_type VARCHAR(50) NOT NULL,
+    created_date  DATETIME,
+    modified_date DATETIME,
+    CONSTRAINT uk_post_user UNIQUE (post_id, user_id),
+    CONSTRAINT fk_reaction_post FOREIGN KEY (post_id) REFERENCES posts (id),
+    CONSTRAINT fk_reaction_user FOREIGN KEY (user_id) REFERENCES users (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- User 테이블 초기 데이터
