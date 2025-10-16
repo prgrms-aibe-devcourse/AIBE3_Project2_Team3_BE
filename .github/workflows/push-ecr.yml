@@ -19,7 +19,8 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
+    outputs:
+      image_tag_final: ${{ steps.set-tag.outputs.image_tag_final }}
     steps:
       # 1️⃣ 소스 체크아웃
       - uses: actions/checkout@v4
@@ -74,8 +75,10 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
-          # 이후 잡/스텝에서 공통으로 쓸 최종 태그
-          echo "IMAGE_TAG_FINAL=${IMAGE_TAG}" >> $GITHUB_ENV
+
+      - name: Set job output (IMAGE_TAG_FINAL)           # 👈 추가
+        id: set-tag
+        run: echo "image_tag_final=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
       # 8️⃣ Build & Push — 태그가 없을 때만 수행
       - name: Build & Push (SHA tag only)
@@ -100,7 +103,7 @@ jobs:
       - name: Run deploy via SSM
         env:
           INSTANCE_ID: i-0a8f78a81cd34b4a8
-          TAG: ${{ env.IMAGE_TAG_FINAL }}
+          TAG: ${{ needs.build-and-push.outputs.image_tag_final }}
         run: |
           set -euo pipefail
           CMD_ID=$(aws ssm send-command \
