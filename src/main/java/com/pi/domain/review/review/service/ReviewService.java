@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -73,4 +75,10 @@ public class ReviewService {
     public long count() {
         return reviewRepository.count();
     }
+
+    public Optional<ReviewDto> findMyReviewByPost(Long postId, Long userId) {
+        return reviewRepository.findByPost_IdAndUser_Id(postId, userId)
+                .map(ReviewDto::new);
+    }
+
 }
