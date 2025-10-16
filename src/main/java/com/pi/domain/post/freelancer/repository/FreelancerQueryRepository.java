@@ -82,7 +82,9 @@ public class FreelancerQueryRepository {
 
     public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long actorId) {
         // EXISTS 서브쿼리
-        var likedExpr = JPAExpressions
+        var likedExpr = (actorId == null)
+                ? com.querydsl.core.types.dsl.Expressions.FALSE
+                : JPAExpressions
                 .selectOne()
                 .from(reaction)
                 .where(
