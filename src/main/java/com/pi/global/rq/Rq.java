@@ -33,6 +33,14 @@ public class Rq {
                 .orElse(null);
     }
 
+    public User getActorOrNull() {
+        try {
+            return getActor();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public void setHeader(String name, String value) {
         if (value == null) value = "";
 
