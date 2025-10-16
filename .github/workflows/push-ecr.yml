@@ -1,0 +1,42 @@
+name: Build & Push to ECR
+
+on:
+  push:
+    branches: [ "main" ]   # 신뢰정책 sub와 동일한 브랜치여야 함
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-2
+  AWS_ACCOUNT_ID: "109936653790"
+  ECR_REPOSITORY: "YOUR_ECR_REPO"        # 예: aibe3-team3-be
+  IMAGE_TAG: "${{ github.sha }}"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS creds (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::109936653790:role/GitHubActionsECRAccessRole
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          docker build -t $REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+          docker push $REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          # latest 추가(선택)
+          docker tag  $REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} $REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+          docker push $REGISTRY/${{ env.ECR_REPOSITORY }}:latest
