@@ -30,9 +30,10 @@ public record ProjectDto(
         Integer skillLevel,
         long viewCount,
         long likeCount,
-        boolean liked
+        boolean liked,
+        Long applicationCount
 ) {
-    public ProjectDto(Post post, boolean liked) {
+    public ProjectDto(Post post, boolean liked, Long applicationCount) {
         this(
                 post.getId(),
                 post.getCreatedDate(),
@@ -54,7 +55,8 @@ public record ProjectDto(
                 post.getProject().getSkillLevel(),
                 post.getViewCount(),
                 post.getLikeCount(),
-                liked
+                liked,
+                applicationCount
         );
     }
 }
