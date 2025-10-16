@@ -27,10 +27,6 @@ public class ApiV1AnswerController {
     public RsData<AnswerDto> createAnswer(@Valid @RequestBody AnswerCreateReqBody reqBody) {
         User actor = rq.getActor();
 
-        System.out.println("현재 사용자: " + actor.getNickname());
-        System.out.println("사용자 role: " + actor.getRole());
-        System.out.println("isAdmin 결과: " + actor.isAdmin());
-
         Answer.checkActorCanCreate(actor);
 
         AnswerDto answerDto = answerService.createAnswer(reqBody, actor);

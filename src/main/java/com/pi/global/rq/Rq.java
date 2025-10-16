@@ -1,6 +1,7 @@
 package com.pi.global.rq;
 
 import com.pi.domain.user.user.entity.User;
+import com.pi.domain.user.user.entity.UserRole;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.security.SecurityUser;
 import jakarta.servlet.http.Cookie;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +31,15 @@ public class Rq {
                 .map(Authentication::getPrincipal)
                 .filter(principal -> principal instanceof SecurityUser)
                 .map(principal -> (SecurityUser) principal)
-                .map(securityUser -> new User(securityUser.getId(), securityUser.getUsername(), securityUser.getNickname()))
+                .map(securityUser -> {
+                    boolean isAdmin = securityUser.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .anyMatch(a -> "ROLE_ADMIN".equals(a));
+
+                    UserRole role = isAdmin ? UserRole.ROLE_ADMIN : UserRole.ROLE_USER;
+
+                    return new User(securityUser.getId(), securityUser.getUsername(), securityUser.getNickname(), role);
+                })
                 .orElse(null);
     }
 

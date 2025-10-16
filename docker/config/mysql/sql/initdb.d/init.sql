@@ -9,7 +9,7 @@ CREATE TABLE users
     username          VARCHAR(50)  NOT NULL UNIQUE,
     password          VARCHAR(100) NOT NULL,
     nickname          VARCHAR(50),
-    role              TINYINT      NOT NULL,
+    role              VARCHAR(20)  NOT NULL,
     email             VARCHAR(100) NOT NULL UNIQUE,
     profile_image_url VARCHAR(255),
     deleted           BOOLEAN      NOT NULL DEFAULT FALSE,
@@ -294,11 +294,11 @@ CREATE TABLE reactions
 
 -- User 테이블 초기 데이터
 INSERT INTO users (username, password, nickname, role, email, deleted, created_date, modified_date)
-VALUES ('admin', 'admin123!', '관리자', 1, 'admin@pi.com', FALSE, NOW(), NOW()),
-       ('system', 'system123!', '시스템', 1, 'system@pi.com', FALSE, NOW(), NOW()),
-       ('user1', 'user123!', '유저1', 0, 'user1@pi.com', FALSE, NOW(), NOW()),
-       ('user2', 'user123!', '유저2', 0, 'user2@pi.com', FALSE, NOW(), NOW()),
-       ('user3', 'user123!', '유저3', 0, 'user3@pi.com', FALSE, NOW(), NOW());
+VALUES ('admin', '$2y$04$4Dxsdv5u.SYeJxeH6BFeG.KIMDzE1vA/Hub7zIY85h/WdM/fpkEjW', '관리자', 'ROLE_ADMIN', 'admin@pi.com', FALSE, NOW(), NOW()),
+       ('system', '$2y$04$4Dxsdv5u.SYeJxeH6BFeG.KIMDzE1vA/Hub7zIY85h/WdM/fpkEjW', '시스템', 'ROLE_ADMIN', 'system@pi.com', FALSE, NOW(), NOW()),
+       ('user1', '$2y$04$z.ojhMEFDMGtPpWUGt0SIe0yfvElhbfUm2wsTAxbqqee9GhM53Z46', '유저1', 'ROLE_USER', 'user1@pi.com', FALSE, NOW(), NOW()),
+       ('user2', '$2y$04$z.ojhMEFDMGtPpWUGt0SIe0yfvElhbfUm2wsTAxbqqee9GhM53Z46', '유저2', 'ROLE_USER', 'user2@pi.com', FALSE, NOW(), NOW()),
+       ('user3', '$2y$04$z.ojhMEFDMGtPpWUGt0SIe0yfvElhbfUm2wsTAxbqqee9GhM53Z46', '유저3', 'ROLE_USER', 'user3@pi.com', FALSE, NOW(), NOW());
 
 -- Question 테이블 초기 데이터
 INSERT INTO questions (title, content, user_id, created_date, modified_date)
