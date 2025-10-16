@@ -11,7 +11,7 @@ permissions:
 env:
   AWS_REGION: ap-northeast-2
   AWS_ACCOUNT_ID: "109936653790"
-  ECR_REPOSITORY: "YOUR_ECR_REPO"    # 대문자/언더스코어 포함돼도 OK
+  ECR_REPOSITORY: "jobpick-backend"
   IMAGE_TAG: "${{ github.sha }}"
 
 jobs:
