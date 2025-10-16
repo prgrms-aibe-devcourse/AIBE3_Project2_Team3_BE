@@ -26,9 +26,10 @@ public record FreelancerDto(
         long viewCount,
         long likeCount,
         boolean liked,
-        List<FreelancerFileDto> files
+        List<FreelancerFileDto> files,
+        Long offerCount
 ) {
-    public FreelancerDto(Post post, List<FreelancerFileDto> files, boolean liked) {
+    public FreelancerDto(Post post, List<FreelancerFileDto> files, boolean liked, Long offerCount) {
         this(
                 post.getId(),
                 post.getCreatedDate(),
@@ -45,7 +46,8 @@ public record FreelancerDto(
                 post.getViewCount(),
                 post.getLikeCount(),
                 liked,
-                safeList(files)
+                safeList(files),
+                offerCount
         );
     }
 
