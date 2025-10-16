@@ -28,13 +28,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.pi.domain.application.application.entity.QApplication.application;
 import static com.pi.domain.category.category.entity.QCategory.category;
 import static com.pi.domain.post.post.entity.QPost.post;
-import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
 import static com.pi.domain.post.project.entity.QProject.project;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
@@ -149,6 +150,7 @@ public class ProjectQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, Long> applicationsMap = fetchApplications(postIds);
 
         // [3] Step 3 — ProjectDto 조립
         List<ProjectDto> result = basicList.stream()
@@ -182,7 +184,8 @@ public class ProjectQueryRepository {
                         p.getSkillLevel(),
                         p.getViewCount(),
                         p.getLikeCount(),
-                        p.liked
+                        p.liked,
+                        applicationsMap.getOrDefault(p.getId(), 0L)
                 ))
                 .toList();
 
@@ -261,6 +264,20 @@ public class ProjectQueryRepository {
                                 t -> new SkillDto(t.get(skill.id), t.get(skill.name)),
                                 Collectors.toList()
                         )
+                ));
+    }
+
+    public Map<Long, Long> fetchApplications(List<Long> postIds) {
+        List<Tuple> tuples = queryFactory
+                .select(application.post.id,
+                        application.countDistinct()).from(application)
+                .where(application.post.id.in(postIds))
+                .groupBy(application.post.id)
+                .fetch();
+        return tuples.stream()
+                .collect(Collectors.toMap(
+                        t -> t.get(application.post.id),
+                        t -> t.get(application.countDistinct())
                 ));
     }
 
@@ -379,6 +396,7 @@ public class ProjectQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, Long> applicationsMap = fetchApplications(postIds);
 
         // 3) DTO 조립
         List<ProjectDto> result = basicList.stream()
@@ -411,7 +429,8 @@ public class ProjectQueryRepository {
                         p.getSkillLevel(),
                         p.getViewCount(),               // 타입 Long/long 일치 확인
                         p.getLikeCount(),
-                        p.isLiked()
+                        p.isLiked(),
+                        applicationsMap.getOrDefault(p.getId(), 0L)
                 ))
                 .toList();
 

@@ -1,0 +1,22 @@
+name: AWS OIDC WhoAmI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  whoami:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS creds via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::109936653790:role/GitHubActionsECRAccessRole   # 역할 ARN
+          aws-region: ap-northeast-2
+          audience: sts.amazonaws.com
+
+      - name: Show caller identity
+        run: aws sts get-caller-identity

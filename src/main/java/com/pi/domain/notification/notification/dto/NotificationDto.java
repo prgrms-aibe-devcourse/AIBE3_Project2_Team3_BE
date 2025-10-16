@@ -29,7 +29,6 @@ public record NotificationDto(
 
 
     private static String determineType(Notification n) {
-        if (n.getOffer() != null) return "OFFER";
         if (n.getChatMessage() != null) return "CHAT";
         if (n.getReview() != null) return "REVIEW";
 //        if (n.getContract() != null) return "CONTRACT";
@@ -38,7 +37,6 @@ public record NotificationDto(
 
     // 페이지 이동을 위한 관련 엔티티
     private static Long extractRelatedEntityId(Notification n) {
-        if (n.getOffer() != null) return n.getOffer().getId();
         if (n.getChatMessage() != null) return n.getChatMessage().getId();
         if (n.getReview() != null) return n.getReview().getId();
 //        if (n.getContract() != null) return n.getContract().getId();

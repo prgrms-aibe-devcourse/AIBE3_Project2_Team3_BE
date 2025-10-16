@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -60,17 +62,18 @@ public class ReviewService {
         return reviewRepository.findById(id).get();
     }
 
-    public Page<ReviewDto> findReviewsByFreelancer(Long freelancerId, Pageable pageable) {
-        return reviewRepository.findByPost_Freelancer_Id(freelancerId, pageable)
-                .map(ReviewDto::new);
-    }
-
-    public Page<ReviewDto> findReviewsByProject(Long projectId, Pageable pageable) {
-        return reviewRepository.findByPost_Project_Id(projectId, pageable)
+    public Page<ReviewDto> findReviewsByPost(Long postId, Pageable pageable) {
+        return reviewRepository.findByPost_Id(postId, pageable)
                 .map(ReviewDto::new);
     }
 
     public long count() {
         return reviewRepository.count();
     }
+
+    public Optional<ReviewDto> findMyReviewByPost(Long postId, Long userId) {
+        return reviewRepository.findByPost_IdAndUser_Id(postId, userId)
+                .map(ReviewDto::new);
+    }
+
 }

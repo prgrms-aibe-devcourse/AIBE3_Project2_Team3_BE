@@ -33,13 +33,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.pi.domain.category.category.entity.QCategory.category;
+import static com.pi.domain.offer.offer.entity.QOffer.offer;
 import static com.pi.domain.post.file.entity.QFreelancerFile.freelancerFile;
 import static com.pi.domain.post.freelancer.entity.QFreelancer.freelancer;
 import static com.pi.domain.post.post.entity.QPost.post;
-import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
@@ -142,6 +143,7 @@ public class FreelancerQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, Long> offersMap = fetchOffers(postIds);
         Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
 
         // 3) 최종 DTO 조립
@@ -170,7 +172,8 @@ public class FreelancerQueryRepository {
                         p.getViewCount(),
                         p.getLikeCount(),
                         p.liked,
-                        filesMap.getOrDefault(p.getId(), List.of())
+                        filesMap.getOrDefault(p.getId(), List.of()),
+                        offersMap.getOrDefault(p.getId(), 0L)
                 ))
                 .toList();
 
@@ -248,6 +251,21 @@ public class FreelancerQueryRepository {
                                 t -> new SkillDto(t.get(skill.id), t.get(skill.name)),
                                 Collectors.toList()
                         )
+                ));
+    }
+
+
+    public Map<Long, Long> fetchOffers(List<Long> postIds) {
+        List<Tuple> tuples = queryFactory
+                .select(offer.post.id,
+                        offer.countDistinct()).from(offer)
+                .where(offer.post.id.in(postIds))
+                .groupBy(offer.post.id)
+                .fetch();
+        return tuples.stream()
+                .collect(Collectors.toMap(
+                        t -> t.get(offer.post.id),
+                        t -> t.get(offer.countDistinct())
                 ));
     }
 
@@ -339,6 +357,7 @@ public class FreelancerQueryRepository {
                 )
                 .exists();
     }
+
     public Optional<Post> findDetailBase(Long id) {
         Post p = queryFactory
                 .selectFrom(post)
@@ -406,6 +425,7 @@ public class FreelancerQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, Long> offersMap = fetchOffers(postIds);
         Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
 
         // 3) 최종 DTO 조립
@@ -434,7 +454,8 @@ public class FreelancerQueryRepository {
                         p.getViewCount(),
                         p.getLikeCount(),
                         p.liked,
-                        filesMap.getOrDefault(p.getId(), List.of())
+                        filesMap.getOrDefault(p.getId(), List.of()),
+                        offersMap.getOrDefault(p.getId(), 0L)
                 ))
                 .toList();
 

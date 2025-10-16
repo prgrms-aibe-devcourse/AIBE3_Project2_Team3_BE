@@ -56,21 +56,20 @@ public class ApiV1ReviewController {
         return new RsData<>("200-4", "리뷰 조회 성공", new ReviewDto(review));
     }
 
-    @GetMapping("/freelancer/{freelancerId}")
-    public RsData<PagePayload<ReviewDto>> getFreelancerReviews(
-            @PathVariable Long freelancerId,
+    @GetMapping("/post/{postId}")
+    public RsData<PagePayload<ReviewDto>> getPostReviews(
+            @PathVariable Long postId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        Page<ReviewDto> reviews = reviewService.findReviewsByFreelancer(freelancerId, pageable);
-        return new RsData<>("200-5", "프리랜서 리뷰 조회 성공", Ut.pageMapper.of(reviews));
+        Page<ReviewDto> reviews = reviewService.findReviewsByPost(postId, pageable);
+        return new RsData<>("200-5", "리뷰 조회 성공", Ut.pageMapper.of(reviews));
     }
 
-    @GetMapping("/project/{projectId}")
-    public RsData<PagePayload<ReviewDto>> getProjectReviews(
-            @PathVariable Long projectId,
-            @PageableDefault(size = 10, sort = "id") Pageable pageable
-    ) {
-        Page<ReviewDto> reviews = reviewService.findReviewsByProject(projectId, pageable);
-        return new RsData<>("200-6", "프로젝트 리뷰 조회 성공", Ut.pageMapper.of(reviews));
+    @GetMapping("/my/{postId}")
+    public RsData<ReviewDto> getMyReview(@PathVariable Long postId) {
+        User actor = rq.getActor();
+        return reviewService.findMyReviewByPost(postId, actor.getId())
+                .map(dto -> new RsData<>("200-6", "내 리뷰 조회 성공", dto))
+                .orElseGet(() -> new RsData<>("200-7", "내 리뷰가 없습니다.", null));
     }
 }

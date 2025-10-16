@@ -31,10 +31,22 @@ public class SecurityConfig {
                                 .requestMatchers("favicon.ico").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/ws/**").permitAll()
+                                //로그인 없이 이용할 수 있는 기능: 프리랜서/프로젝트 다건, 단건 조회
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/v1/freelancers",
+                                        "/api/v1/freelancers/**",
+                                        "/api/v1/projects",
+                                        "/api/v1/projects/**"
+                                ).permitAll()
+                                .requestMatchers(HttpMethod.POST,
+                                        "/api/*/projects/{id}/view",
+                                        "/api/*/freelancers/{id}/view"
+                                ).permitAll() // 조회수증가 인증없이
                                 // 게시글 다건 단건, 댓글 다건 단건 요청 권한을 전체 허용하겠다.
                                 // \\d+ -> 숫자가 한 자리 이상 연속된 것 (ex. 1, 23, 123)
                                 .requestMatchers(HttpMethod.GET, "/api/v1/projects", "api/v1/projects/{id}",
                                         "api/v1/reviews/freelancers/{id}", "api/v1/freelancers").permitAll()
+                                .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/projects/*/view").permitAll()
                                 .requestMatchers("/api/*/users/login", "/api/*/users/logout").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/*/users/join").permitAll()
@@ -98,7 +110,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 허용할 오리진 설정
-        configuration.setAllowedOrigins(List.of("https://cdpn.io", "http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("https://cdpn.io", "http://localhost:3000", "https://jobpick-one.vercel.app", "https://jobpick.store",
+                "https://www.jobpick.store"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // 자격 증명 허용 설정

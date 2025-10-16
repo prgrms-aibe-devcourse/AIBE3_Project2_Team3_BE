@@ -1,0 +1,15 @@
+.git
+.gitignore
+.gradle
+out
+**/*.iml
+.idea
+node_modules
+Dockerfile*
+docker-compose*.yml
+
+# build는 전부 무시
+build/**
+
+# 단, libs 안의 산출물은 포함
+!build/libs/**
