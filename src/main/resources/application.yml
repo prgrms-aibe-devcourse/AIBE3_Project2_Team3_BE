@@ -46,3 +46,20 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 20MB
+server:
+  forward-headers-strategy: native   # Nginx의 X-Forwarded-* 신뢰
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
