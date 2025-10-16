@@ -72,3 +72,18 @@ jobs:
           echo "Building Docker image for commit ${{ env.IMAGE_TAG }}"
           docker build --pull --no-cache -t $REGISTRY/$ECR_REPO_NORM:${{ env.IMAGE_TAG }} .
           docker push $REGISTRY/$ECR_REPO_NORM:${{ env.IMAGE_TAG }}
+  remote-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH (use commit SHA tag)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}        # 예: 3.34.122.127 또는 api.jobpick.store
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}      # EC2 접속용 프라이빗키 내용 전체
+          script: |
+            TAG=${{ github.sha }}
+            /usr/local/bin/deploy_jobpick.sh "$TAG"
+            # (선택) 간단 스모크 테스트
+            curl -fsS http://127.0.0.1:8080/actuator/health && echo "Health OK"
