@@ -83,18 +83,18 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 
-      - name: Run deploy via SSM
+      - name: Deploy via SSM (run script on EC2)
         env:
-          INSTANCE_ID: i-0a8f78a81cd34b4a8   # jobpick-ec2
+          INSTANCE_ID: i-0a8f78a81cd34b4a8   # 너의 인스턴스 ID
           TAG: ${{ github.sha }}
         run: |
+          set -euo pipefail
           CMD_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
             --comment "jobpick deploy $TAG" \
             --parameters commands=["/usr/local/bin/deploy_jobpick.sh","$TAG"] \
             --query "Command.CommandId" --output text)
-
           echo "SSM Command: $CMD_ID"
           for i in {1..40}; do
             STATUS=$(aws ssm list-command-invocations \
@@ -107,3 +107,4 @@ jobs:
             sleep 5
           done
           echo "Timeout waiting SSM command"; exit 1
+  
