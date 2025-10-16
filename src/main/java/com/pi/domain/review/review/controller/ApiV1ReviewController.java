@@ -73,4 +73,12 @@ public class ApiV1ReviewController {
         Page<ReviewDto> reviews = reviewService.findReviewsByProject(projectId, pageable);
         return new RsData<>("200-6", "프로젝트 리뷰 조회 성공", Ut.pageMapper.of(reviews));
     }
+
+    @GetMapping("/my/{postId}")
+    public RsData<ReviewDto> getMyReview(@PathVariable Long postId) {
+        User actor = rq.getActor();
+        return reviewService.findMyReviewByPost(postId, actor.getId())
+                .map(dto -> new RsData<>("200-7", "내 리뷰 조회 성공", dto))
+                .orElseGet(() -> new RsData<>("200-8", "내 리뷰가 없습니다.", null));
+    }
 }
