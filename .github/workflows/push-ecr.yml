@@ -100,27 +100,37 @@ jobs:
       - name: Run deploy via SSM
         env:
           INSTANCE_ID: i-0a8f78a81cd34b4a8
-          TAG: ${{ env.IMAGE_TAG_FINAL }}   # ← 요걸로 변경
+          TAG: ${{ env.IMAGE_TAG_FINAL }}
         run: |
+          set -euo pipefail
           CMD_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
             --comment "jobpick deploy $TAG" \
-            --parameters commands=["/usr/local/bin/deploy_jobpick.sh","$TAG"] \
+            --parameters 'commands=["/usr/local/bin/deploy_jobpick.sh '"$TAG"'"]' \
             --query "Command.CommandId" --output text)
           echo "SSM Command: $CMD_ID"
+
+          # 진행상태 폴링
           for i in {1..40}; do
-            STATUS=$(aws ssm list-command-invocations \
-              --command-id "$CMD_ID" \
-              --details \
+            STATUS=$(aws ssm list-command-invocations --command-id "$CMD_ID" --details \
               --query "CommandInvocations[0].Status" --output text || true)
             echo "Status: $STATUS"
-            if [ "$STATUS" = "Success" ]; then exit 0; fi
-            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then exit 1; fi
+            if [ "$STATUS" = "Success" ]; then break; fi
+            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then
+              # 실패 시 표준출력/에러를 바로 덤프해서 원인 확인
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" \
+                --query "StandardOutputContent" --output text || true
+              echo "---- STDERR ----"
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" \
+                --query "StandardErrorContent" --output text || true
+              exit 1
+            fi
             sleep 5
           done
-          echo "Timeout waiting SSM command"; exit 1
-      - name: Who am I
-        run: aws sts get-caller-identity
+
+          # 성공시 마지막 출력도 한 번 보여주고 종료
+          aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" --output text || true
 
   
