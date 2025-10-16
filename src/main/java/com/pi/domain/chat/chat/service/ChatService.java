@@ -45,9 +45,11 @@ public class ChatService {
         String name = reqBody.roomName().trim();
         if (name.length() > 100) throw new IllegalArgumentException("채팅방 이름이 너무 깁니다.");
 
-        if (reqBody.offerId() != null && reqBody.offerId() > 0) return createOrFindOfferRoom(actor, reqBody);
-        if (reqBody.applicationId() != null && reqBody.applicationId() > 0)
-            return createOrFindApplicationRoom(actor, reqBody);
+        boolean hasOfferId = reqBody.offerId() != null && reqBody.offerId() > 0;
+        boolean hasApplicationId = reqBody.applicationId() != null && reqBody.applicationId() > 0;
+        if (hasOfferId && hasApplicationId) throw new ServiceException("400-1", "잘못된 요청입니다.");
+        if (hasOfferId) return createOrFindOfferRoom(actor, reqBody);
+        if (hasApplicationId) return createOrFindApplicationRoom(actor, reqBody);
 
         List<Long> inviteeIds = Optional.ofNullable(reqBody.inviteeIds()).orElseGet(List::of)
                 .stream().filter(id -> !id.equals(actor.getId())) // 본인 제거
@@ -95,25 +97,12 @@ public class ChatService {
 
         Optional<ChatRoom> existingRoom = chatRoomRepository.findByOfferId(offerId);
         if (existingRoom.isPresent()) {
-            Long existingRoomId = existingRoom.get().getId();
+            ChatRoom room = existingRoom.get();
 
-            ChatMember offerMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, offerUser.getId()).get();
-            if (offerMember.getEndedDate() != null) {
-                offerMember.setEndedDate(null);
-                offerMember.accept();
-            } else if (offerMember.getStartedDate() == null) {
-                offerMember.accept();
-            }
+            chatMemberGuard.reactivateMember(room, offerUser, ChatRole.MEMBER);
+            chatMemberGuard.reactivateMember(room, freelancerUser, ChatRole.OWNER);
 
-            ChatMember freelancerMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, freelancerUser.getId()).get();
-            if (freelancerMember.getEndedDate() != null) {
-                freelancerMember.setEndedDate(null);
-                freelancerMember.accept();
-            } else if (freelancerMember.getStartedDate() == null) {
-                freelancerMember.accept();
-            }
-
-            return new ChatRoomDto(existingRoomId, null, null, 0L, null, List.of(), 0);
+            return new ChatRoomDto(room.getId(), null, null, 0L, null, List.of(), 0);
         }
 
         ChatRoom room = ChatRoom.create(reqBody.roomName());
@@ -143,25 +132,12 @@ public class ChatService {
 
         Optional<ChatRoom> existingRoom = chatRoomRepository.findByApplicationId(applicationId);
         if (existingRoom.isPresent()) {
-            Long existingRoomId = existingRoom.get().getId();
+            ChatRoom room = existingRoom.get();
 
-            ChatMember applicationMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, applicationUser.getId()).get();
-            if (applicationMember.getEndedDate() != null) {
-                applicationMember.setEndedDate(null);
-                applicationMember.accept();
-            } else if (applicationMember.getStartedDate() == null) {
-                applicationMember.accept();
-            }
+            chatMemberGuard.reactivateMember(room, applicationUser, ChatRole.MEMBER);
+            chatMemberGuard.reactivateMember(room, projectUser, ChatRole.OWNER);
 
-            ChatMember projectMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, projectUser.getId()).get();
-            if (projectMember.getEndedDate() != null) {
-                projectMember.setEndedDate(null);
-                projectMember.accept();
-            } else if (projectMember.getStartedDate() == null) {
-                projectMember.accept();
-            }
-
-            return new ChatRoomDto(existingRoomId, null, null, 0L, null, List.of(), 0);
+            return new ChatRoomDto(room.getId(), null, null, 0L, null, List.of(), 0);
         }
 
         ChatRoom room = ChatRoom.create(reqBody.roomName());
