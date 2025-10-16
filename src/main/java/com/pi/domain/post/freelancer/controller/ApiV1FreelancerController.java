@@ -75,7 +75,7 @@ public class ApiV1FreelancerController {
             @RequestParam(required = false) Long minSalary,
             @RequestParam(required = false) Long maxSalary
     ) {
-        User actor = rq.getActor();
+        User actor = rq.getActorOrNull();
         Long userId = (actor != null) ? actor.getId() : null;
         Page<FreelancerDto> dtoPage = freelancerService.searchFreelancers(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable, userId);
         return Ut.pageMapper.of(dtoPage);
@@ -87,7 +87,7 @@ public class ApiV1FreelancerController {
     public FreelancerDto getItem(
             @PathVariable Long id
     ) {
-        User actor = rq.getActor();
+        User actor = rq.getActorOrNull();
         Long userId = (actor != null) ? actor.getId() : null;
         return freelancerService.getItem(id, userId);
     }
