@@ -49,7 +49,7 @@ public class ApiV1FreelancerController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         User actor = rq.getActor();
-        Post post = freelancerService.create(
+        FreelancerDto dto = freelancerService.create(
                 actor,
                 reqBody.post(),
                 reqBody.freelancer(),
@@ -59,9 +59,9 @@ public class ApiV1FreelancerController {
                 files
         );
 
-
-        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", new FreelancerDto(post));
+        return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", dto);
     }
+
 
     @GetMapping
     @Transactional

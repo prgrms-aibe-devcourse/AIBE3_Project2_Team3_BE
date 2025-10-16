@@ -67,6 +67,7 @@ public class FreelancerQueryRepository {
         private Long period;
         private Integer viewCount;
         private Integer likeCount;
+        private boolean isLiked;
 
         // author (user)
         private Long authorId;
@@ -111,7 +112,7 @@ public class FreelancerQueryRepository {
                 .from(post)
                 .join(post.freelancer, freelancer) // 프리랜서 글만 대상
                 .join(post.user, user)
-                .leftJoin(reaction)
+                .leftJoin(post.reactions, reaction)
                 .on(reaction.user.id.eq(loginUserId)
                         .and(reaction.type.eq(ReactionType.LIKE)))
                 .where(
@@ -137,7 +138,7 @@ public class FreelancerQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
-        Map<Long, List<FreelancerFileDto>> filesMap = fetchFiles(postIds);
+        Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
 
         // 3) 최종 DTO 조립
         List<FreelancerDto> result = basicList.stream()
@@ -334,6 +335,7 @@ public class FreelancerQueryRepository {
                 )
                 .exists();
     }
+
     public Optional<Post> findDetailBase(Long id) {
         Post p = queryFactory
                 .selectFrom(post)
