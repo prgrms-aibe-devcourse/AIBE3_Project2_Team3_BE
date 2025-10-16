@@ -47,7 +47,7 @@ public class FreelancerService {
     public Post findById(Long id) {
         return postRepository.findByFreelancerIsNotNullAndId(id).get();
     }
-
+    
     @Transactional(readOnly = true)
     public Page<FreelancerDto> getMyFreelancers(User user, Pageable pageable) {
         Page<Post> posts = postRepository.findByFreelancerIsNotNullAndUser_Id(user.getId(), pageable);
