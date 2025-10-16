@@ -4,6 +4,7 @@ import com.pi.domain.category.category.dto.CategoryDto;
 import com.pi.domain.category.category.entity.QCategory;
 import com.pi.domain.post.project.dto.ProjectDto;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.region.region.entity.QRegion;
 import com.pi.domain.skill.skill.dto.SkillDto;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.pi.domain.category.category.entity.QCategory.category;
 import static com.pi.domain.post.post.entity.QPost.post;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
@@ -73,11 +75,22 @@ public class ProjectQueryRepository {
         private String authorEmail;
         private String authorRole;
         private String authorProfileImageUrl;
-        private Integer viewCount;
-        private Integer likeCount;
+        private long viewCount;
+        private long likeCount;
+        private boolean liked;
     }
 
-    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
+    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable, Long userId) {
+        // EXISTS 서브쿼리
+        var likedExpr = JPAExpressions
+                .selectOne()
+                .from(reaction)
+                .where(
+                        reaction.post.id.eq(post.id),
+                        reaction.user.id.eq(userId),
+                        reaction.type.eq(ReactionType.LIKE)
+                )
+                .exists();
 
         // [1] Step 1 — 단순 필드만 SELECT
         List<ProjectSimpleDto> basicList = queryFactory
@@ -107,7 +120,8 @@ public class ProjectQueryRepository {
                         user.role.stringValue(),
                         user.profileImageUrl,
                         post.viewCount,
-                        post.likeCount
+                        post.likeCount,
+                        likedExpr
                 ))
                 .from(post)
                 .join(post.project, project)
@@ -167,7 +181,8 @@ public class ProjectQueryRepository {
                         p.getPersonnel(),
                         p.getSkillLevel(),
                         p.getViewCount(),
-                        p.getLikeCount()
+                        p.getLikeCount(),
+                        p.liked
                 ))
                 .toList();
 
@@ -295,5 +310,120 @@ public class ProjectQueryRepository {
                         postSkill.skill.id.in(ids)
                 )
                 .exists();
+    }
+
+    public Page<ProjectDto> findMyProjects(Long ownerId, Pageable pageable) {
+        // 로그인 안 했으면 liked=false 고정
+        var likedExpr = (ownerId == null)
+                ? com.querydsl.core.types.dsl.Expressions.FALSE
+                : JPAExpressions
+                .selectOne()
+                .from(reaction)
+                .where(
+                        reaction.post.id.eq(post.id),
+                        reaction.user.id.eq(ownerId),
+                        reaction.type.eq(ReactionType.LIKE)
+                )
+                .exists();
+
+        // 1) 1차 평평한 SELECT
+        List<ProjectSimpleDto> basicList = queryFactory
+                .select(Projections.constructor(ProjectSimpleDto.class,
+                        post.id,
+                        post.createdDate,
+                        post.modifiedDate,
+
+                        post.title,
+                        post.content,
+                        post.isViewed,           // ProjectSimpleDto.viewed 타입을 Boolean/boolean 일치시켜둔 상태
+
+                        project.salary,
+                        project.deadlineDate,
+                        project.startedDate,
+                        project.endedDate,
+                        project.hirerType,
+                        project.employmentType,
+                        project.personnel,
+                        project.skillLevel,
+
+                        user.id,
+                        user.createdDate,
+                        user.modifiedDate,
+                        user.nickname,
+                        user.email,
+                        user.role.stringValue(),
+                        user.profileImageUrl,
+
+                        post.viewCount,
+                        post.likeCount,
+                        likedExpr
+                ))
+                .from(post)
+                .join(post.project, project)
+                .join(post.user, user)
+                .where(
+                        post.user.id.eq(ownerId),      // ← 여기만 다름 (내 글)
+                        post.project.isNotNull()
+                )
+                .orderBy(post.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        if (basicList.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 2) 배치 조회 (기존 helper 재사용)
+        List<Long> postIds = basicList.stream().map(ProjectSimpleDto::getId).toList();
+        Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
+        Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
+        Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+
+        // 3) DTO 조립
+        List<ProjectDto> result = basicList.stream()
+                .map(p -> new ProjectDto(
+                        p.getId(),
+                        p.getCreatedDate(),
+                        p.getModifiedDate(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.isViewed(),                   // primitive면 Boolean.TRUE.equals(...)로
+                        new UserDto(
+                                p.getAuthorId(),
+                                p.getAuthorCreatedDate(),
+                                p.getAuthorModifiedDate(),
+                                p.getAuthorNickname(),
+                                p.getAuthorEmail(),
+                                p.getAuthorRole(),
+                                p.getAuthorProfileImageUrl()
+                        ),
+                        regionsMap.getOrDefault(p.getId(), List.of()),
+                        categoriesMap.getOrDefault(p.getId(), List.of()),
+                        skillsMap.getOrDefault(p.getId(), List.of()),
+                        p.getDeadlineDate(),
+                        p.getStartedDate(),
+                        p.getEndedDate(),
+                        p.getHirerType(),
+                        p.getEmploymentType(),
+                        p.getSalary(),
+                        p.getPersonnel(),
+                        p.getSkillLevel(),
+                        p.getViewCount(),               // 타입 Long/long 일치 확인
+                        p.getLikeCount(),
+                        p.isLiked()
+                ))
+                .toList();
+
+        // 4) count
+        JPAQuery<Long> countQuery = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(
+                        post.user.id.eq(ownerId),
+                        post.project.isNotNull()
+                );
+
+        return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
     }
 }

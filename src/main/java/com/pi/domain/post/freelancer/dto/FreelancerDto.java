@@ -23,31 +23,12 @@ public record FreelancerDto(
         List<SkillDto> skills,
         Long salary,
         Long period,
-        Integer viewCount,
-        Integer likeCount,
+        long viewCount,
+        long likeCount,
+        boolean liked,
         List<FreelancerFileDto> files
 ) {
-    public FreelancerDto(Post post) {
-        this(
-                post.getId(),
-                post.getCreatedDate(),
-                post.getModifiedDate(),
-                post.getTitle(),
-                post.getContent(),
-                post.isViewed(),
-                new UserDto(post.getUser()),
-                safeList(post.getPostRegions()).stream().map(pr -> new RegionDto(pr.getRegion())).toList(),
-                safeList(post.getPostCategories()).stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
-                safeList(post.getPostSkills()).stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
-                post.getFreelancer() != null ? post.getFreelancer().getSalary() : null,   // ✅ null 방어
-                post.getFreelancer() != null ? post.getFreelancer().getPeriod() : null,   // ✅ null 방어
-                post.getViewCount(),
-                post.getLikeCount(),
-                List.of() // ✅ 파일은 Service에서 주입
-        );
-    }
-
-    public FreelancerDto(Post post, List<FreelancerFileDto> files) {
+    public FreelancerDto(Post post, List<FreelancerFileDto> files, boolean liked) {
         this(
                 post.getId(),
                 post.getCreatedDate(),
@@ -63,6 +44,7 @@ public record FreelancerDto(
                 post.getFreelancer().getPeriod(),
                 post.getViewCount(),
                 post.getLikeCount(),
+                liked,
                 safeList(files)
         );
     }
