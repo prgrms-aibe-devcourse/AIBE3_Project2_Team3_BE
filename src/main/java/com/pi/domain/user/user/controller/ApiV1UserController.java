@@ -12,8 +12,10 @@ import com.pi.global.security.SecurityUser;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -36,15 +38,16 @@ public class ApiV1UserController {
         );
     }
 
-    @PutMapping
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     public RsData<UserDto> modify(
-            @Valid @RequestBody UserModifyReqBody reqBody
-    ) {
+            @Valid @RequestPart UserModifyReqBody reqBody,
+            @RequestPart(value = "file", required = false) MultipartFile file
+            ) {
         User actor = rq.getActor();
         User user = userService.findByUsername(actor.getUsername()).get();
         user.checkActorCanModify(actor);
-        userService.modify(user, reqBody.nickname(), reqBody.email());
+        userService.modify(user, reqBody.nickname(), reqBody.email(), file);
         String newAccess = authTokenService.genAccessToken(user);
         rq.setCookie("accessToken", newAccess);
 

@@ -4,7 +4,6 @@ import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.reaction.reaction.entity.Reaction;
-import com.pi.domain.reaction.reaction.entity.ReactionType;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.user.user.entity.User;
@@ -18,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -165,24 +163,5 @@ public class Post extends BaseEntity {
 
     public void decreaseLikeCount() {
         this.likeCount--;
-    }
-
-    public Post withIsLiked(boolean isLiked) {
-        this.isLiked = isLiked;
-        return this;
-    }
-
-    public boolean isLikedBy(User user) {
-        if (user == null) return false;
-        return reactions.stream()
-                .anyMatch(r -> Objects.equals(r.getUser().getId(), user.getId()) &&
-                        r.getType() == ReactionType.LIKE);
-    }
-
-    public int getLikeCount() {
-        // ReactionType 필드를 추가했으므로, LIKE 타입만 세도록 수정
-        return (int) reactions.stream()
-                .filter(r -> r.getType().equals(ReactionType.LIKE))
-                .count();
     }
 }

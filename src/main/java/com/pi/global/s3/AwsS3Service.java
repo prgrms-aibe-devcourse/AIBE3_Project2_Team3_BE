@@ -25,9 +25,15 @@ import java.util.UUID;
 @Slf4j
 public class AwsS3Service {
     private final AmazonS3 amazonS3;
+    private final S3KeyParser s3KeyParser;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+
+    public String uploadFile(MultipartFile file, String directoryName) {
+        String fileKey = directoryName + "/" + generateUniqueFileName(file.getOriginalFilename());
+        return upload(file, fileKey);
+    }
 
     public List<String> uploadFiles(List<MultipartFile> files) {
         List<String> fileUrls = new ArrayList<>();
@@ -54,7 +60,7 @@ public class AwsS3Service {
         String decodedFileKey = URLDecoder.decode(fileKey, StandardCharsets.UTF_8);
         S3Object s3Object = amazonS3.getObject(bucket, decodedFileKey);
 
-        String fileName = getOriginalFileName(fileKey);
+        String fileName = s3KeyParser.originalNameFromKey(fileKey);
         String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
 
         String contentType = s3Object.getObjectMetadata().getContentType();
@@ -65,6 +71,11 @@ public class AwsS3Service {
 
     public void deleteFile(String fileKey) {
         amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileKey));
+    }
+
+    public void deleteFileByUrl(String fileUrl) {
+        String key = s3KeyParser.extractKey(fileUrl); // URI 기반으로 path만 추출하는 유틸 권장
+        deleteFile(key);
     }
 
     private String upload(MultipartFile file, String fileKey) {
@@ -95,19 +106,8 @@ public class AwsS3Service {
         return fileUrl.substring(index + delimiter.length());
     }
 
-    private String getOriginalFileName(String fileKey) {
-        return fileKey.substring(fileKey.indexOf("_") + 1);
-    }
-
     public String getDecodedFileKey(String fileUrl) {
         String fileKey = getFileKey(fileUrl);
         return URLDecoder.decode(fileKey, StandardCharsets.UTF_8);
-    }
-
-    public String getDecodedFileName(String fileUrl) {
-        String fileKey = getFileKey(fileUrl);
-        String originalFileName = getOriginalFileName(fileKey);
-
-        return URLDecoder.decode(originalFileName, StandardCharsets.UTF_8);
     }
 }
