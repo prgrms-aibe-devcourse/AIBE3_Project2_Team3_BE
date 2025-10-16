@@ -4,7 +4,9 @@ import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyReqBody;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteReqBody;
 import com.pi.domain.post.freelancer.service.FreelancerService;
+import com.pi.domain.post.post.entity.LikeResBody;
 import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.post.post.entity.ViewResBody;
 import com.pi.domain.post.post.service.PostService;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.reaction.reaction.service.ReactionService;
@@ -12,7 +14,6 @@ import com.pi.domain.user.user.entity.User;
 import com.pi.global.rq.Rq;
 import com.pi.global.rsData.PagePayload;
 import com.pi.global.rsData.RsData;
-import com.pi.global.s3.S3KeyParser;
 import com.pi.global.util.Ut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,7 +40,6 @@ public class ApiV1FreelancerController {
     private final PostService postService;
     private final ReactionService reactionService;
     private final Rq rq;
-    private final S3KeyParser s3KeyParser;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
@@ -62,6 +62,7 @@ public class ApiV1FreelancerController {
         return new RsData<>("200-1", "프리랜서 게시글이 등록되었습니다.", dto);
     }
 
+
     @GetMapping
     @Transactional
     @Operation(summary = "프리랜서 글 다건 조회 (필터 + 검색 자동 분기)")
@@ -74,7 +75,8 @@ public class ApiV1FreelancerController {
             @RequestParam(required = false) Long minSalary,
             @RequestParam(required = false) Long maxSalary
     ) {
-        Page<FreelancerDto> dtoPage = freelancerService.searchFreelancers(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable);
+        Long userId = rq.getActor().getId();
+        Page<FreelancerDto> dtoPage = freelancerService.searchFreelancers(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable, userId);
         return Ut.pageMapper.of(dtoPage);
     }
 
@@ -84,7 +86,8 @@ public class ApiV1FreelancerController {
     public FreelancerDto getItem(
             @PathVariable Long id
     ) {
-        return freelancerService.getItem(id);
+        Long userId = rq.getActor().getId();
+        return freelancerService.getItem(id, userId);
     }
 
     @GetMapping("/my")
@@ -111,7 +114,7 @@ public class ApiV1FreelancerController {
         User actor = rq.getActor();
         Post post = freelancerService.findById(id);
         post.checkActorCanModify(actor);
-        FreelancerDto dto = freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), files, removeIds);
+        FreelancerDto dto = freelancerService.modify(post, reqBody.post(), reqBody.freelancer(), reqBody.regionIds(), reqBody.categoryIds(), reqBody.skillIds(), files, removeIds, actor.getId());
 
         return new RsData<>("200-1", "프리랜서 게시글이 수정되었습니다.", dto);
     }
@@ -130,22 +133,41 @@ public class ApiV1FreelancerController {
         return new RsData<>("200-1", "프리랜서 게시글이 삭제되었습니다.");
     }
 
-    @PostMapping("/{id}/like")
-    @Operation(summary = "프리랜서 글 좋아요/취소")
-    public RsData<Void> toggleLike(
-            @PathVariable Long id) {
-        User actor = rq.getActor();
-        Long userId = actor.getId();
-        reactionService.toggleLike(id, userId);
-        return new RsData<>("200-1", "프로젝트 게시글 좋아요 상태가 변경되었습니다.");
-    }
-
-    @PostMapping("/{id}/view")
+    @PostMapping("/{id}/views")
     @Operation(summary = "프리랜서 글 조회수 증가")
-    public RsData<Void> increaseViewCount(@PathVariable Long id) {
-        postService.increaseViewCount(id);
-        return new RsData<>("200-1", "프리랜서 게시글 조회수가 증가되었습니다.");
+    public RsData<ViewResBody> increaseViewCount(@PathVariable Long id) {
+        long current = postService.increaseViewCount(id);
+        return new RsData<>("200-1", "프리랜서 게시글 조회수가 증가되었습니다.", new ViewResBody(id, current));
     }
 
+    @PostMapping("/{id}/likes")
+    @Operation(summary = "좋아요 ON")
+    public RsData<LikeResBody> likeOn(@PathVariable Long id) {
+        User actor = rq.getActor();
+        boolean on = reactionService.likeOn(actor, id);
+        long count = reactionService.getLikeCount(id);
+        return new RsData<>("200-1", on ? "좋아요 완료" : "이미 좋아요 상태",
+                new LikeResBody(id, count, true));
+    }
+
+    @DeleteMapping("/{id}/likes")
+    @Operation(summary = "좋아요 OFF")
+    public RsData<LikeResBody> likeOff(@PathVariable Long id) {
+        User actor = rq.getActor();
+        boolean off = reactionService.likeOff(actor, id);
+        long count = reactionService.getLikeCount(id);
+        return new RsData<>("200-2", off ? "좋아요 해제" : "이미 해제 상태",
+                new LikeResBody(id, count, false));
+    }
+
+    @PostMapping("/{id}/likes/toggle")
+    @Operation(summary = "좋아요 토글")
+    public RsData<LikeResBody> likeToggle(@PathVariable Long id) {
+        User actor = rq.getActor(); // non-null 보장
+        boolean on = reactionService.toggleLike(actor, id); // 내부 @Transactional
+        long count = reactionService.getLikeCount(id);      // 스칼라 @Query
+        return new RsData<>("200-3", on ? "좋아요 ON" : "좋아요 OFF",
+                new LikeResBody(id, count, on));
+    }
 }
 

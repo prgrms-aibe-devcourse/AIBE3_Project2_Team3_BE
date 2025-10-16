@@ -2,6 +2,7 @@ package com.pi.domain.post.post.service;
 
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
+import com.pi.domain.reaction.reaction.repository.ReactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+    private final ReactionRepository reactionRepository;
 
     public long count() {
         return postRepository.count();
@@ -20,10 +22,11 @@ public class PostService {
     }
 
     @Transactional
-    public Post increaseViewCount(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException());
-        post.increaseViewCount();
-        return post;
+    public long increaseViewCount(Long postId) {
+        int updated = postRepository.increaseView(postId);
+        if (updated == 0) {
+            throw new IllegalArgumentException("Post not found: " + postId);
+        }
+        return postRepository.getViewCount(postId);
     }
 }

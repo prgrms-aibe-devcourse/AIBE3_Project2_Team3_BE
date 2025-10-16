@@ -23,4 +23,7 @@ public class Reaction extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reaction_type", nullable = false)
+    private ReactionType type = ReactionType.LIKE;
 }
