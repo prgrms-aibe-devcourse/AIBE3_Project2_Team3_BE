@@ -1,6 +1,8 @@
 package com.pi.domain.post.post.entity;
 
+import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.category.category.entity.Category;
+import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.project.entity.Project;
 import com.pi.domain.reaction.reaction.entity.Reaction;
@@ -54,6 +56,11 @@ public class Post extends BaseEntity {
     @Setter
     @Transient
     private boolean isLiked = false;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Offer> offers = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Application> applications = new ArrayList<>();
 
     public Post(User user, String title, String content, boolean isViewed) {
         this.user = user;
