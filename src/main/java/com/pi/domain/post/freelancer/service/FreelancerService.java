@@ -76,7 +76,7 @@ public class FreelancerService {
                                 ))
                                 .toList();
 
-        return new FreelancerDto(savedPost, fileDtos, false);
+        return new FreelancerDto(savedPost, fileDtos, false, 0L);
     }
 
     private void createFiles(Freelancer freelancer, List<MultipartFile> files) {
@@ -129,8 +129,9 @@ public class FreelancerService {
         if (userId != null) {
             liked = reactionRepository.existsByPost_IdAndUser_IdAndType(savedPost.getId(), userId, ReactionType.LIKE);
         }
+        Long offerCount = freelancerQueryRepository.fetchOffers(List.of(savedPost.getId())).getOrDefault(savedPost.getId(), 0L);
 
-        return new FreelancerDto(savedPost, fileDtos, liked);
+        return new FreelancerDto(savedPost, fileDtos, liked, offerCount);
     }
 
     private void addRelations(Post post, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
@@ -175,6 +176,8 @@ public class FreelancerService {
         var regionsMap = freelancerQueryRepository.fetchRegions(List.of(id));
         var categoriesMap = freelancerQueryRepository.fetchCategories(List.of(id));
         var skillsMap = freelancerQueryRepository.fetchSkills(List.of(id));
+        var offersMap = freelancerQueryRepository.fetchOffers(List.of(id));
+        Long offerCount = offersMap.getOrDefault(id, 0L);
 
         boolean liked = false;
         if (userId != null) {
@@ -198,7 +201,8 @@ public class FreelancerService {
                 p.getViewCount(),
                 p.getLikeCount(),
                 liked,
-                filesMap.getOrDefault(id, List.of())
+                filesMap.getOrDefault(id, List.of()),
+                offerCount
         );
     }
 }

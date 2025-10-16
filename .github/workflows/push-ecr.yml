@@ -72,3 +72,41 @@ jobs:
           echo "Building Docker image for commit ${{ env.IMAGE_TAG }}"
           docker build --pull --no-cache -t $REGISTRY/$ECR_REPO_NORM:${{ env.IMAGE_TAG }} .
           docker push $REGISTRY/$ECR_REPO_NORM:${{ env.IMAGE_TAG }}
+  remote-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS creds (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::109936653790:role/GitHubActionsECRAccessRole
+          aws-region: ap-northeast-2
+          audience: sts.amazonaws.com
+
+      - name: Run deploy via SSM
+        env:
+          INSTANCE_ID: i-0a8f78a81cd34b4a8
+          TAG: ${{ github.sha }}
+        run: |
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "jobpick deploy $TAG" \
+            --parameters commands=["/usr/local/bin/deploy_jobpick.sh","$TAG"] \
+            --query "Command.CommandId" --output text)
+          echo "SSM Command: $CMD_ID"
+          for i in {1..40}; do
+            STATUS=$(aws ssm list-command-invocations \
+              --command-id "$CMD_ID" \
+              --details \
+              --query "CommandInvocations[0].Status" --output text || true)
+            echo "Status: $STATUS"
+            if [ "$STATUS" = "Success" ]; then exit 0; fi
+            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then exit 1; fi
+            sleep 5
+          done
+          echo "Timeout waiting SSM command"; exit 1
+      - name: Who am I
+        run: aws sts get-caller-identity
+
+  

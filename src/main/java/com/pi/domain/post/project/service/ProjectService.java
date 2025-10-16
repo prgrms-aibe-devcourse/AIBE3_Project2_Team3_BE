@@ -47,12 +47,14 @@ public class ProjectService {
 
     public ProjectDto getItem(Long id, Long userId) {
         Post post = findById(id);
+        var applicationsMap = projectQueryRepository.fetchApplications(List.of(id));
+        Long applicationCount = applicationsMap.getOrDefault(id, 0L);
         boolean liked = false;
         if (userId != null) {
             liked = reactionRepository
                     .existsByPost_IdAndUser_IdAndType(id, userId, ReactionType.LIKE);
         }
-        return new ProjectDto(post, liked);
+        return new ProjectDto(post, liked, applicationCount);
     }
 
     @Transactional(readOnly = true)
@@ -70,7 +72,7 @@ public class ProjectService {
         addRelations(post, regionIds, categoryIds, skillIds);
         Post saved = postRepository.save(post); // ✅ 한 번만 저장
 
-        return new ProjectDto(saved, false);
+        return new ProjectDto(saved, false, 0L);
     }
 
     @Transactional
@@ -89,8 +91,9 @@ public class ProjectService {
 
         boolean liked = (userId != null)
                 && reactionRepository.existsByPost_IdAndUser_IdAndType(saved.getId(), userId, ReactionType.LIKE);
+        Long applicationCount = projectQueryRepository.fetchApplications(List.of(saved.getId())).getOrDefault(saved.getId(), 0L);
 
-        return new ProjectDto(saved, liked);
+        return new ProjectDto(saved, liked, applicationCount);
     }
 
     @Transactional(readOnly = true)
