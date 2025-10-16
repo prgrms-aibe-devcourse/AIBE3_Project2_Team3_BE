@@ -39,8 +39,8 @@ public class SecurityConfig {
                                         "/api/v1/projects/**"
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.POST,
-                                        "/api/*/projects/{id}/view",
-                                        "/api/*/freelancers/{id}/view"
+                                        "/api/*/projects/*/view",
+                                        "/api/*/freelancers/*/view"
                                 ).permitAll() // 조회수증가 인증없이
                                 // 게시글 다건 단건, 댓글 다건 단건 요청 권한을 전체 허용하겠다.
                                 // \\d+ -> 숫자가 한 자리 이상 연속된 것 (ex. 1, 23, 123)
