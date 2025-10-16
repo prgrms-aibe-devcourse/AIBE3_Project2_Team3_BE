@@ -62,13 +62,8 @@ public class ReviewService {
         return reviewRepository.findById(id).get();
     }
 
-    public Page<ReviewDto> findReviewsByFreelancer(Long freelancerId, Pageable pageable) {
-        return reviewRepository.findByPost_Freelancer_Id(freelancerId, pageable)
-                .map(ReviewDto::new);
-    }
-
-    public Page<ReviewDto> findReviewsByProject(Long projectId, Pageable pageable) {
-        return reviewRepository.findByPost_Project_Id(projectId, pageable)
+    public Page<ReviewDto> findReviewsByPost(Long postId, Pageable pageable) {
+        return reviewRepository.findByPost_Id(postId, pageable)
                 .map(ReviewDto::new);
     }
 
