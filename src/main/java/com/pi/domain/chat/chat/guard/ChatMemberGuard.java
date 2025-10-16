@@ -1,11 +1,18 @@
 package com.pi.domain.chat.chat.guard;
 
+import com.pi.domain.chat.chat.entity.ChatMember;
+import com.pi.domain.chat.chat.entity.ChatRole;
+import com.pi.domain.chat.chat.entity.ChatRoom;
 import com.pi.domain.chat.chat.entity.MemberStatus;
 import com.pi.domain.chat.chat.repository.ChatMemberRepository;
+import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -36,6 +43,25 @@ public class ChatMemberGuard {
         MemberStatus s = getStatus(userId, roomId);
         if (s == MemberStatus.NONE || s == MemberStatus.LEFT) {
             throw new ServiceException("403-3", "해당 방의 멤버가 아닙니다.");
+        }
+    }
+
+    // 재참여 및 수락 처리
+    public void reactivateMember(ChatRoom room, User user, ChatRole chatRole) {
+        Optional<ChatMember> optionalChatMember = ChatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(room.getId(), user.getId());
+
+        if (optionalChatMember.isEmpty()) {
+            ChatMember newMember = ChatMember.joined(room, user, chatRole);
+            room.addMember(newMember);
+            return;
+        }
+
+        ChatMember member = optionalChatMember.get();
+        if (member.getEndedDate() != null) {
+            member.setEndedDate(null);
+            member.setStartedDate(LocalDateTime.now());
+        } else if (member.getStartedDate() == null) {
+            member.accept();
         }
     }
 }
