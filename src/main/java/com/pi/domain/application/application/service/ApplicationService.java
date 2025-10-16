@@ -93,7 +93,7 @@ public class ApplicationService {
         fileKeys.forEach(awsS3Service::deleteFile);
     }
 
-    private Application update(Application application, String content, Long salary, Integer period) {
+    private Application update(Application application, String content, Long salary, Long period) {
         application.modify(content, salary, period);
         return application;
     }

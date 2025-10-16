@@ -8,6 +8,6 @@ public record ApplicationWriteReqBody(
         @NotNull Long postId,
         @NotNull @Size(min = 50) String content,
         @NotNull @Min(0) Long salary,
-        @NotNull @Min(0) Integer period
+        @NotNull @Min(1) Long period
 ) {
 }

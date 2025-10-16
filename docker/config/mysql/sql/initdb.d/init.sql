@@ -57,7 +57,7 @@ CREATE TABLE applications
     status       VARCHAR(255) DEFAULT 'PENDING',
     content      TEXT,
     salary       BIGINT UNSIGNED DEFAULT 0,
-    period INT UNSIGNED DEFAULT 0,
+    period       BIGINT UNSIGNED DEFAULT 1,
     created_date  DATETIME,
     modified_date DATETIME,
     CONSTRAINT uk_applications UNIQUE (post_id, user_id),
