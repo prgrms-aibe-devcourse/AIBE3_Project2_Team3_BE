@@ -2,7 +2,9 @@ name: Build & Push to ECR
 
 on:
   push:
-    branches: [ "main" ]   # IAM 신뢰정책 sub와 일치해야 함
+    branches: [ "main", "dev" ]        # dev에서도 실행
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   id-token: write
@@ -29,6 +31,10 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: gradle
+
+      - name: Print expected OIDC sub
+        run: |
+          echo "EXPECTED_SUB=repo:${GITHUB_REPOSITORY,,}:ref:${GITHUB_REF}"
 
       # 3️⃣ Gradle 빌드 (Dockerfile이 단일 스테이지일 경우 필요)
       - name: Grant execute permission for Gradle
