@@ -42,7 +42,7 @@ db_dev.trace.db
 
 
 .env
-.env.docker
+#.env.docker
 application-secret.yml
 
 # QueryDSL generated
