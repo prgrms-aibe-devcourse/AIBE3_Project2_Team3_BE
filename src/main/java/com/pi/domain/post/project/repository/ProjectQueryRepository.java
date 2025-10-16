@@ -83,7 +83,9 @@ public class ProjectQueryRepository {
 
     public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable, Long userId) {
         // EXISTS 서브쿼리
-        var likedExpr = JPAExpressions
+        var likedExpr = (userId == null)
+                ? com.querydsl.core.types.dsl.Expressions.FALSE
+                : JPAExpressions
                 .selectOne()
                 .from(reaction)
                 .where(
