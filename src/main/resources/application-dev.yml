@@ -4,3 +4,8 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+app:
+  cookie:
+    domain: ""         # dev: 도메인 미설정(HostOnly). 절대 'localhost' 넣지 않기
+    secure: false
+    sameSite: Lax

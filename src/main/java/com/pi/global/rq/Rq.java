@@ -72,23 +72,42 @@ public class Rq {
     }
 
     public void setCookie(String name, String value) {
-        if (value == null) value = "";
+        boolean delete = (value == null) || value.isBlank();
+        String host = req.getServerName();
+        boolean isLocal = "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host);
 
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/"); // 쿠키를 도메인 전체에서 쓰겠다.
-        cookie.setHttpOnly(true); // 쿠키를 스크립트로 접근 못하게(XSS 공격방어)
-        cookie.setDomain("localhost"); // 쿠키가 적용될 도메인 지정
-        cookie.setSecure(false); // https 에서만 쿠키전송
-        cookie.setAttribute("SameSite", "Strict"); // 동일 사이트에서만 쿠키 전송(CSRF 공격방어)
+        String domain = System.getenv("COOKIE_DOMAIN"); // 로컬이면 비워두기
+        boolean secure = Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_SECURE",
+                isLocal ? "false" : "true"));
+        boolean crossSite = Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_CROSS_SITE",
+                isLocal ? "false" : "true")); // prod: true
 
-        // 값이 없다면 해당 변수를 삭제하라는 뜻
-        if (value.isBlank()) {
-            cookie.setMaxAge(0);
-        } else {
-            cookie.setMaxAge(60 * 60 * 24 * 365); // 1년
+        // 1) 표준 Cookie로 기본 속성
+        Cookie cookie = new Cookie(name, delete ? "" : value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(secure);
+        cookie.setMaxAge(delete ? 0 : 60 * 60 * 24 * 365);
+
+        // 로컬에서는 domain 지정하지 말기 (HostOnly 쿠키)
+        if (!isLocal && domain != null && !domain.isBlank()) {
+            cookie.setDomain(domain.startsWith(".") ? domain : domain);
         }
 
         resp.addCookie(cookie);
+
+        // 2) SameSite는 컨테이너별 편차가 있으므로 Set-Cookie 헤더로 확정
+        String sameSite = crossSite ? "None" : "Lax"; // cross-site면 무조건 None
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append("=").append(delete ? "" : value)
+                .append("; Path=/")
+                .append("; Max-Age=").append(delete ? 0 : 60 * 60 * 24 * 365)
+                .append("; HttpOnly");
+        if (!isLocal && domain != null && !domain.isBlank()) sb.append("; Domain=").append(domain);
+        if (secure) sb.append("; Secure");
+        sb.append("; SameSite=").append(sameSite);
+
+        resp.addHeader("Set-Cookie", sb.toString());
     }
 
     public void deleteCookie(String name) {
