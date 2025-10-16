@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    boolean existsByPost(Post post);
+    boolean existsByPostAndUserId(Post post, Long userId);
 
     Page<Review> findByPost_Freelancer_Id(Long freelancerId, Pageable pageable);
 
