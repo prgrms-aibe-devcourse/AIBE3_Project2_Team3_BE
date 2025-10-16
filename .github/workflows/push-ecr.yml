@@ -76,14 +76,34 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to EC2 via SSH (use commit SHA tag)
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Configure AWS creds (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.EC2_HOST }}        # 예: 3.34.122.127 또는 api.jobpick.store
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}      # EC2 접속용 프라이빗키 내용 전체
-          script: |
-            TAG=${{ github.sha }}
-            /usr/local/bin/deploy_jobpick.sh "$TAG"
-            # (선택) 간단 스모크 테스트
-            curl -fsS http://127.0.0.1:8080/actuator/health && echo "Health OK"
+          role-to-assume: arn:aws:iam::109936653790:role/GitHubActionsECRAccessRole
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Run deploy via SSM
+        env:
+          INSTANCE_ID: i-0a8f78a81cd34b4a8   # jobpick-ec2
+          TAG: ${{ github.sha }}
+        run: |
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "jobpick deploy $TAG" \
+            --parameters commands=["/usr/local/bin/deploy_jobpick.sh","$TAG"] \
+            --query "Command.CommandId" --output text)
+
+          echo "SSM Command: $CMD_ID"
+          for i in {1..40}; do
+            STATUS=$(aws ssm list-command-invocations \
+              --command-id "$CMD_ID" \
+              --details \
+              --query "CommandInvocations[0].Status" --output text || true)
+            echo "Status: $STATUS"
+            if [ "$STATUS" = "Success" ]; then exit 0; fi
+            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then exit 1; fi
+            sleep 5
+          done
+          echo "Timeout waiting SSM command"; exit 1
