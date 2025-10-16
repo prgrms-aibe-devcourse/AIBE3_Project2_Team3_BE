@@ -25,7 +25,7 @@ public class ReviewService {
     public Review create(User actor, Long postId, int rating, String comment) {
         Post post = postRepository.findById(postId).get();
 
-        if (reviewRepository.existsByPost(post)) {
+        if (reviewRepository.existsByPostAndUserId(post, actor.getId())) {
             throw new ServiceException("409-1", "이미 이 게시글에 대한 리뷰가 존재합니다.");
         }
 
