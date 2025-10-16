@@ -46,8 +46,8 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostSkill> postSkills = new ArrayList<>();
 
-    private int viewCount = 0;
-    private int likeCount = 0;
+    private long viewCount = 0;
+    private long likeCount = 0;
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reaction> reactions = new ArrayList<>();
 

@@ -28,11 +28,11 @@ public record ProjectDto(
         Long salary,
         Integer personnel,
         Integer skillLevel,
-        Integer viewCount,
-        Integer likeCount,
-        boolean isLiked
+        long viewCount,
+        long likeCount,
+        boolean liked
 ) {
-    public ProjectDto(Post post) {
+    public ProjectDto(Post post, boolean liked) {
         this(
                 post.getId(),
                 post.getCreatedDate(),
@@ -54,7 +54,7 @@ public record ProjectDto(
                 post.getProject().getSkillLevel(),
                 post.getViewCount(),
                 post.getLikeCount(),
-                post.isLiked()
+                liked
         );
     }
 }

@@ -15,7 +15,6 @@ import com.pi.global.s3.S3KeyParser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -37,10 +36,10 @@ import static com.pi.domain.category.category.entity.QCategory.category;
 import static com.pi.domain.post.file.entity.QFreelancerFile.freelancerFile;
 import static com.pi.domain.post.freelancer.entity.QFreelancer.freelancer;
 import static com.pi.domain.post.post.entity.QPost.post;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
-import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
@@ -65,9 +64,10 @@ public class FreelancerQueryRepository {
 
         private Long salary;
         private Long period;
-        private Integer viewCount;
-        private Integer likeCount;
-        private boolean isLiked;
+        private long viewCount;
+        private long likeCount;
+
+        private boolean liked;
 
         // author (user)
         private Long authorId;
@@ -79,7 +79,17 @@ public class FreelancerQueryRepository {
         private String authorProfileImageUrl;
     }
 
-    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long loginUserId) {
+    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long actorId) {
+        // EXISTS 서브쿼리
+        var likedExpr = JPAExpressions
+                .selectOne()
+                .from(reaction)
+                .where(
+                        reaction.post.id.eq(post.id),
+                        reaction.user.id.eq(actorId),
+                        reaction.type.eq(ReactionType.LIKE)
+                )
+                .exists();
 
         // 1) 평평한 DTO로 1차 조회 (post + freelancer + user)
         List<FreelancerSimpleDto> basicList = queryFactory
@@ -96,10 +106,7 @@ public class FreelancerQueryRepository {
                         freelancer.period,
                         post.viewCount,
                         post.likeCount,
-                        new CaseBuilder()
-                                .when(reaction.id.isNotNull())
-                                .then(true)
-                                .otherwise(false),
+                        likedExpr,
 
                         user.id,
                         user.createdDate,
@@ -112,9 +119,6 @@ public class FreelancerQueryRepository {
                 .from(post)
                 .join(post.freelancer, freelancer) // 프리랜서 글만 대상
                 .join(post.user, user)
-                .leftJoin(post.reactions, reaction)
-                .on(reaction.user.id.eq(loginUserId)
-                        .and(reaction.type.eq(ReactionType.LIKE)))
                 .where(
                         post.isViewed.isTrue(),
                         keywordContains(condition.keyword()),
@@ -165,7 +169,7 @@ public class FreelancerQueryRepository {
                         p.getPeriod(),
                         p.getViewCount(),
                         p.getLikeCount(),
-                        p.isLiked(),
+                        p.liked,
                         filesMap.getOrDefault(p.getId(), List.of())
                 ))
                 .toList();
@@ -335,7 +339,6 @@ public class FreelancerQueryRepository {
                 )
                 .exists();
     }
-
     public Optional<Post> findDetailBase(Long id) {
         Post p = queryFactory
                 .selectFrom(post)
@@ -344,5 +347,106 @@ public class FreelancerQueryRepository {
                 .where(post.id.eq(id))
                 .fetchOne();
         return Optional.ofNullable(p);
+    }
+
+    public Page<FreelancerDto> findMyFreelancers(Long ownerId, Pageable pageable) {
+        var likedExpr = (ownerId == null)
+                ? com.querydsl.core.types.dsl.Expressions.FALSE
+                : JPAExpressions
+                .selectOne()
+                .from(reaction)
+                .where(
+                        reaction.post.id.eq(post.id),
+                        reaction.user.id.eq(ownerId),
+                        reaction.type.eq(ReactionType.LIKE)
+                )
+                .exists();
+
+        // 1) 평평한 1차 조회
+        List<FreelancerSimpleDto> basicList = queryFactory
+                .select(Projections.constructor(FreelancerSimpleDto.class,
+                        post.id,
+                        post.createdDate,
+                        post.modifiedDate,
+
+                        post.title,
+                        post.content,
+                        post.isViewed,          // Boolean으로 받음
+
+                        freelancer.salary,
+                        freelancer.period,
+                        post.viewCount,
+                        post.likeCount,
+                        likedExpr,
+
+                        user.id,
+                        user.createdDate,
+                        user.modifiedDate,
+                        user.nickname,
+                        user.email,
+                        user.role.stringValue(),
+                        user.profileImageUrl
+                ))
+                .from(post)
+                .join(post.freelancer, freelancer)
+                .join(post.user, user)
+                .where(
+                        post.user.id.eq(ownerId),
+                        post.freelancer.isNotNull()
+                )
+                .orderBy(post.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        if (basicList.isEmpty()) return Page.empty(pageable);
+
+        // 2) 배치 조회
+        List<Long> postIds = basicList.stream().map(FreelancerSimpleDto::getId).toList();
+        Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
+        Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
+        Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
+
+        // 3) 최종 DTO 조립
+        List<FreelancerDto> result = basicList.stream()
+                .map(p -> new FreelancerDto(
+                        p.getId(),
+                        p.getCreatedDate(),
+                        p.getModifiedDate(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.isViewed(),
+                        new UserDto(
+                                p.getAuthorId(),
+                                p.getAuthorCreatedDate(),
+                                p.getAuthorModifiedDate(),
+                                p.getAuthorNickname(),
+                                p.getAuthorEmail(),
+                                p.getAuthorRole(),
+                                p.getAuthorProfileImageUrl()
+                        ),
+                        regionsMap.getOrDefault(p.getId(), List.of()),
+                        categoriesMap.getOrDefault(p.getId(), List.of()),
+                        skillsMap.getOrDefault(p.getId(), List.of()),
+                        p.getSalary(),
+                        p.getPeriod(),
+                        p.getViewCount(),
+                        p.getLikeCount(),
+                        p.liked,
+                        filesMap.getOrDefault(p.getId(), List.of())
+                ))
+                .toList();
+
+        // 4) count
+        JPAQuery<Long> countQuery = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(
+                        post.user.id.eq(ownerId),
+                        post.freelancer.isNotNull()
+                );
+
+        return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
     }
 }
