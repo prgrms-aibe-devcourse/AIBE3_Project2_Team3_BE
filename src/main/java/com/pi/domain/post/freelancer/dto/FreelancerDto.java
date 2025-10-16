@@ -1,6 +1,7 @@
 package com.pi.domain.post.freelancer.dto;
 
 import com.pi.domain.category.category.dto.CategoryDto;
+import com.pi.domain.post.file.dto.FreelancerFileDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.skill.skill.dto.SkillDto;
@@ -21,9 +22,13 @@ public record FreelancerDto(
         List<CategoryDto> categories,
         List<SkillDto> skills,
         Long salary,
-        Long period
+        Long period,
+        long viewCount,
+        long likeCount,
+        boolean liked,
+        List<FreelancerFileDto> files
 ) {
-    public FreelancerDto(Post post) {
+    public FreelancerDto(Post post, List<FreelancerFileDto> files, boolean liked) {
         this(
                 post.getId(),
                 post.getCreatedDate(),
@@ -36,7 +41,15 @@ public record FreelancerDto(
                 post.getPostCategories().stream().map(pc -> new CategoryDto(pc.getCategory())).toList(),
                 post.getPostSkills().stream().map(ps -> new SkillDto(ps.getSkill())).toList(),
                 post.getFreelancer().getSalary(),
-                post.getFreelancer().getPeriod()
+                post.getFreelancer().getPeriod(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                liked,
+                safeList(files)
         );
+    }
+
+    private static <T> List<T> safeList(List<T> src) {
+        return src == null ? List.of() : src;
     }
 }

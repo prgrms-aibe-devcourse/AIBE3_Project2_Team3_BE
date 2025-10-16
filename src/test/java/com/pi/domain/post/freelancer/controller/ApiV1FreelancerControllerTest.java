@@ -12,8 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -29,9 +27,6 @@ public class ApiV1FreelancerControllerTest {
 
     @Autowired
     private FreelancerService freelancerService;
-
-    @MockBean
-    private JavaMailSender javaMailSender;
 
     @Test
     @DisplayName("프리랜서 글 작성")

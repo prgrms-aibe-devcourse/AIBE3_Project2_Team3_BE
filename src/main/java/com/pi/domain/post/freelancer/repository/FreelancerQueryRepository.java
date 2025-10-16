@@ -2,12 +2,16 @@ package com.pi.domain.post.freelancer.repository;
 
 import com.pi.domain.category.category.dto.CategoryDto;
 import com.pi.domain.category.category.entity.QCategory;
+import com.pi.domain.post.file.dto.FreelancerFileDto;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
+import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
 import com.pi.domain.region.region.dto.RegionDto;
 import com.pi.domain.region.region.entity.QRegion;
 import com.pi.domain.skill.skill.dto.SkillDto;
 import com.pi.domain.user.user.dto.UserDto;
+import com.pi.global.s3.S3KeyParser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -25,22 +29,27 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.pi.domain.category.category.entity.QCategory.category;
+import static com.pi.domain.post.file.entity.QFreelancerFile.freelancerFile;
 import static com.pi.domain.post.freelancer.entity.QFreelancer.freelancer;
 import static com.pi.domain.post.post.entity.QPost.post;
+import static com.pi.domain.reaction.reaction.entity.QReaction.reaction;
 import static com.pi.domain.post.post.entity.QPostCategory.postCategory;
 import static com.pi.domain.post.post.entity.QPostRegion.postRegion;
 import static com.pi.domain.post.post.entity.QPostSkill.postSkill;
 import static com.pi.domain.region.region.entity.QRegion.region;
 import static com.pi.domain.skill.skill.entity.QSkill.skill;
 import static com.pi.domain.user.user.entity.QUser.user;
+import static java.util.stream.Collectors.groupingBy;
 
 @Repository
 @RequiredArgsConstructor
 public class FreelancerQueryRepository {
     private final JPAQueryFactory queryFactory;
+    private final S3KeyParser s3KeyParser;
 
     @Getter
     @AllArgsConstructor
@@ -55,6 +64,10 @@ public class FreelancerQueryRepository {
 
         private Long salary;
         private Long period;
+        private long viewCount;
+        private long likeCount;
+
+        private boolean liked;
 
         // author (user)
         private Long authorId;
@@ -66,7 +79,17 @@ public class FreelancerQueryRepository {
         private String authorProfileImageUrl;
     }
 
-    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
+    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long actorId) {
+        // EXISTS 서브쿼리
+        var likedExpr = JPAExpressions
+                .selectOne()
+                .from(reaction)
+                .where(
+                        reaction.post.id.eq(post.id),
+                        reaction.user.id.eq(actorId),
+                        reaction.type.eq(ReactionType.LIKE)
+                )
+                .exists();
 
         // 1) 평평한 DTO로 1차 조회 (post + freelancer + user)
         List<FreelancerSimpleDto> basicList = queryFactory
@@ -81,6 +104,9 @@ public class FreelancerQueryRepository {
 
                         freelancer.salary,
                         freelancer.period,
+                        post.viewCount,
+                        post.likeCount,
+                        likedExpr,
 
                         user.id,
                         user.createdDate,
@@ -116,6 +142,7 @@ public class FreelancerQueryRepository {
         Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
         Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
         Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
 
         // 3) 최종 DTO 조립
         List<FreelancerDto> result = basicList.stream()
@@ -139,7 +166,11 @@ public class FreelancerQueryRepository {
                         categoriesMap.getOrDefault(p.getId(), List.of()),
                         skillsMap.getOrDefault(p.getId(), List.of()),
                         p.getSalary(),
-                        p.getPeriod()
+                        p.getPeriod(),
+                        p.getViewCount(),
+                        p.getLikeCount(),
+                        p.liked,
+                        filesMap.getOrDefault(p.getId(), List.of())
                 ))
                 .toList();
 
@@ -162,7 +193,7 @@ public class FreelancerQueryRepository {
 
     // ---------- 배치 서브쿼리들 ----------
 
-    private Map<Long, List<RegionDto>> fetchRegions(List<Long> postIds) {
+    public Map<Long, List<RegionDto>> fetchRegions(List<Long> postIds) {
         QRegion parentRegion = new QRegion("parentRegion");
         List<Tuple> tuples = queryFactory
                 .select(postRegion.post.id, region.id, region.name, region.parent.id)
@@ -173,7 +204,7 @@ public class FreelancerQueryRepository {
                 .fetch();
 
         return tuples.stream()
-                .collect(Collectors.groupingBy(
+                .collect(groupingBy(
                         t -> t.get(postRegion.post.id),
                         Collectors.mapping(
                                 t -> new RegionDto(t.get(region.id), t.get(region.name), t.get(region.parent.id)),
@@ -182,7 +213,7 @@ public class FreelancerQueryRepository {
                 ));
     }
 
-    private Map<Long, List<CategoryDto>> fetchCategories(List<Long> postIds) {
+    public Map<Long, List<CategoryDto>> fetchCategories(List<Long> postIds) {
         QCategory parentCategory = new QCategory("parentCategory");
         List<Tuple> tuples = queryFactory
                 .select(postCategory.post.id, category.id, category.name, category.parent.id)
@@ -193,7 +224,7 @@ public class FreelancerQueryRepository {
                 .fetch();
 
         return tuples.stream()
-                .collect(Collectors.groupingBy(
+                .collect(groupingBy(
                         t -> t.get(postCategory.post.id),
                         Collectors.mapping(
                                 t -> new CategoryDto(t.get(category.id), t.get(category.name), t.get(category.parent.id)),
@@ -202,7 +233,7 @@ public class FreelancerQueryRepository {
                 ));
     }
 
-    private Map<Long, List<SkillDto>> fetchSkills(List<Long> postIds) {
+    public Map<Long, List<SkillDto>> fetchSkills(List<Long> postIds) {
         List<Tuple> tuples = queryFactory
                 .select(postSkill.post.id, skill.id, skill.name)
                 .from(postSkill)
@@ -211,13 +242,53 @@ public class FreelancerQueryRepository {
                 .fetch();
 
         return tuples.stream()
-                .collect(Collectors.groupingBy(
+                .collect(groupingBy(
                         t -> t.get(postSkill.post.id),
                         Collectors.mapping(
                                 t -> new SkillDto(t.get(skill.id), t.get(skill.name)),
                                 Collectors.toList()
                         )
                 ));
+    }
+
+    private Map<Long, List<FreelancerFileDto>> fetchFreelancerFiles(List<Long> postIds) {
+        List<Tuple> tuples = queryFactory
+                .select(post.id, freelancerFile.id, freelancerFile.url)
+                .from(post)
+                .join(post.freelancer, freelancer)
+                .join(freelancer.files, freelancerFile)
+                .where(post.id.in(postIds))
+                .orderBy(freelancerFile.id.asc())
+                .fetch();
+
+        return tuples.stream().collect(groupingBy(
+                t -> t.get(post.id),
+                Collectors.mapping(t -> new FreelancerFileDto(
+                        t.get(freelancerFile.id),
+                        t.get(freelancerFile.url),
+                        s3KeyParser.getDecodedFileName(t.get(freelancerFile.url))
+                ), Collectors.toList())
+        ));
+    }
+
+    public Map<Long, List<FreelancerFileDto>> fetchFreelancerFiles(Long postId) {
+        List<Tuple> tuples = queryFactory
+                .select(post.id, freelancerFile.id, freelancerFile.url)
+                .from(post)
+                .join(post.freelancer, freelancer)
+                .join(freelancer.files, freelancerFile)
+                .where(post.id.eq(postId))
+                .orderBy(freelancerFile.id.asc())
+                .fetch();
+
+        return tuples.stream().collect(groupingBy(
+                t -> t.get(post.id),
+                Collectors.mapping(t -> new FreelancerFileDto(
+                        t.get(freelancerFile.id),
+                        t.get(freelancerFile.url),
+                        s3KeyParser.getDecodedFileName(t.get(freelancerFile.url))
+                ), Collectors.toList())
+        ));
     }
 
     // ---------- 조건 메서드 ----------
@@ -267,5 +338,115 @@ public class FreelancerQueryRepository {
                         postSkill.skill.id.in(ids)
                 )
                 .exists();
+    }
+    public Optional<Post> findDetailBase(Long id) {
+        Post p = queryFactory
+                .selectFrom(post)
+                .join(post.freelancer, freelancer).fetchJoin() // toOne
+                .join(post.user, user).fetchJoin()             // toOne
+                .where(post.id.eq(id))
+                .fetchOne();
+        return Optional.ofNullable(p);
+    }
+
+    public Page<FreelancerDto> findMyFreelancers(Long ownerId, Pageable pageable) {
+        var likedExpr = (ownerId == null)
+                ? com.querydsl.core.types.dsl.Expressions.FALSE
+                : JPAExpressions
+                .selectOne()
+                .from(reaction)
+                .where(
+                        reaction.post.id.eq(post.id),
+                        reaction.user.id.eq(ownerId),
+                        reaction.type.eq(ReactionType.LIKE)
+                )
+                .exists();
+
+        // 1) 평평한 1차 조회
+        List<FreelancerSimpleDto> basicList = queryFactory
+                .select(Projections.constructor(FreelancerSimpleDto.class,
+                        post.id,
+                        post.createdDate,
+                        post.modifiedDate,
+
+                        post.title,
+                        post.content,
+                        post.isViewed,          // Boolean으로 받음
+
+                        freelancer.salary,
+                        freelancer.period,
+                        post.viewCount,
+                        post.likeCount,
+                        likedExpr,
+
+                        user.id,
+                        user.createdDate,
+                        user.modifiedDate,
+                        user.nickname,
+                        user.email,
+                        user.role.stringValue(),
+                        user.profileImageUrl
+                ))
+                .from(post)
+                .join(post.freelancer, freelancer)
+                .join(post.user, user)
+                .where(
+                        post.user.id.eq(ownerId),
+                        post.freelancer.isNotNull()
+                )
+                .orderBy(post.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        if (basicList.isEmpty()) return Page.empty(pageable);
+
+        // 2) 배치 조회
+        List<Long> postIds = basicList.stream().map(FreelancerSimpleDto::getId).toList();
+        Map<Long, List<RegionDto>> regionsMap = fetchRegions(postIds);
+        Map<Long, List<CategoryDto>> categoriesMap = fetchCategories(postIds);
+        Map<Long, List<SkillDto>> skillsMap = fetchSkills(postIds);
+        Map<Long, List<FreelancerFileDto>> filesMap = fetchFreelancerFiles(postIds);
+
+        // 3) 최종 DTO 조립
+        List<FreelancerDto> result = basicList.stream()
+                .map(p -> new FreelancerDto(
+                        p.getId(),
+                        p.getCreatedDate(),
+                        p.getModifiedDate(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.isViewed(),
+                        new UserDto(
+                                p.getAuthorId(),
+                                p.getAuthorCreatedDate(),
+                                p.getAuthorModifiedDate(),
+                                p.getAuthorNickname(),
+                                p.getAuthorEmail(),
+                                p.getAuthorRole(),
+                                p.getAuthorProfileImageUrl()
+                        ),
+                        regionsMap.getOrDefault(p.getId(), List.of()),
+                        categoriesMap.getOrDefault(p.getId(), List.of()),
+                        skillsMap.getOrDefault(p.getId(), List.of()),
+                        p.getSalary(),
+                        p.getPeriod(),
+                        p.getViewCount(),
+                        p.getLikeCount(),
+                        p.liked,
+                        filesMap.getOrDefault(p.getId(), List.of())
+                ))
+                .toList();
+
+        // 4) count
+        JPAQuery<Long> countQuery = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(
+                        post.user.id.eq(ownerId),
+                        post.freelancer.isNotNull()
+                );
+
+        return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
     }
 }

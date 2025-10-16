@@ -11,9 +11,10 @@ import com.pi.domain.post.project.dto.ProjectModifyDto;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
 import com.pi.domain.post.project.dto.ProjectWriteDto;
 import com.pi.domain.post.project.entity.Project;
-import com.pi.domain.post.project.entity.ProjectStatus;
 import com.pi.domain.post.project.repository.ProjectQueryRepository;
-import com.pi.domain.post.project.repository.ProjectRepository;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
+import com.pi.domain.reaction.reaction.repository.ReactionRepository;
+import com.pi.domain.reaction.reaction.service.ReactionService;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
 import com.pi.domain.skill.skill.entity.Skill;
@@ -21,7 +22,6 @@ import com.pi.domain.skill.skill.repository.SkillRepository;
 import com.pi.domain.user.user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,47 +32,49 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-    private final ProjectRepository projectRepository;
     private final PostRepository postRepository;
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
     private final ProjectQueryRepository projectQueryRepository;
-
-    @Transactional(readOnly = true)
-    public long count() {
-        return projectRepository.count();
-    }
+    private final ReactionService reactionService;
+    private final ReactionRepository reactionRepository;
 
     @Transactional(readOnly = true)
     public Post findById(Long id) {
         return postRepository.findByProjectIsNotNullAndId(id).get();
     }
 
+    public ProjectDto getItem(Long id, Long userId) {
+        Post post = findById(id);
+        boolean liked = false;
+        if (userId != null) {
+            liked = reactionRepository
+                    .existsByPost_IdAndUser_IdAndType(id, userId, ReactionType.LIKE);
+        }
+        return new ProjectDto(post, liked);
+    }
+
     @Transactional(readOnly = true)
-    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable) {
-        return projectQueryRepository.searchProjects(condition, pageable);
+    public Page<ProjectDto> searchProjects(ProjectSearchParams condition, Pageable pageable, Long userId) {
+        return projectQueryRepository.searchProjects(condition, pageable, userId);
     }
 
     @Transactional
-    public Post create(User actor, PostWriteDto po, ProjectWriteDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    public ProjectDto create(User actor, PostWriteDto po, ProjectWriteDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
         Post post = new Post(actor, po.title(), po.content(), po.isViewed());
-        postRepository.save(post);  // ID 생성
-
-        Project project = new Project();
-        project.setPost(post); // @MapsId로 post.id 복사
-        project.changeStatus(ProjectStatus.ONGOING);
-        post.setProject(project);
+        post.setProject(Project.of(post));
 
         post.getProject().modify(pr.deadlineDate(), pr.startedDate(), pr.endedDate(), pr.hirerType(), pr.employmentType(), pr.salary(), pr.personnel(), pr.skillLevel());
 
         addRelations(post, regionIds, categoryIds, skillIds);
+        Post saved = postRepository.save(post); // ✅ 한 번만 저장
 
-        return postRepository.save(post);
+        return new ProjectDto(saved, false);
     }
 
     @Transactional
-    public Post modify(Post post, PostModifyDto po, ProjectModifyDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    public ProjectDto modify(Post post, PostModifyDto po, ProjectModifyDto pr, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds, Long userId) {
         post.modify(po.title(), po.content(), po.isViewed());
         post.getProject().modify(pr.deadlineDate(), pr.startedDate(), pr.endedDate(), pr.hirerType(), pr.employmentType(), pr.salary(), pr.personnel(), pr.skillLevel());
 
@@ -83,21 +85,17 @@ public class ProjectService {
 
         addRelations(post, regionIds, categoryIds, skillIds);
 
-        return postRepository.save(post);
-    }
+        Post saved = postRepository.save(post);
 
-    @Transactional
-    public void delete(Post post) {
-        if (post.getProject() != null) {
-            projectRepository.delete(post.getProject());
-        }
-        postRepository.delete(post);
+        boolean liked = (userId != null)
+                && reactionRepository.existsByPost_IdAndUser_IdAndType(saved.getId(), userId, ReactionType.LIKE);
+
+        return new ProjectDto(saved, liked);
     }
 
     @Transactional(readOnly = true)
     public Page<ProjectDto> getMyProjects(User actor, Pageable pageable) {
-        Page<Post> posts = postRepository.findByUserAndProjectIsNotNull(actor.getId(), pageable);
-        return posts.map(ProjectDto::new);
+        return projectQueryRepository.findMyProjects(actor.getId(), pageable);
     }
 
     // 테스트 용도
@@ -105,16 +103,6 @@ public class ProjectService {
     public Post findLatestPost() {
         return postRepository.findTopByOrderByIdDesc()
                 .orElseThrow(() -> new RuntimeException());
-    }
-
-    @Transactional
-    public void changeStatus(Long id, ProjectStatus status) throws NotFoundException {
-        if (status == null) {
-            throw new IllegalArgumentException();
-        }
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException());
-        project.changeStatus(status);
     }
 
 

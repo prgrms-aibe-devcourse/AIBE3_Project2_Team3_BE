@@ -6,6 +6,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record OfferWriteReqBody(
         @NotNull Long postId,
-        @Min(1) @Max(100) Integer amount
+        @NotNull @Min(1) @Max(1000) Integer amount
 ) {
 }

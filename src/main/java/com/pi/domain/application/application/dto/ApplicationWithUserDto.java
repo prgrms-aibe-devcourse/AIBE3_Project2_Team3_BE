@@ -2,11 +2,13 @@ package com.pi.domain.application.application.dto;
 
 import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.post.post.entity.Post;
+import com.pi.domain.user.user.entity.User;
 
 import java.time.LocalDateTime;
 
-public record ApplicationWithPostDto(
+public record ApplicationWithUserDto(
         long id,
+        String content,
         String status,
         long salary,
         int period,
@@ -14,12 +16,13 @@ public record ApplicationWithPostDto(
         long postId,
         String postType, // "PROJECT" or "FREELANCER"
         String postTitle,
-        long postUserId,
-        String postUserNickname
+        long userId,
+        String userNickname
 ) {
-    public ApplicationWithPostDto(Application application, Post post) {
+    public ApplicationWithUserDto(Application application, Post post, User user) {
         this(
                 application.getId(),
+                application.getContent(),
                 application.getStatus().name(),
                 application.getSalary(),
                 application.getPeriod(),
@@ -27,8 +30,8 @@ public record ApplicationWithPostDto(
                 post.getId(),
                 "PROJECT",
                 post.getTitle(),
-                post.getUser().getId(),
-                post.getUser().getNickname()
+                user.getId(),
+                user.getNickname()
         );
     }
 }

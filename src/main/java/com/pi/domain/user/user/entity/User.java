@@ -29,6 +29,7 @@ public class User extends BaseEntity {
     private UserRole role;
     @Column(unique = true)
     private String email;
+    @Setter
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 

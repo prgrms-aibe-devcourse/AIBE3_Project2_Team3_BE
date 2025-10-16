@@ -1,125 +1,204 @@
 package com.pi.domain.post.freelancer.service;
 
+import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.category.category.repository.CategoryRepository;
+import com.pi.domain.post.file.dto.FreelancerFileDto;
+import com.pi.domain.post.file.entity.FreelancerFile;
 import com.pi.domain.post.freelancer.dto.FreelancerDto;
 import com.pi.domain.post.freelancer.dto.FreelancerModifyDto;
 import com.pi.domain.post.freelancer.dto.FreelancerWriteDto;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.freelancer.repository.FreelancerQueryRepository;
-import com.pi.domain.post.freelancer.repository.FreelancerRepository;
 import com.pi.domain.post.post.dto.PostModifyDto;
 import com.pi.domain.post.post.dto.PostWriteDto;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.post.post.repository.PostRepository;
 import com.pi.domain.post.project.dto.ProjectSearchParams;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
+import com.pi.domain.reaction.reaction.repository.ReactionRepository;
+import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.region.region.repository.RegionRepository;
+import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.skill.skill.repository.SkillRepository;
+import com.pi.domain.user.user.dto.UserDto;
 import com.pi.domain.user.user.entity.User;
+import com.pi.global.s3.AwsS3Service;
+import com.pi.global.s3.S3KeyParser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FreelancerService {
-    private final FreelancerRepository freelancerRepository;
     private final PostRepository postRepository;
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
     private final SkillRepository skillRepository;
     private final FreelancerQueryRepository freelancerQueryRepository;
-
-    public long count() {
-        return freelancerRepository.count();
-    }
+    private final AwsS3Service awsS3Service;
+    private static final String AWS_S3_DIRECTORY = "freelancer";
+    private final S3KeyParser s3KeyParser;
+    private final ReactionRepository reactionRepository;
 
     public Post findById(Long id) {
         return postRepository.findByFreelancerIsNotNullAndId(id).get();
     }
 
-    public Page<Post> getPage(Pageable pageable, String searchKeyword) {
-        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
-            return postRepository.findByFreelancerIsNotNull(pageable);
-        }
-        return postRepository.findByFreelancerIsNotNullAndTitleContainingIgnoreCase(pageable, searchKeyword);
-    }
-
     @Transactional(readOnly = true)
     public Page<FreelancerDto> getMyFreelancers(User user, Pageable pageable) {
-        Page<Post> posts = postRepository.findByFreelancerIsNotNullAndUser_Id(user.getId(), pageable);
-        return posts.map(FreelancerDto::new);
+        return freelancerQueryRepository.findMyFreelancers(user.getId(), pageable);
     }
 
-    public Post create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    @Transactional
+    public FreelancerDto create(User actor, PostWriteDto p, FreelancerWriteDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds, List<MultipartFile> files) {
         Post post = new Post(actor, p.title(), p.content(), p.isViewed());
         post.setFreelancer(Freelancer.of(post));
         post.getFreelancer().modify(f.salary(), f.period());
-        if (regionIds != null) {
-            for (Long regionId : regionIds) {
-                post.addRegion(regionRepository.findById(regionId).get());
-            }
-        }
+        addRelations(post, regionIds, categoryIds, skillIds);
 
-        if (categoryIds != null) {
-            for (Long categoryId : categoryIds) {
-                post.addCategory(categoryRepository.findById(categoryId).get());
-            }
-        }
+        createFiles(post.getFreelancer(), files);
+        Post savedPost = postRepository.save(post);
 
-        if (skillIds != null) {
-            for (Long skillId : skillIds) {
-                post.addSkill(skillRepository.findById(skillId).get());
-            }
-        }
+        List<FreelancerFileDto> fileDtos =
+                savedPost.getFreelancer() == null ? List.of() :
+                        savedPost.getFreelancer().getFiles().stream()
+                                .map(ff -> new FreelancerFileDto(
+                                        ff.getId(),
+                                        ff.getUrl(),
+                                        s3KeyParser.getDecodedFileName(ff.getUrl())
+                                ))
+                                .toList();
 
-        return postRepository.save(post);
+        return new FreelancerDto(savedPost, fileDtos, false);
     }
 
-    public Post modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+    private void createFiles(Freelancer freelancer, List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) return;
+
+        List<String> fileUrls = awsS3Service.uploadFiles(files, AWS_S3_DIRECTORY);
+        fileUrls.forEach(freelancer::addFreelancerFile);
+    }
+
+    private void deleteFiles(Freelancer freelancer, List<Long> removeIds) {
+        if (removeIds != null && !removeIds.isEmpty()) {
+            List<FreelancerFile> toRemove = freelancer.getFiles().stream()
+                    .filter(f -> removeIds.contains(f.getId()))
+                    .toList();
+
+            for (FreelancerFile file : toRemove) {
+                String fileKey = awsS3Service.getDecodedFileKey(file.getUrl());
+                awsS3Service.deleteFile(fileKey);
+                freelancer.getFiles().remove(file);
+            }
+        }
+    }
+
+    @Transactional
+    public FreelancerDto modify(Post post, PostModifyDto p, FreelancerModifyDto f, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds, List<MultipartFile> files, List<Long> removeFileIds, Long userId) {
         post.modify(p.title(), p.content(), p.isViewed());
         post.getFreelancer().modify(f.salary(), f.period());
 
         post.getPostRegions().clear();
+        post.getPostCategories().clear();
+        post.getPostSkills().clear();
+        postRepository.flush();
+        addRelations(post, regionIds, categoryIds, skillIds);
+
+        deleteFiles(post.getFreelancer(), removeFileIds);
+        createFiles(post.getFreelancer(), files);
+
+        Post savedPost = postRepository.save(post);
+
+        List<FreelancerFileDto> fileDtos =
+                savedPost.getFreelancer() == null ? List.of() :
+                        savedPost.getFreelancer().getFiles().stream()
+                                .map(ff -> new FreelancerFileDto(
+                                        ff.getId(),
+                                        ff.getUrl(),
+                                        s3KeyParser.getDecodedFileName(ff.getUrl())
+                                ))
+                                .toList();
+        boolean liked = false;
+        if (userId != null) {
+            liked = reactionRepository.existsByPost_IdAndUser_IdAndType(savedPost.getId(), userId, ReactionType.LIKE);
+        }
+
+        return new FreelancerDto(savedPost, fileDtos, liked);
+    }
+
+    private void addRelations(Post post, List<Long> regionIds, List<Long> categoryIds, List<Long> skillIds) {
+        post.getPostRegions().clear();
         if (regionIds != null) {
             for (Long regionId : regionIds) {
-                post.addRegion(regionRepository.findById(regionId).get());
+                Region region = regionRepository.findById(regionId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 지역 ID: " + regionId));
+                post.addRegion(region);
             }
         }
 
         post.getPostCategories().clear();
         if (categoryIds != null) {
             for (Long categoryId : categoryIds) {
-                post.addCategory(categoryRepository.findById(categoryId).get());
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 카테고리 ID: " + categoryId));
+                post.addCategory(category);
             }
         }
 
         post.getPostSkills().clear();
         if (skillIds != null) {
             for (Long skillId : skillIds) {
-                post.addSkill(skillRepository.findById(skillId).get());
+                Skill skill = skillRepository.findById(skillId)
+                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 스킬 ID: " + skillId));
+                post.addSkill(skill);
             }
         }
-
-        return postRepository.save(post);
     }
 
     @Transactional(readOnly = true)
-    public Page<Post> search(Pageable pageable,
-                             Long categoryId,
-                             Long regionId,
-                             List<Long> skillIds,
-                             String title,
-                             Long minSalary,
-                             Long maxSalary) {
-        return postRepository.searchFreelancers(pageable, categoryId, regionId, skillIds, title, minSalary, maxSalary);
+    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable, Long userId) {
+        return freelancerQueryRepository.searchFreelancers(condition, pageable, userId);
     }
 
     @Transactional(readOnly = true)
-    public Page<FreelancerDto> searchFreelancers(ProjectSearchParams condition, Pageable pageable) {
-        return freelancerQueryRepository.searchFreelancers(condition, pageable);
+    public FreelancerDto getItem(Long id, Long userId) {
+        Post p = freelancerQueryRepository.findDetailBase(id).get();
+
+        var filesMap = freelancerQueryRepository.fetchFreelancerFiles(id);
+        var regionsMap = freelancerQueryRepository.fetchRegions(List.of(id));
+        var categoriesMap = freelancerQueryRepository.fetchCategories(List.of(id));
+        var skillsMap = freelancerQueryRepository.fetchSkills(List.of(id));
+
+        boolean liked = false;
+        if (userId != null) {
+            liked = reactionRepository
+                    .existsByPost_IdAndUser_IdAndType(id, userId, ReactionType.LIKE);
+        }
+
+        return new FreelancerDto(
+                p.getId(),
+                p.getCreatedDate(),
+                p.getModifiedDate(),
+                p.getTitle(),
+                p.getContent(),
+                p.isViewed(),
+                new UserDto(p.getUser()),
+                regionsMap.getOrDefault(id, List.of()),
+                categoriesMap.getOrDefault(id, List.of()),
+                skillsMap.getOrDefault(id, List.of()),
+                p.getFreelancer() != null ? p.getFreelancer().getSalary() : null,
+                p.getFreelancer() != null ? p.getFreelancer().getPeriod() : null,
+                p.getViewCount(),
+                p.getLikeCount(),
+                liked,
+                filesMap.getOrDefault(id, List.of())
+        );
     }
 }

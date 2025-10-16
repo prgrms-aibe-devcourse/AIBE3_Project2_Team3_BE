@@ -3,7 +3,8 @@ package com.pi.domain.post.post.entity;
 import com.pi.domain.category.category.entity.Category;
 import com.pi.domain.post.freelancer.entity.Freelancer;
 import com.pi.domain.post.project.entity.Project;
-import com.pi.domain.post.project.entity.ProjectStatus;
+import com.pi.domain.reaction.reaction.entity.Reaction;
+import com.pi.domain.reaction.reaction.entity.ReactionType;
 import com.pi.domain.region.region.entity.Region;
 import com.pi.domain.skill.skill.entity.Skill;
 import com.pi.domain.user.user.entity.User;
@@ -17,11 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Slf4j
+@Table(name = "posts")
 public class Post extends BaseEntity {
     @ManyToOne
     private User user;
@@ -43,8 +46,14 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostSkill> postSkills = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    private ProjectStatus status;
+    private long viewCount = 0;
+    private long likeCount = 0;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reaction> reactions = new ArrayList<>();
+
+    @Setter
+    @Transient
+    private boolean isLiked = false;
 
     public Post(User user, String title, String content, boolean isViewed) {
         this.user = user;
@@ -104,10 +113,6 @@ public class Post extends BaseEntity {
         });
     }
 
-    public void changeState(ProjectStatus newState) {
-        this.status = newState;
-    }
-
     private boolean isOwner(User actor) {
         return actor.getUsername().equals(user.getUsername());
     }
@@ -150,4 +155,33 @@ public class Post extends BaseEntity {
         }
     }
 
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
+    }
+
+    public Post withIsLiked(boolean isLiked) {
+        this.isLiked = isLiked;
+        return this;
+    }
+
+    public boolean isLikedBy(User user) {
+        if (user == null) return false;
+        return reactions.stream()
+                .anyMatch(r -> Objects.equals(r.getUser().getId(), user.getId()) &&
+                        r.getType() == ReactionType.LIKE);
+    }
+
+    public int getLikeCount() {
+        return (int) reactions.stream()
+                .filter(r -> r.getType().equals(ReactionType.LIKE))
+                .count();
+    }
 }

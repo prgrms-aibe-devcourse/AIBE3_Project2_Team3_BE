@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "projects")
 public class Project {
     @Id
     private Long id;
@@ -29,10 +30,6 @@ public class Project {
     private Long salary;
     private Integer personnel;
     private Integer skillLevel;
-    
-    @Enumerated(EnumType.STRING)
-    @Setter
-    private ProjectStatus status;
 
     private Project(Post post) {
         setPost(post);
@@ -51,10 +48,5 @@ public class Project {
         this.salary = salary;
         this.personnel = personnel;
         this.skillLevel = skillLevel;
-    }
-
-
-    public void changeStatus(ProjectStatus status) {
-        this.status = status;
     }
 }

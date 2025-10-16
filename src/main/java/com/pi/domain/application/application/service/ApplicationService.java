@@ -5,8 +5,10 @@ import com.pi.domain.application.application.dto.ApplicationWriteReqBody;
 import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.repository.ApplicationRepository;
+import com.pi.domain.application.file.entity.ApplicationFile;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
+import com.pi.global.exception.ServiceException;
 import com.pi.global.s3.AwsS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +59,11 @@ public class ApplicationService {
     }
 
     public Application create(Post post, User actor, ApplicationWriteReqBody reqBody, List<MultipartFile> files) {
+        if (applicationRepository.existsByPostAndUser(post, actor)) {
+            log.warn("중복 지원 불가. 게시글: {}, 사용자: {}", post.getId(), actor.getId());
+            throw new ServiceException("409-1", "이미 존재하는 데이터입니다.");
+        }
+
         Application application = new Application(post, actor, reqBody.content(), reqBody.salary(), reqBody.period());
         applicationRepository.save(application);
 
@@ -65,10 +72,10 @@ public class ApplicationService {
         return application;
     }
 
-    public void update(Application application, ApplicationModifyReqBody reqBody, List<MultipartFile> files) {
+    public void update(Application application, ApplicationModifyReqBody reqBody, List<MultipartFile> files, List<Long> removeFileIds) {
         application = update(application, reqBody.content(), reqBody.salary(), reqBody.period());
 
-        deleteFiles(application);
+        deleteFiles(application, removeFileIds);
         createFiles(application, files);
     }
 
@@ -98,13 +105,17 @@ public class ApplicationService {
         fileUrls.forEach(application::addApplicationFile);
     }
 
-    private void deleteFiles(Application application) {
-        List<String> fileKeys = application.getFiles().stream()
-                .map(file -> awsS3Service.getDecodedFileKey(file.getUrl()))
-                .toList();
+    private void deleteFiles(Application application, List<Long> removeIds) {
+        if (removeIds != null && !removeIds.isEmpty()) {
+            List<ApplicationFile> toRemove = application.getFiles().stream()
+                    .filter(f -> removeIds.contains(f.getId()))
+                    .toList();
 
-        application.getFiles().clear();
-
-        fileKeys.forEach(awsS3Service::deleteFile);
+            for(ApplicationFile file : toRemove) {
+                String fileKey = awsS3Service.getDecodedFileKey(file.getUrl());
+                awsS3Service.deleteFile(fileKey);
+                application.getFiles().remove(file);
+            }
+        }
     }
 }
