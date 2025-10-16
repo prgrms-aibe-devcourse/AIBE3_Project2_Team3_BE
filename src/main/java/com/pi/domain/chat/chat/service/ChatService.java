@@ -1,5 +1,7 @@
 package com.pi.domain.chat.chat.service;
 
+import com.pi.domain.application.application.entity.Application;
+import com.pi.domain.application.application.repository.ApplicationRepository;
 import com.pi.domain.chat.chat.dto.*;
 import com.pi.domain.chat.chat.entity.*;
 import com.pi.domain.chat.chat.guard.ChatMemberGuard;
@@ -7,6 +9,8 @@ import com.pi.domain.chat.chat.repository.ChatMemberRepository;
 import com.pi.domain.chat.chat.repository.ChatMessageRepository;
 import com.pi.domain.chat.chat.repository.ChatRoomQueryRepository;
 import com.pi.domain.chat.chat.repository.ChatRoomRepository;
+import com.pi.domain.offer.offer.entity.Offer;
+import com.pi.domain.offer.offer.repository.OfferRepository;
 import com.pi.domain.user.user.dto.UserDto;
 import com.pi.domain.user.user.entity.User;
 import com.pi.domain.user.user.repository.UserRepository;
@@ -33,11 +37,18 @@ public class ChatService {
     private final UserRepository userRepository;
     private final ChatRoomQueryRepository chatRoomQueryRepository;
     private final ChatMemberGuard chatMemberGuard;
+    private final OfferRepository offerRepository;
+    private final ApplicationRepository applicationRepository;
 
     @Transactional
     public ChatRoomDto createRoom(User actor, @Valid ChatCreateReqBody reqBody) {
         String name = reqBody.roomName().trim();
         if (name.length() > 100) throw new IllegalArgumentException("채팅방 이름이 너무 깁니다.");
+
+        if (reqBody.offerId() != null && reqBody.offerId() > 0) return createOrFindOfferRoom(actor, reqBody);
+        if (reqBody.applicationId() != null && reqBody.applicationId() > 0)
+            return createOrFindApplicationRoom(actor, reqBody);
+
         List<Long> inviteeIds = Optional.ofNullable(reqBody.inviteeIds()).orElseGet(List::of)
                 .stream().filter(id -> !id.equals(actor.getId())) // 본인 제거
                 .distinct().toList();
@@ -68,6 +79,102 @@ public class ChatService {
                 .map(UserDto::new)
                 .toList();
         return new ChatRoomDto(room.getId(), room.getName(), lastMessage, memberCount, "ACTIVE", preview, 0);
+    }
+
+    @Transactional
+    private ChatRoomDto createOrFindOfferRoom(User actor, ChatCreateReqBody reqBody) {
+        Long offerId = reqBody.offerId();
+
+        Offer offer = offerRepository.findById(offerId).get();
+        User offerUser = offer.getUser();
+        User freelancerUser = offer.getPost().getUser();
+
+        if (offer.isDifferentUser(actor, offerUser) && offer.isDifferentUser(actor, freelancerUser)) {
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
+
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findByOfferId(offerId);
+        if (existingRoom.isPresent()) {
+            Long existingRoomId = existingRoom.get().getId();
+
+            ChatMember offerMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, offerUser.getId()).get();
+            if (offerMember.getEndedDate() != null) {
+                offerMember.setEndedDate(null);
+                offerMember.accept();
+            } else if (offerMember.getStartedDate() == null) {
+                offerMember.accept();
+            }
+
+            ChatMember freelancerMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, freelancerUser.getId()).get();
+            if (freelancerMember.getEndedDate() != null) {
+                freelancerMember.setEndedDate(null);
+                freelancerMember.accept();
+            } else if (freelancerMember.getStartedDate() == null) {
+                freelancerMember.accept();
+            }
+
+            return new ChatRoomDto(existingRoomId, null, null, 0L, null, List.of(), 0);
+        }
+
+        ChatRoom room = ChatRoom.create(reqBody.roomName());
+        room.setOffer(offer);
+        chatRoomRepository.save(room);
+
+        ChatMember owner = ChatMember.joined(room, freelancerUser, ChatRole.OWNER);
+        room.addMember(owner);
+
+        ChatMember member = ChatMember.joined(room, offerUser, ChatRole.MEMBER);
+        room.addMember(member);
+
+        return new ChatRoomDto(room.getId(), null, null, 0L, null, List.of(), 0);
+    }
+
+    @Transactional
+    private ChatRoomDto createOrFindApplicationRoom(User actor, ChatCreateReqBody reqBody) {
+        Long applicationId = reqBody.applicationId();
+
+        Application application = applicationRepository.findById(applicationId).get();
+        User applicationUser = application.getUser();
+        User projectUser = application.getPost().getUser();
+
+        if (application.isDifferentUser(actor, applicationUser) && application.isDifferentUser(actor, projectUser)) {
+            throw new ServiceException("403-1", "권한이 없습니다.");
+        }
+
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findByApplicationId(applicationId);
+        if (existingRoom.isPresent()) {
+            Long existingRoomId = existingRoom.get().getId();
+
+            ChatMember applicationMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, applicationUser.getId()).get();
+            if (applicationMember.getEndedDate() != null) {
+                applicationMember.setEndedDate(null);
+                applicationMember.accept();
+            } else if (applicationMember.getStartedDate() == null) {
+                applicationMember.accept();
+            }
+
+            ChatMember projectMember = chatMemberRepository.findTopByChatRoom_IdAndUser_IdOrderByIdDesc(existingRoomId, projectUser.getId()).get();
+            if (projectMember.getEndedDate() != null) {
+                projectMember.setEndedDate(null);
+                projectMember.accept();
+            } else if (projectMember.getStartedDate() == null) {
+                projectMember.accept();
+            }
+
+            return new ChatRoomDto(existingRoomId, null, null, 0L, null, List.of(), 0);
+        }
+
+        ChatRoom room = ChatRoom.create(reqBody.roomName());
+        room.setApplication(application);
+        chatRoomRepository.save(room);
+
+        ChatMember owner = ChatMember.joined(room, projectUser, ChatRole.OWNER);
+        room.addMember(owner);
+
+        ChatMember member = ChatMember.joined(room, applicationUser, ChatRole.MEMBER);
+        room.addMember(member);
+
+        return new ChatRoomDto(room.getId(), null, null, 0L, null, List.of(), 0);
     }
 
     @Transactional
@@ -152,11 +259,13 @@ public class ChatService {
         );
     }
 
-    /** 초대 수락 */
+    /**
+     * 초대 수락
+     */
     @Transactional
     public void accept(Long userId, Long roomId) {
         ChatMember m = chatMemberRepository.findByChatRoom_IdAndUser_IdAndEndedDateIsNull(roomId, userId)
-                .orElseThrow(() -> new ServiceException("404-1","초대/멤버십을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ServiceException("404-1", "초대/멤버십을 찾을 수 없습니다."));
 
         if (m.getStartedDate() == null) {
             m.accept(); // startedDate = now
@@ -175,11 +284,13 @@ public class ChatService {
         }
     }
 
-    /** 방 떠나기 */
+    /**
+     * 방 떠나기
+     */
     @Transactional
     public void leave(Long userId, Long roomId) {
         ChatMember m = chatMemberRepository.findByChatRoom_IdAndUser_IdAndStartedDateIsNotNullAndEndedDateIsNull(roomId, userId)
-                .orElseThrow(() -> new ServiceException("403-4","참여 중이 아닙니다."));
+                .orElseThrow(() -> new ServiceException("403-4", "참여 중이 아닙니다."));
 
         // OWNER 정책: 지금은 그냥 나가도록. 필요 시 OWNER 위임/차단 로직 추가.
         m.leave(); // endedDate = now
@@ -191,12 +302,12 @@ public class ChatService {
     @Transactional
     public ChatInviteResBody invite(Long inviterId, Long roomId, List<Long> inviteeIds) {
         ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new ServiceException("404-1","채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ServiceException("404-1", "채팅방을 찾을 수 없습니다."));
 
         // 권한: ACTIVE 멤버만 초대 가능(OWNER만으로 제한하려면 role 체크 추가)
         boolean inviterActive = chatMemberRepository
                 .existsByChatRoom_IdAndUser_IdAndStartedDateIsNotNullAndEndedDateIsNull(roomId, inviterId);
-        if (!inviterActive) throw new ServiceException("403-2","초대 권한이 없습니다.");
+        if (!inviterActive) throw new ServiceException("403-2", "초대 권한이 없습니다.");
 
         List<Long> userIds = Optional.ofNullable(inviteeIds).orElseGet(List::of).stream()
                 .filter(id -> !id.equals(inviterId))   // 본인 초대 금지

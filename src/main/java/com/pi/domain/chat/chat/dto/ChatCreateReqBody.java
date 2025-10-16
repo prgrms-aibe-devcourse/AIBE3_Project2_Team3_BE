@@ -7,6 +7,8 @@ import java.util.List;
 
 public record ChatCreateReqBody(
         @NotBlank String roomName,
-        @NotNull List<Long> inviteeIds
+        @NotNull List<Long> inviteeIds,
+        Long offerId,
+        Long applicationId
 ) {
 }
