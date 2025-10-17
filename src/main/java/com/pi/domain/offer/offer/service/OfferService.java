@@ -1,5 +1,6 @@
 package com.pi.domain.offer.offer.service;
 
+import com.pi.domain.chat.chat.repository.ChatRoomRepository;
 import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.domain.offer.offer.entity.OfferStatus;
 import com.pi.domain.offer.offer.repository.OfferRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     public long count() {
         return offerRepository.count();
@@ -61,6 +63,9 @@ public class OfferService {
     }
 
     public void delete(Offer offer) {
+        chatRoomRepository.findByOfferId(offer.getId()).ifPresent(room -> {
+            room.setOffer(null);
+        });
         offerRepository.delete(offer);
     }
 }

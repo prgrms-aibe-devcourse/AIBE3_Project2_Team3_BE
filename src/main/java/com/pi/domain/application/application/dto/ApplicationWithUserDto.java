@@ -11,7 +11,7 @@ public record ApplicationWithUserDto(
         String content,
         String status,
         long salary,
-        int period,
+        long period,
         LocalDateTime createdDate,
         long postId,
         String postType, // "PROJECT" or "FREELANCER"

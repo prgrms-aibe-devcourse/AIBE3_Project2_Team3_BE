@@ -6,6 +6,7 @@ import com.pi.domain.application.application.entity.Application;
 import com.pi.domain.application.application.entity.ApplicationStatus;
 import com.pi.domain.application.application.repository.ApplicationRepository;
 import com.pi.domain.application.file.entity.ApplicationFile;
+import com.pi.domain.chat.chat.repository.ChatRoomRepository;
 import com.pi.domain.post.post.entity.Post;
 import com.pi.domain.user.user.entity.User;
 import com.pi.global.exception.ServiceException;
@@ -26,6 +27,7 @@ public class ApplicationService {
     private static final String AWS_S3_DIRECTORY = "application";
     private final ApplicationRepository applicationRepository;
     private final AwsS3Service awsS3Service;
+    private final ChatRoomRepository chatRoomRepository;
 
     public long count() {
         return applicationRepository.count();
@@ -84,6 +86,10 @@ public class ApplicationService {
     }
 
     public void delete(Application application) {
+        chatRoomRepository.findByApplicationId(application.getId()).ifPresent(room -> {
+            room.setApplication(null);
+        });
+
         List<String> fileKeys = application.getFiles().stream()
                 .map(file -> awsS3Service.getDecodedFileKey(file.getUrl()))
                 .toList();
@@ -93,7 +99,7 @@ public class ApplicationService {
         fileKeys.forEach(awsS3Service::deleteFile);
     }
 
-    private Application update(Application application, String content, Long salary, Integer period) {
+    private Application update(Application application, String content, Long salary, Long period) {
         application.modify(content, salary, period);
         return application;
     }
@@ -111,7 +117,7 @@ public class ApplicationService {
                     .filter(f -> removeIds.contains(f.getId()))
                     .toList();
 
-            for(ApplicationFile file : toRemove) {
+            for (ApplicationFile file : toRemove) {
                 String fileKey = awsS3Service.getDecodedFileKey(file.getUrl());
                 awsS3Service.deleteFile(fileKey);
                 application.getFiles().remove(file);

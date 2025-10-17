@@ -1,9 +1,14 @@
 package com.pi.domain.chat.chat.entity;
 
+import com.pi.domain.application.application.entity.Application;
+import com.pi.domain.offer.offer.entity.Offer;
 import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +25,12 @@ public class ChatRoom extends BaseEntity {
     @Column(name = "name", nullable = false, length = 100) // 채팅방 이름
     private String name;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private Offer offer;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Application application;
+
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMember> members = new ArrayList<>();
 
@@ -34,7 +45,9 @@ public class ChatRoom extends BaseEntity {
         return new ChatRoom(name);
     }
 
-    public void rename(String newName) { setName(newName); }
+    public void rename(String newName) {
+        setName(newName);
+    }
 
     public void addMember(ChatMember member) {
         // 중복 방지 등 도메인 규칙 체크 가능

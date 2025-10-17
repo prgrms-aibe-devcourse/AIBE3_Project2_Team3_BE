@@ -9,7 +9,7 @@ public record PostApplicationWithUserDto(
         long id,
         String status,
         long salary,
-        int period,
+        long period,
         LocalDateTime createdDate,
         long userId,
         String userNickname
