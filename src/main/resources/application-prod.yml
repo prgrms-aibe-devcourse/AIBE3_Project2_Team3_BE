@@ -14,3 +14,8 @@ spring:
     port: ${SPRING__MAIL__PORT}
     username: ${SPRING__MAIL__USERNAME}
     password: ${SPRING__MAIL__PASSWORD}
+app:
+  cookie:
+    domain: "api.jobpick.store"  # 최상위 도메인에 점 포함
+    secure: true            # HTTPS 필수
+    sameSite: None

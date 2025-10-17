@@ -1,10 +1,12 @@
 package com.pi.domain.application.application.dto;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record ApplicationModifyReqBody(
-        String content,
-        @Min(0) Long salary,
-        @Min(0) Integer period
+        @NotNull @Size(min = 50) String content,
+        @NotNull @Min(0) Long salary,
+        @NotNull @Min(1) Long period
 ) {
 }

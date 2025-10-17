@@ -60,7 +60,8 @@ public class ApiV1ProjectController {
             @RequestParam(required = false) Long minSalary,
             @RequestParam(required = false) Long maxSalary
     ) {
-        long userId = rq.getActor().getId();
+        User actor = rq.getActorOrNull();
+        Long userId = (actor != null) ? actor.getId() : null;
         Page<ProjectDto> dtoPage = projectService.searchProjects(new ProjectSearchParams(regionIds, categoryIds, skillIds, minSalary, maxSalary, keyword), pageable, userId);
         return Ut.pageMapper.of(dtoPage);
     }
@@ -80,8 +81,8 @@ public class ApiV1ProjectController {
     public ProjectDto getItem(
             @PathVariable Long id
     ) {
-        User actor = rq.getActor();
-        Long userId = actor.getId();
+        User actor = rq.getActorOrNull();
+        Long userId = (actor != null) ? actor.getId() : null;
         return projectService.getItem(id, userId);
     }
 

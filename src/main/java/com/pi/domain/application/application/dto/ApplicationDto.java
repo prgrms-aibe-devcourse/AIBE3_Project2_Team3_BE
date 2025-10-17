@@ -14,7 +14,7 @@ public record ApplicationDto(
         String status,
         String content,
         long salary,
-        int period,
+        long period,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         List<ApplicationFileDto> files

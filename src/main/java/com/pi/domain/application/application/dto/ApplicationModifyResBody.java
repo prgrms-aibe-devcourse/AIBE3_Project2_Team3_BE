@@ -5,7 +5,7 @@ import com.pi.domain.application.application.entity.Application;
 public record ApplicationModifyResBody(
         String content,
         long salary,
-        int period
+        long period
 ) {
     public ApplicationModifyResBody(Application application) {
         this(
