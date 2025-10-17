@@ -86,7 +86,7 @@ public class ApplicationService {
     }
 
     public void delete(Application application) {
-        chatRoomRepository.findByOfferId(application.getId()).ifPresent(room -> {
+        chatRoomRepository.findByApplicationId(application.getId()).ifPresent(room -> {
             room.setApplication(null);
         });
 
