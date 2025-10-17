@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public record AnswerDto(
         Long id,
-        String content,
+        String comment,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         UserDto user
@@ -15,7 +15,7 @@ public record AnswerDto(
     public AnswerDto(Answer answer) {
         this(
                 answer.getId(),
-                answer.getContent(),
+                answer.getComment(),
                 answer.getCreatedDate(),
                 answer.getModifiedDate(),
                 new UserDto(answer.getUser())

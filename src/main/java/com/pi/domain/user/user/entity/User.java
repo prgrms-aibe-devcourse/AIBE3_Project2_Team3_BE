@@ -2,9 +2,7 @@ package com.pi.domain.user.user.entity;
 
 import com.pi.global.exception.ServiceException;
 import com.pi.global.jpa.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +24,8 @@ public class User extends BaseEntity {
     @Setter
     private String password;
     private String nickname;
+    @Column
+    @Enumerated(EnumType.STRING)
     private UserRole role;
     @Column(unique = true)
     private String email;
@@ -94,8 +94,7 @@ public class User extends BaseEntity {
     }
 
     public boolean isAdmin() {
-        if (role.equals(UserRole.ROLE_ADMIN)) return true;
-        return false;
+        return UserRole.ROLE_ADMIN.equals(role);
     }
 
     public List<String> getAuthoritiesStringList() {
