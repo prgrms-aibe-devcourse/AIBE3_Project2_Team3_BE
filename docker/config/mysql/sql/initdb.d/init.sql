@@ -57,7 +57,7 @@ CREATE TABLE applications
     status       VARCHAR(255) DEFAULT 'PENDING',
     content      TEXT,
     salary       BIGINT UNSIGNED DEFAULT 0,
-    period INT UNSIGNED DEFAULT 0,
+    period       BIGINT UNSIGNED DEFAULT 1,
     created_date  DATETIME,
     modified_date DATETIME,
     CONSTRAINT uk_applications UNIQUE (post_id, user_id),
@@ -231,9 +231,13 @@ CREATE TABLE chat_rooms
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(100) NOT NULL,
+    offer_id         BIGINT NULL,
+    application_id   BIGINT NULL,
     created_date  DATETIME,
     modified_date DATETIME,
-    INDEX        idx_chat_rooms_name (name)
+    INDEX        idx_chat_rooms_name (name),
+    CONSTRAINT fk_chat_rooms_offer FOREIGN KEY (offer_id) REFERENCES offers (id) ON DELETE SET NULL,
+    CONSTRAINT fk_chat_rooms_application FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE SET NULL
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- ChatMember 테이블
