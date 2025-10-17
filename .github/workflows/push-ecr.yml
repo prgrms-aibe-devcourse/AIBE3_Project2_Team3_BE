@@ -2,9 +2,7 @@ name: Build & Push to ECR
 
 on:
   push:
-    branches: [ "main", "dev" ]        # dev에서도 실행
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]        # dev에서도 실행
 
 permissions:
   id-token: write

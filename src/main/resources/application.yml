@@ -63,3 +63,9 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
+app:
+  cookie:
+    name: AUTH
+    path: /
+    httpOnly: true
+    maxAgeSeconds: 31536000
