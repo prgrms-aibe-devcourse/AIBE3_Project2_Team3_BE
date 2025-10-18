@@ -16,7 +16,7 @@ import com.pi.global.exception.ServiceException;
 public class Answer extends BaseEntity {
 
     @Column(nullable = false, length = 1000)
-    private String content;
+    private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -26,14 +26,14 @@ public class Answer extends BaseEntity {
     @JoinColumn(name = "question_id")
     private Question question;
 
-    public Answer(String content, User user, Question question) {
-        this.content = content;
+    public Answer(String comment, User user, Question question) {
+        this.comment = comment;
         this.user = user;
         this.question = question;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setContent(String comment) {
+        this.comment = comment;
     }
 
     public static void checkActorCanCreate(User actor) {

@@ -46,8 +46,8 @@ public class Application extends BaseEntity {
     @Column(columnDefinition = "BIGINT UNSIGNED DEFAULT 0")
     private long salary = 0;
 
-    @Column(columnDefinition = "INT UNSIGNED DEFAULT 0")
-    private int period = 0;
+    @Column(columnDefinition = "BIGINT UNSIGNED DEFAULT 1")
+    private long period = 1;
 
     @OneToMany(mappedBy = "application", fetch = LAZY, cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private List<ApplicationFile> files = new ArrayList<>();
@@ -59,7 +59,7 @@ public class Application extends BaseEntity {
         this.content = content;
     }
 
-    public Application(Post post, User user, String content, long salary, int period) {
+    public Application(Post post, User user, String content, long salary, long period) {
         this.post = post;
         this.user = user;
         this.status = ApplicationStatus.PENDING;
@@ -86,7 +86,7 @@ public class Application extends BaseEntity {
         return files.remove(applicationFile);
     }
 
-    public void modify(String content, Long salary, Integer period) {
+    public void modify(String content, Long salary, Long period) {
         this.content = content == null ? this.content : content;
         this.salary = salary == null ? this.salary : salary;
         this.period = period == null ? this.period : period;
